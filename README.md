@@ -2,7 +2,7 @@
 
 Cogniguide is our final-year research project.
 
-We are investigating how Generative AI affects teenagers’ **critical thinking** and **cognitive development**, and we are building an AI agent that **guides teens to think** instead of giving direct answers. The agent uses **Socratic questioning**, reflective prompts, and step‑by‑step hints to support independent learning. [179]
+We are investigating how Generative AI affects teenagers’ **critical thinking** and **cognitive development**, and we are building an AI agent that **guides teens to think** instead of giving direct answers. The agent uses **Socratic questioning**, reflective prompts, and step‑by‑step hints to support independent learning. 
 
 ---
 
@@ -14,7 +14,7 @@ We are investigating how Generative AI affects teenagers’ **critical thinking*
    - critical thinking  
    - metacognitive awareness  
    - independent problem‑solving  
-   - self‑confidence [179]
+   - self‑confidence 
 
 2. **Build a Socratic AI agent**
 
@@ -22,13 +22,13 @@ We are investigating how Generative AI affects teenagers’ **critical thinking*
    - asks guiding questions instead of giving solutions  
    - gives hints gradually (scaffolding)  
    - encourages reflection on mistakes and strategies  
-   - is safe and age‑appropriate for teenagers [179]
+   - is safe and age‑appropriate for teenagers 
 
 3. **Evaluate the agent with teenagers**
 
    Run a small controlled study comparing:
    - our Socratic agent vs. a standard direct‑answer AI assistant  
-   - using pre/post tests and interaction logs to see changes in thinking skills [179]
+   - using pre/post tests and interaction logs to see changes in thinking skills 
 
 ---
 
@@ -36,11 +36,11 @@ We are investigating how Generative AI affects teenagers’ **critical thinking*
 
 The Cogniguide system has three main parts:
 
-- **Frontend (Flutter)** – mobile/web interface for teenagers: chat screen + simple progress dashboard. [179]  
-- **Backend (Flask, Python)** – REST API that talks to the LLM, applies Socratic rules, logs interactions. [179]  
-- **Database (Supabase)** – stores anonymised user IDs, chat logs, and metacognitive indicators (e.g. self‑corrections, reflection depth). [179]
+- **Frontend (Flutter)** – mobile/web interface for teenagers: chat screen + simple progress dashboard.  
+- **Backend (Flask, Python)** – REST API that talks to the LLM, applies Socratic rules, logs interactions.   
+- **Database (Supabase)** – stores anonymised user IDs, chat logs, and metacognitive indicators (e.g. self‑corrections, reflection depth). 
 
-In **Phase 1** we mainly focus on **data and baseline agent behaviour**, not the full app. We use the **SocraTeach** dataset from the SocraticLM project, which contains Socratic‑style teaching dialogues for math problems. [176][193]
+In **Phase 1** we mainly focus on **data and baseline agent behaviour**, not the full app. We use the **SocraTeach** dataset from the SocraticLM project, which contains Socratic‑style teaching dialogues for math problems. 
 
 ---
 
@@ -108,7 +108,7 @@ cogniguide/
   Small Jupyter notebooks for:
   - exploring the SocraTeach dataset,  
   - trying out prompt ideas,  
-  - visualising simple statistics. [193]
+  - visualising simple statistics. 
 
 - **`backend/`**  
   All server‑side code (Python + Flask):
@@ -133,14 +133,14 @@ cogniguide/
 
 ### Phase 1 – Data preparation & baseline agent
 
-**Goal:** Use existing datasets to understand Socratic teaching patterns and build a simple baseline agent. [179][193]
+**Goal:** Use existing datasets to understand Socratic teaching patterns and build a simple baseline agent. 
 
 Main activities:
-- Download and store the **SocraTeach** dataset under `data/raw/socrateach/`. [176][193]  
+- Download and store the **SocraTeach** dataset under `data/raw/socrateach/`. 
 - Explore and clean the dialogues (remove broken / trivial conversations).  
 - Convert them into training pairs where:
   - **input** = student problem + previous turns,  
-  - **output** = teacher’s Socratic question or hint. [193]  
+  - **output** = teacher’s Socratic question or hint.  
 - Implement a basic Socratic agent using a pre‑trained LLM + strong system prompt.  
 - Manually test small examples to see if it:
   - asks useful questions,  
@@ -149,28 +149,28 @@ Main activities:
 
 ### Phase 2 – Full Cogniguide agent
 
-**Goal:** Turn the baseline into a full adaptive agent that follows our proposal design. [179]
+**Goal:** Turn the baseline into a full adaptive agent that follows our proposal design. 
 
 Planned features:
 - Adaptive reasoning support (adjust question difficulty based on prior answers).  
 - Scaffolding engine that gradually reduces hint detail as the learner improves.  
 - Personalised reflection prompts generated from each user’s interaction history.  
-- Learner progress dashboard with metacognitive indicators such as self‑correction frequency and reflection depth. [179]
+- Learner progress dashboard with metacognitive indicators such as self‑correction frequency and reflection depth. 
 
 ### Phase 3 – Teen user study
 
-**Goal:** Evaluate the impact of Cogniguide on teenagers’ thinking. [179]
+**Goal:** Evaluate the impact of Cogniguide on teenagers’ thinking. 
 
 Planned steps:
 - Ethics approval and consent from parents + teens.  
 - Recruit teenagers (13–18) and randomly assign them to:
   - Cogniguide (Socratic agent),  
-  - standard direct‑answer AI assistant. [179]  
+  - standard direct‑answer AI assistant. 
 - Run 3 sessions per week over 4 weeks.  
 - Use:
   - Adapted Watson–Glaser Critical Thinking Appraisal (short form),  
   - Metacognitive Awareness Inventory (MAI, adolescent‑adapted),  
-  - plus interview data and interaction logs. [179]  
+  - plus interview data and interaction logs.  
 - Analyse pre/post changes and qualitative themes about how teens describe their thinking and AI use.
 
 ---
@@ -213,11 +213,11 @@ python backend/scripts/preprocess_socrateach.py
 This script should:
 - read from `data/raw/socrateach/`,
 - create cleaned splits in `data/processed/`,
-- and print basic statistics (number of dialogues, avg. turns, etc.). [193]
+- and print basic statistics (number of dialogues, avg. turns, etc.).
 
 ---
 
 ## Notes
 
-- The SocraTeach dataset is mainly math‑focused and not collected directly from teenagers. It is used in **Phase 1 and Phase 2** to learn Socratic dialogue behaviour. [193]  
-- The actual impact on teenagers’ cognition will be measured later in **Phase 3** using our own study with real teenage participants. [179]
+- The SocraTeach dataset is mainly math‑focused and not collected directly from teenagers. It is used in **Phase 1 and Phase 2** to learn Socratic dialogue behaviour.  
+- The actual impact on teenagers’ cognition will be measured later in **Phase 3** using our own study with real teenage participants. 
