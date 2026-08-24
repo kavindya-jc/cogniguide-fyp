@@ -4,7 +4,7 @@ data/raw/socrateach/SocraTeach_multi.json
 data/processed/
 
 # Ignore notebook outputs
-notebooks/*.ipynb
+# notebooks/*.ipynb
 !notebooks/.gitkeep
 
 # Python
