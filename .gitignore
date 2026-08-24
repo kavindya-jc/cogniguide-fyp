@@ -1,5 +1,5 @@
 # Ignore raw and processed data
-data/raw/socrateach/SocraTeach_multi.json
+  data/raw/socrateach/SocraTeach_multi.json
 data/processed/
 
 # Ignore notebook outputs
