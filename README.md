@@ -49,6 +49,7 @@ The Cogniguide system has three main parts:
 In **Phase 1** we mainly focus on **data and baseline agent behaviour**, not the full app. We use the **SocraTeach** dataset from the SocraticLM project, which contains Socratic‑style teaching dialogues for math problems.
 
 ## Project Structure
+
 ```
 cogniguide/
 README.md
