@@ -18,7 +18,7 @@ We are investigating how Generative AI affects teenagers' **critical thinking** 
 
 > **Note:** Raw dataset files are not tracked in Git due to size. Each user must download separately from the source above.
 
-See [`README_processed_data.md`](README_processed_data.md) for the full processed data schema and field descriptions.
+See [`README_processed_data.md`](..\data\README_processed_data.md) for the full processed data schema and field descriptions.
 
 ## Project Goals
 
