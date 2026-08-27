@@ -11,30 +11,39 @@ We are investigating how Generative AI affects teenagers' **critical thinking** 
 **Contents:** 35K multi-round Teacher-Student math tutoring dialogues
 
 **Setup instructions:**
+
 1. Download `SocraTeach_multi.json` from the SocraticLM repository
 2. Place it in `data/raw/socrateach/`
 3. Run preprocessing: `python backend/scripts/preprocess_socrateach.py`
 
 > **Note:** Raw dataset files are not tracked in Git due to size. Each user must download separately from the source above.
 
+See [`README_processed_data.md`](README_processed_data.md) for the full processed data schema and field descriptions.
+
 ## Project Goals
 
 ### Study Impact of GenAI on Teens
+
 Understand how regular use of GenAI tools influences teenagers':
+
 - Critical thinking
 - Metacognitive awareness
 - Independent problem‑solving
 - Self‑confidence
 
 ### Build a Socratic AI Agent
+
 Create a chat‑based tutor that:
+
 - Asks guiding questions instead of giving solutions
 - Gives hints gradually (scaffolding)
 - Encourages reflection on mistakes and strategies
 - Is safe and age‑appropriate for teenagers
 
 ### Evaluate the Agent with Teenagers
+
 Run a small controlled study comparing:
+
 - Our Socratic agent vs. a standard direct‑answer AI assistant
 - Using pre/post tests and interaction logs to see changes in thinking skills
 
@@ -106,38 +115,49 @@ phase3_protocol.md # Study protocol, consent, instruments
 ## Folder Explanations
 
 ### `data/`
+
 - **raw/** – Original downloaded datasets (no changes)
 - **processed/** – Cleaned and formatted data ready for training and experiments
 
 ### `notebooks/`
+
 Small Jupyter notebooks for:
+
 - Exploring the SocraTeach dataset
 - Trying out prompt ideas
 - Visualising simple statistics
 
 ### `backend/`
+
 All server‑side code (Python + Flask):
+
 - **app/** – The actual web API and Socratic agent logic
 - **scripts/** – One‑off scripts for preprocessing, training, evaluation
 - **tests/** – Simple automated checks to make sure the agent follows rules
 
 ### `frontend/`
+
 Flutter app that teenagers will use:
+
 - Chat interface to talk with the agent
 - Basic dashboard showing progress and reflections
 
 ### `experiments/`
+
 A place to save configs, small results, and notes, grouped by project phase.
 
 ### `docs/`
+
 All written documents: proposal, reports, study design, diagrams.
 
 ## Project Phases
 
 ### Phase 1 – Data Preparation & Baseline Agent
+
 **Goal:** Use existing datasets to understand Socratic teaching patterns and build a simple baseline agent.
 
 **Main activities:**
+
 1. Download and store the **SocraTeach** dataset under `data/raw/socrateach/`
 2. Explore and clean the dialogues (remove broken / trivial conversations)
 3. Convert them into training pairs where:
@@ -150,18 +170,22 @@ All written documents: proposal, reports, study design, diagrams.
    - Remains understandable for teenagers
 
 ### Phase 2 – Full Cogniguide Agent
+
 **Goal:** Turn the baseline into a full adaptive agent that follows our proposal design.
 
 **Planned features:**
+
 - Adaptive reasoning support (adjust question difficulty based on prior answers)
 - Scaffolding engine that gradually reduces hint detail as the learner improves
 - Personalised reflection prompts generated from each user's interaction history
 - Learner progress dashboard with metacognitive indicators
 
 ### Phase 3 – Teen User Study
+
 **Goal:** Evaluate the impact of Cogniguide on teenagers' thinking.
 
 **Planned steps:**
+
 1. Ethics approval and consent from parents + teens
 2. Recruit teenagers (13–18) and randomly assign them to:
    - Cogniguide (Socratic agent)
@@ -206,6 +230,7 @@ python backend/scripts/preprocess_socrateach.py
 ```
 
 This script should:
+
 - Read from `data/raw/socrateach/`
 - Create cleaned splits in `data/processed/`
 - Print basic statistics (number of dialogues, avg. turns, etc.)
