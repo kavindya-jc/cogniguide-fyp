@@ -87,28 +87,44 @@ Now provide your next Socratic response according to your teaching rules:"""
 
 
 if __name__ == "__main__":
-    print(
-        f"[Debug] Loaded API Key Prefix: '{API_KEY[:6]}...' | Length: {len(API_KEY)}")
-
     test_problem = (
         "Natalia sold clips to 48 of her friends in April, and then she "
         "sold half as many clips in May. How many clips did Natalia sell "
         "altogether in April and May?"
     )
 
-    print("\n=== CogniGuide Socratic Baseline Agent Test ===")
+    print("=== CogniGuide Socratic Agent Demonstration ===")
     print(f"Problem: {test_problem}\n")
 
     history: List[Dict[str, str]] = []
 
-    # First turn
-    initial_reply = socratic_response(test_problem, history)
-    print(f"Teacher: {initial_reply}\n")
+    # Turn 1: Initial prompt from teacher
+    reply_1 = socratic_response(test_problem, history)
+    print(f"Teacher: {reply_1}\n")
+    history.append({"role": "teacher", "content": reply_1})
 
-    # Second turn
-    history.append({"role": "teacher", "content": initial_reply})
-    history.append({"role": "student", "content": "Is the answer 72 clips?"})
-    print(f"Student: {history[-1]['content']}")
+    # Turn 2: Student is confused
+    student_msg_1 = "I don't know how to start."
+    print(f"Student: {student_msg_1}")
+    history.append({"role": "student", "content": student_msg_1})
 
-    second_reply = socratic_response(test_problem, history)
-    print(f"Teacher: {second_reply}")
+    reply_2 = socratic_response(test_problem, history)
+    print(f"Teacher: {reply_2}\n")
+    history.append({"role": "teacher", "content": reply_2})
+
+    # Turn 3: Student figures out the intermediate step
+    student_msg_2 = "Oh, half of 48 is 24, so she sold 24 clips in May!"
+    print(f"Student: {student_msg_2}")
+    history.append({"role": "student", "content": student_msg_2})
+
+    reply_3 = socratic_response(test_problem, history)
+    print(f"Teacher: {reply_3}\n")
+    history.append({"role": "teacher", "content": reply_3})
+
+    # Turn 4: Student calculates the total
+    student_msg_3 = "48 plus 24 is 72 clips altogether!"
+    print(f"Student: {student_msg_3}")
+    history.append({"role": "student", "content": student_msg_3})
+
+    reply_4 = socratic_response(test_problem, history)
+    print(f"Teacher: {reply_4}")
