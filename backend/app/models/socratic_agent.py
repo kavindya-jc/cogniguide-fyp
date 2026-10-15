@@ -20,7 +20,9 @@ load_dotenv(find_dotenv(), override=True)
 _raw_key = os.getenv("GEMINI_API_KEY", "")
 API_KEY = _raw_key.strip().strip('"').strip("'")
 
-MODEL_NAME = "gemini-3.6-flash"
+# The model name lives ONLY in .env (GEMINI_MODEL). To switch models, edit .env — not this file.
+_raw_model = os.getenv("GEMINI_MODEL", "")
+MODEL_NAME = _raw_model.strip().strip('"').strip("'")
 
 SYSTEM_PROMPT = """You are a Socratic math tutor for teenage students.
 
@@ -53,6 +55,11 @@ def socratic_response(problem: str, conversation_history: List[Dict[str, str]]) 
         raise EnvironmentError(
             "GEMINI_API_KEY environment variable not found. "
             "Please add GEMINI_API_KEY to your .env file."
+        )
+    if not MODEL_NAME:
+        raise EnvironmentError(
+            "GEMINI_MODEL environment variable not found. "
+            "Please add GEMINI_MODEL (the Gemini model name) to your .env file."
         )
 
     formatted_history = _format_history(conversation_history)
@@ -94,6 +101,7 @@ if __name__ == "__main__":
     )
 
     print("=== CogniGuide Socratic Agent Demonstration ===")
+    print(f"Model: {MODEL_NAME}")
     print(f"Problem: {test_problem}\n")
 
     history: List[Dict[str, str]] = []
