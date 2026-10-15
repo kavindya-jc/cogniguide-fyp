@@ -1,0 +1,92 @@
+{
+  "GSM8K_train_6381_GSM8K_train_6381_4_turn0": {
+    "model": "gemini-3.6-flash",
+    "problem": "The standard poodle is 8 inches taller than the miniature poodle, and the miniature poodle is 6 inches taller than the toy poodle.  If the standard poodle in 28 inches tall, how tall is the toy poodle in inches?",
+    "context": "",
+    "agent_reply": "Hi there! This sounds like a fun puzzle to solve together. \n\nSince we know the standard poodle is 28 inches tall, how do you think we could use that information to figure out the height of the miniature poodle first?",
+    "reference_reply": "How tall is the miniature poodle?",
+    "user_type": "(6)",
+    "label": null
+  },
+  "MAWPS_train_2002_MAWPS_train_2002_0_turn2": {
+    "model": "gemini-3.6-flash",
+    "problem": "On the first day of the week Pat had 39 stickers . Pat earned 22 more during the week . How many stickers did Pat have at the end of the   week ?",
+    "context": "Teacher: How many stickers did Pat earn during the week?\nStudent: Are you asking how many he started with or got new?\nTeacher: I'm asking about how many new stickers Pat got during the week. The problem mentioned Pat earned 22 more stickers during the week. So, how many stickers is that?\nStudent: He earned 22 stickers, but I am not sure what to do with that information.\n",
+    "agent_reply": "Spot on! Now, remember that Pat started the week with 39 stickers. Since Pat earned 22 *more*, what math operation do you think we should use to combine those amounts?",
+    "reference_reply": "That's alright, we will work on that together. Now that we know Pat earned 22 new stickers during the week, we can add that to the number of stickers he already had. Let's go back to the beginning of the week. The problem told us he had 39 stickers initially, right? So, how many stickers do you think Pat could have at the end of the week if we combine these two amounts?",
+    "user_type": "(4)",
+    "label": null
+  },
+  "GSM8K_test_1309_GSM8K_test_1309_1_turn0": {
+    "model": "gemini-3.6-flash",
+    "problem": "The girls are trying to raise money for a carnival. Kim raises $320 more than Alexandra, who raises $430, and Maryam raises $400 more than Sarah, who raises $300. How much money, in dollars, did they all raise in total?",
+    "context": "",
+    "agent_reply": "Hi there! To find the total amount raised by all four girls, where do you think we should start?",
+    "reference_reply": "How much money does Kim raise?",
+    "user_type": "(2)",
+    "label": null
+  },
+  "GSM8K_train_1448_GSM8K_train_1448_3_turn3": {
+    "model": "gemini-3.6-flash",
+    "problem": "There are 28 students in a classroom. Half of them have 5 notebooks each and the other half have 3 notebooks each. How many notebooks in total are in the classroom?",
+    "context": "Teacher: How many students are in the half of the class?\nStudent: Can't you just say how many notebooks there are?\nTeacher: We could, but it's important for you to understand how we get to that solution. Remember, we're trying to find out how many notebooks are in the entire classroom. To get there, we need to first figure out how many students make up half of the class. So, can you tell me, how many students are in half of the class?\nStudent: Alright, there are 14 students in half of the class.\nTeacher: Exactly, well done! Now, if half of the class each have 5 notebooks, how many notebooks do those 14 students have in total?\nStudent: 70 notebooks! You just add 5 to 14, right?\n",
+    "agent_reply": "You got the right number with 70, great job! But wait, if you do $14 + 5$, do you really get 70? What operation did you actually use to get that 70?",
+    "reference_reply": "You're on the right track! But instead of adding, we need to multiply in this situation. If each of the 14 students have 5 notebooks, how many notebooks will there be in total?",
+    "user_type": "(3)",
+    "label": null
+  },
+  "MAWPS_train_1067_MAWPS_train_1067_2_turn2": {
+    "model": "gemini-3.6-flash",
+    "problem": "Craig has 20 apples . Judy has 11 apples . He shares 7 with Eugene . How many apples will Craig have ?",
+    "context": "Teacher: How many apples does Craig have after sharing with Eugene?\nStudent: 20 minus 7 is 12, right?\nTeacher: Close, but not quite. Can you try subtracting 7 from 20 again?\nStudent: Oops, I made a mistake. Let me try again, 20 minus 7 is 13.\n",
+    "agent_reply": "Spot on! 20 minus 7 is indeed 13. You did a great job focusing on just Craig's apples and correcting that subtraction to find the right answer!",
+    "reference_reply": "That's correct! Now Craig has 13 apples after sharing with Eugene. How many apples does Judy have?",
+    "user_type": "(6)",
+    "label": null
+  },
+  "GSM8K_train_6105_GSM8K_train_6105_3_turn0": {
+    "model": "gemini-3.6-flash",
+    "problem": "A town council began the decade by planting cherry trees around the neighborhood to make the neighborhood look more welcoming. By the end of the decade, they have planted twice as many cherry trees as they originally planned and have now realized that falling cherry blossom leaves are causing a problem. Each tree drops 100 leaves each during the fall. If the town council originally intended to plant 7 cherry trees, how many leaves now fall from the trees?",
+    "context": "",
+    "agent_reply": "Welcome! Let's break this down step by step to solve it. \n\nFirst, based on the problem, how many cherry trees did the town council actually end up planting?",
+    "reference_reply": "How many cherry trees are there?",
+    "user_type": "(3)",
+    "label": null
+  },
+  "MAWPS_train_2299_MAWPS_train_2299_1_turn3": {
+    "model": "gemini-3.6-flash",
+    "problem": "A teacher had 34 worksheets to grade . If she graded 7 , but then another 36 were turned in , how many worksheets would she have to grade ?",
+    "context": "Teacher: How many worksheets are left to grade after the teacher graded some?\nStudent: So, she graded all 34?\nTeacher: Not exactly. The problem says she only graded 7 worksheets. So how many worksheets are left ungraded from her initial pile?\nStudent: Err... would it be 34 minus 7 then?\nTeacher: That's correct! So now, what would be the remaining number of worksheets left to grade after the teacher graded 7 out of 34?\nStudent: After subtracting 7 from 34, the remaining number of worksheets left to grade is 27.\n",
+    "agent_reply": "Spot on! So there are 27 worksheets left from that first pile. \n\nWhat does the story say happens next, and what operation should we use to account for those new worksheets?",
+    "reference_reply": "Great subtraction! We now know how many worksheets were left ungraded from her initial pile. But, the problem also states that some new worksheets were turned in. How many worksheets are left to grade after the new ones are turned in?",
+    "user_type": "(6)",
+    "label": null
+  },
+  "GSM8K_train_3309_GSM8K_train_3309_3_turn1": {
+    "model": "gemini-3.6-flash",
+    "problem": "Denver uses 7 pieces of wood for each birdhouse and he pays $1.50 for each piece of wood. If he makes a $5.50 profit per birdhouse, how much will Denver charge to Danny for buying two birdhouses?",
+    "context": "Teacher: How much does it cost to make one birdhouse?\nStudent: I'm not sure, I'm bad at maths.\n",
+    "agent_reply": "No worries at all, we'll take it one simple step at a time together! \n\nIf one piece of wood costs $1.50, how do you think we could figure out the cost for the 7 pieces needed to make one birdhouse?",
+    "reference_reply": "That's perfectly alright. Let's break it down. If Denver uses 7 pieces of wood for each birdhouse and each piece of wood costs $1.50, how could we find out the cost of the wood for one birdhouse?",
+    "user_type": "(4)",
+    "label": null
+  },
+  "GSM8K_train_2303_GSM8K_train_2303_0_turn3": {
+    "model": "gemini-3.6-flash",
+    "problem": "Cynthia has four times as many water balloons as her husband, Randy. Randy has only half as many water balloons as his daughter, Janice. If Janice throws all 6 of her water balloons at her father, how many water balloons does Cynthia have, which she could also choose to throw at Randy?",
+    "context": "Teacher: How many water balloons does Randy have?\nStudent: I'm confused. How many does Cynthia have then?\nTeacher: Let's break it down step by step. First, we know Janice has 6 water balloons, and Randy has half as many balloons as Janice. Can you tell me how many Randy has now based on these details?\nStudent: So half of 6 is 2, so Randy has 2 water balloons?\nTeacher: If you divide 6 by 2, does that equal 2? Try again to see how many water balloons Randy has. Once you figure out the correct answer, we can calculate how many water balloons Cynthia has.\nStudent: Oops, my mistake. Half of 6 is 3, so Randy has 3 water balloons.\n",
+    "agent_reply": "Spot on! So Randy has 3 water balloons. \n\nNow, looking back at the problem, it says Cynthia has four times as many water balloons as Randy. How many would that be?",
+    "reference_reply": "That's correct! Now, since Cynthia has four times as many water balloons as Randy, how many would that make?",
+    "user_type": "(3)",
+    "label": null
+  },
+  "GSM8K_train_2652_GSM8K_train_2652_2_turn0": {
+    "model": "gemini-3.6-flash",
+    "problem": "The school band is having a car wash to raise money. Their goal is to collect $150. So far they have earned $10 each from three families and $5 each from 15 families. How much more money do they have to earn to reach their goal?",
+    "context": "",
+    "agent_reply": "Hey there! That band car wash sounds like a fun project. \n\nTo figure out how much *more* money they need to reach their $150 goal, what do you think we should calculate first?",
+    "reference_reply": "How much money did the school band earn from three families?",
+    "user_type": "(3)",
+    "label": null
+  }
+}
