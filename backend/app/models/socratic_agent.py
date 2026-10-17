@@ -1,13 +1,22 @@
 """
-Baseline Socratic Tutoring Agent — CogniGuide 
+Baseline Socratic Tutoring Agent — CogniGuide
 
 Uses Gemini API to generate Socratic-style teaching responses:
 - Enforces no direct answers in early turns.
 - Generates guiding questions and progressive hints.
 - Prompts student reflection and metacognition.
+
+Stage 4 changes (Phase 2):
+- socratic_response() can take an extra instruction (the hint level from adaptive.py).
+- It waits and tries again when Gemini says 503 "high demand".
+- With raise_on_error=True it raises TutorUnavailable instead of returning
+  a fallback sentence, so the API can tell a failed reply from a real one.
+  The default (False) keeps the old Phase 1 behaviour, so the notebook and
+  manual test script still work as before.
 """
 
 import os
+import time
 from typing import List, Dict
 from dotenv import load_dotenv, find_dotenv
 from google import genai
@@ -24,6 +33,9 @@ API_KEY = _raw_key.strip().strip('"').strip("'")
 _raw_model = os.getenv("GEMINI_MODEL", "")
 MODEL_NAME = _raw_model.strip().strip('"').strip("'")
 
+# Seconds to wait before each retry when Google is busy (so up to 3 tries in total).
+RETRY_WAITS = (2, 5)
+
 SYSTEM_PROMPT = """You are a Socratic math tutor for teenage students.
 
 Your teaching style follows these strict rules:
@@ -35,6 +47,18 @@ Your teaching style follows these strict rules:
 6. Speak naturally, like a real, warm human teacher - not stiffly or robotically. Keep responses concise (1-3 sentences).
 7. If the student has clearly solved the full problem correctly, confirm their success and summarize what they did well.
 """
+
+FALLBACK_EMPTY = "Let's take a look at this together. What is the very first piece of information given in the problem?"
+FALLBACK_ERROR = "I had trouble processing that turn. Could you try restating what step you want to try next?"
+
+
+class TutorUnavailable(Exception):
+    """Gemini could not give a real reply (busy, quota used up, empty answer...)."""
+
+
+def _is_busy(err: Exception) -> bool:
+    text = str(err).upper()
+    return "503" in text or "UNAVAILABLE" in text or "OVERLOADED" in text
 
 
 def _format_history(conversation_history: List[Dict[str, str]]) -> str:
@@ -49,8 +73,18 @@ def _format_history(conversation_history: List[Dict[str, str]]) -> str:
     return "\n".join(lines)
 
 
-def socratic_response(problem: str, conversation_history: List[Dict[str, str]]) -> str:
-    """Generate the next Socratic tutor response."""
+def socratic_response(
+    problem: str,
+    conversation_history: List[Dict[str, str]],
+    extra_instruction: str = "",
+    raise_on_error: bool = False,
+) -> str:
+    """Generate the next Socratic tutor response.
+
+    extra_instruction: optional text added to the system prompt (Stage 4 hint level).
+    raise_on_error: if True, raise TutorUnavailable when no real reply could be made.
+                    If False (default), return a fallback sentence instead.
+    """
     if not API_KEY:
         raise EnvironmentError(
             "GEMINI_API_KEY environment variable not found. "
@@ -72,25 +106,39 @@ Conversation so far:
 
 Now provide your next Socratic response according to your teaching rules:"""
 
-    try:
-        client = genai.Client(api_key=API_KEY)
-        response = client.models.generate_content(
-            model=MODEL_NAME,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                temperature=0.3,
-            ),
-        )
+    system_instruction = SYSTEM_PROMPT
+    if extra_instruction:
+        system_instruction += "\nFor THIS reply only:\n" + extra_instruction + "\n"
 
-        if response.text and response.text.strip():
-            return response.text.strip()
+    client = genai.Client(api_key=API_KEY)
 
-        return "Let's take a look at this together. What is the very first piece of information given in the problem?"
+    for attempt in range(len(RETRY_WAITS) + 1):
+        try:
+            response = client.models.generate_content(
+                model=MODEL_NAME,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    temperature=0.3,
+                ),
+            )
+            if response.text and response.text.strip():
+                return response.text.strip()
 
-    except Exception as err:
-        print(f"[socratic_agent] API call error: {err}")
-        return "I had trouble processing that turn. Could you try restating what step you want to try next?"
+            if raise_on_error:
+                raise TutorUnavailable("Gemini returned an empty reply.")
+            return FALLBACK_EMPTY
+
+        except TutorUnavailable:
+            raise
+        except Exception as err:
+            print(f"[socratic_agent] API call error (try {attempt + 1}): {err}")
+            if _is_busy(err) and attempt < len(RETRY_WAITS):
+                time.sleep(RETRY_WAITS[attempt])
+                continue
+            if raise_on_error:
+                raise TutorUnavailable(str(err)) from err
+            return FALLBACK_ERROR
 
 
 if __name__ == "__main__":

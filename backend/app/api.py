@@ -1,14 +1,19 @@
 """
-CogniGuide Flask API - Phase 2, Stages 1 and 3
+CogniGuide Flask API - Phase 2, Stages 1, 3 and 4
 
-Exposes the Phase 1 baseline Socratic agent over HTTP:
+Exposes the Socratic agent over HTTP:
     GET  /health  -> {"status": "ok"}
-    POST /chat    -> {"reply": "...", "session_id": "..." or null}
+    POST /chat    -> {"reply": "...", "session_id": "..." or null, "hint_level": 1-3}
 
-This file only CALLS socratic_response(). It never changes socratic_agent.py.
 Stage 3: if the request has a student_id, the chat is saved to Supabase
 (through db.py). Saving never breaks the chat: if it fails, the student
 still gets the tutor's reply and the error goes to the server log.
+
+Stage 4: adaptive.py reads the student's recent messages and picks a hint
+level (1-3). That level is added to the tutor's instructions. If Gemini
+cannot give a real reply, /chat answers 503 "tutor_unavailable" and NOTHING
+is saved (no fallback sentence in the database).
+
 See docs/api_contract.md for the full request/reply format.
 
 Run from the backend/ folder:
@@ -21,8 +26,8 @@ import uuid
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from app import db
-from app.models.socratic_agent import socratic_response
+from app import adaptive, db
+from app.models.socratic_agent import TutorUnavailable, socratic_response
 
 MAX_TEXT_LENGTH = 2000
 MAX_HISTORY_ITEMS = 50
@@ -83,11 +88,11 @@ def validate_chat_body(body):
     return None
 
 
-def log_turn(student_code, session_id, problem, history, reply):
+def log_turn(student_code, session_id, problem, history, reply, analysis):
     """Save this turn to the database and return the session id.
 
-    Saves the student's newest message (if the history ends with one) and the tutor's reply.
-    Raises an exception if anything fails; the caller handles it.
+    Saves the student's newest message (if the history ends with one), the tutor's reply,
+    and the Stage 4 indicators. Raises an exception if anything fails; the caller handles it.
     """
     if not db.is_configured():
         app.logger.warning("Supabase is not configured; chat not saved.")
@@ -106,6 +111,12 @@ def log_turn(student_code, session_id, problem, history, reply):
         messages.append(("student", history[-1]["content"]))
     messages.append(("teacher", reply))
     db.save_messages(session_id, messages)
+
+    # Indicators are extra: if they fail, the messages above are already safe.
+    try:
+        db.save_indicators(student_uuid, session_id, adaptive.indicator_rows(analysis))
+    except Exception as err:
+        app.logger.error("Saving indicators failed: %s", err)
 
     return session_id
 
@@ -127,8 +138,21 @@ def chat():
 
     history = body.get("history", [])
 
+    # Stage 4: decide the hint level from the student's recent messages.
+    analysis = adaptive.analyze_history(history)
+    extra_instruction = adaptive.build_instruction(analysis)
+
     try:
-        reply = socratic_response(body["problem"], history)
+        reply = socratic_response(
+            body["problem"],
+            history,
+            extra_instruction=extra_instruction,
+            raise_on_error=True,
+        )
+    except TutorUnavailable as err:
+        # Gemini was busy or failed. Save nothing, tell the app clearly.
+        app.logger.error("Tutor unavailable: %s", err)
+        return error_response(503, "tutor_unavailable", "The tutor is busy right now. Please try again in a moment.")
     except Exception as err:  # e.g. missing GEMINI_API_KEY
         app.logger.error("socratic_response failed: %s", err)
         return error_response(500, "server_error", "The tutor is unavailable right now.")
@@ -138,11 +162,11 @@ def chat():
     student_code = body.get("student_id")
     if student_code:
         try:
-            session_id = log_turn(student_code, session_id, body["problem"], history, reply)
+            session_id = log_turn(student_code, session_id, body["problem"], history, reply, analysis)
         except Exception as err:
             app.logger.error("Saving chat to database failed: %s", err)
 
-    return jsonify({"reply": reply, "session_id": session_id})
+    return jsonify({"reply": reply, "session_id": session_id, "hint_level": analysis["hint_level"]})
 
 
 @app.errorhandler(404)

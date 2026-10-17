@@ -1,5 +1,5 @@
 """
-CogniGuide database helper - Phase 2, Stages 2 and 3
+CogniGuide database helper - Phase 2, Stages 2, 3 and 4
 
 All Supabase code lives here, so api.py stays short.
 Every function raises an exception if the database call fails;
@@ -72,3 +72,17 @@ def save_messages(session_id, messages):
     """Save a list of (role, content) pairs in order, in one database call."""
     rows = [{"session_id": session_id, "role": role, "content": content} for role, content in messages]
     _get_client().table("messages").insert(rows).execute()
+
+
+def save_indicators(student_id, session_id, indicators):
+    """Stage 4: save a list of (indicator_type, value) pairs, in one database call.
+
+    Example: [("hint_level", 2), ("self_correction", 1)]
+    """
+    if not indicators:
+        return
+    rows = [
+        {"student_id": student_id, "session_id": session_id, "indicator_type": kind, "value": value}
+        for kind, value in indicators
+    ]
+    _get_client().table("indicators").insert(rows).execute()
