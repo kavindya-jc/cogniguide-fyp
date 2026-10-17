@@ -1,5 +1,5 @@
 """
-CogniGuide database helper - Phase 2, Stages 2, 3 and 4
+CogniGuide database helper - Phase 2, Stages 2, 3, 4 and 5
 
 All Supabase code lives here, so api.py stays short.
 Every function raises an exception if the database call fails;
@@ -86,3 +86,48 @@ def save_indicators(student_id, session_id, indicators):
         for kind, value in indicators
     ]
     _get_client().table("indicators").insert(rows).execute()
+
+
+def find_student(anon_code):
+    """Stage 5: return the student's database id, or None if we have never seen this code.
+
+    Unlike get_or_create_student, this does NOT create anything.
+    """
+    res = (
+        _get_client()
+        .table("students")
+        .select("id")
+        .eq("anon_code", anon_code)
+        .limit(1)
+        .execute()
+    )
+    return res.data[0]["id"] if res.data else None
+
+
+def get_recent_session_levels(student_id, exclude_session_id=None, max_sessions=3):
+    """Stage 5: average hint level of this student's newest EARLIER sessions, newest first.
+
+    Example result: [1.0, 1.33, 2.67]  (one number per earlier session)
+    The session in progress (exclude_session_id) is left out.
+    """
+    res = (
+        _get_client()
+        .table("indicators")
+        .select("session_id, value")
+        .eq("student_id", student_id)
+        .eq("indicator_type", "hint_level")
+        .order("created_at", desc=True)
+        .order("id", desc=True)
+        .limit(300)
+        .execute()
+    )
+
+    per_session = {}  # session_id -> list of levels; dict keeps the newest-first order
+    for row in res.data or []:
+        sid = row.get("session_id")
+        if sid is None or sid == exclude_session_id or row.get("value") is None:
+            continue
+        per_session.setdefault(sid, []).append(float(row["value"]))
+
+    averages = [sum(levels) / len(levels) for levels in per_session.values()]
+    return averages[:max_sessions]

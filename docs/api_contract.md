@@ -1,4 +1,4 @@
-# CogniGuide API Contract (Phase 2, Stages 1, 3 and 4)
+# CogniGuide API Contract (Phase 2, Stages 1, 3, 4 and 5)
 
 This is the agreement between the frontend and the Flask backend. The frontend only needs this file.
 
@@ -43,11 +43,12 @@ Notes for the frontend:
 ### Success reply (200)
 
 ```json
-{"reply": "Nice start! What does 'half as many' tell you about May?", "session_id": "3f2b8c1e-5a47-4d6e-9b0a-1c2d3e4f5a6b", "hint_level": 1}
+{"reply": "Nice start! What does 'half as many' tell you about May?", "session_id": "3f2b8c1e-5a47-4d6e-9b0a-1c2d3e4f5a6b", "hint_level": 1, "scaffold_level": 3}
 ```
 
 - `session_id` is always present. It is `null` when nothing was saved (no `student_id` sent, or the database is not set up). **Saving never breaks the chat:** if saving fails, the reply is still returned (with the `session_id` you sent, or `null`), and the problem is only recorded in the server log.
-- `hint_level` (new in Stage 4) is a number from 1 to 3. It is the hint level the tutor used for this reply (see section 2). The frontend may ignore it, or show it later on the progress dashboard.
+- `hint_level` (new in Stage 4) is a number from 1 to 3. It is the hint level the tutor **used** for this reply (see sections 2 and 2b). The frontend may ignore it, or show it later on the progress dashboard.
+- `scaffold_level` (new in Stage 5) is a number from 1 to 3: the **highest** hint level the tutor was allowed to use for this student (see section 2b). 3 = full support (the default, also for new students and when no `student_id` is sent). The frontend does not need to send anything new for this; it only needs the same `student_id` on every call. The frontend may ignore it, or show it later on the progress dashboard.
 
 ## 2. How the hint level works (Stage 4)
 
@@ -63,7 +64,31 @@ If the student struggled earlier but the newest message is fine, the level goes 
 
 Known limit: the rules cannot check if a number is right or wrong. They only read the words the student uses.
 
-When the chat ends with a new student message and a `student_id` was sent, the server also saves rows in the database table `indicators`: `hint_level` (1-3), and `self_correction`, `asked_for_answer`, `stuck` (value 1) when they were noticed.
+When the chat ends with a new student message and a `student_id` was sent, the server also saves rows in the database table `indicators`: `hint_level` (1-3), `scaffold_level` (1-3, new in Stage 5), and `self_correction`, `asked_for_answer`, `stuck` (value 1) when they were noticed.
+
+## 2b. How the scaffold level works (Stage 5)
+
+Stage 4 looks at the **current chat**. Stage 5 also looks at the student's **earlier sessions** (saved in the `indicators` table) and slowly takes help away when the student needs less and less of it. This only happens when a `student_id` is sent.
+
+The server takes the average `hint_level` of each of the student's last 3 **earlier** sessions (the session in progress is left out):
+
+| Earlier sessions | `scaffold_level` | Highest hint level the tutor may use |
+|---|---|---|
+| Fewer than 2 sessions with data (new student) | 3 | 3 (full support, same as Stage 4) |
+| Newest earlier session averaged 2.5 or more | 3 | 3 (help comes back) |
+| Average of last 3 is 1.3 or less | 1 | 1 (minimal support) |
+| Average of last 3 is 1.8 or less | 2 | 2 (reduced support) |
+| Anything else | 3 | 3 |
+
+The hint level used is `min(hint level from Stage 4, scaffold_level)`. When help has been faded, the tutor is also told to ask the student to explain their own plan first.
+
+**Safety valve:** if 2 or more of the student's last 3 messages show a struggle (for example "I don't know" and then "just tell me"), the tutor may always use at least hint level 2, so a student is never left without help.
+
+If the database cannot be read, the server uses `scaffold_level` 3 and the chat works as in Stage 4. Nothing for the frontend to handle.
+
+In the `indicators` table, the saved `hint_level` is the level the student **needed** (from Stage 4, before the limit), so the data keeps showing real need. A new indicator `scaffold_level` (1-3) is saved next to it, on the same turns.
+
+Known limits: the thresholds (1.3, 1.8, 2.5, 3 sessions) are first guesses and are not tested with real teenagers yet (Phase 3). They are based on the word rules of Stage 4, which cannot check if an answer is right.
 
 ## 3. GET /health
 

@@ -1,9 +1,9 @@
 """
-CogniGuide Flask API - Phase 2, Stages 1, 3 and 4
+CogniGuide Flask API - Phase 2, Stages 1, 3, 4 and 5
 
 Exposes the Socratic agent over HTTP:
     GET  /health  -> {"status": "ok"}
-    POST /chat    -> {"reply": "...", "session_id": "..." or null, "hint_level": 1-3}
+    POST /chat    -> {"reply": "...", "session_id": "..." or null, "hint_level": 1-3, "scaffold_level": 1-3}
 
 Stage 3: if the request has a student_id, the chat is saved to Supabase
 (through db.py). Saving never breaks the chat: if it fails, the student
@@ -13,6 +13,11 @@ Stage 4: adaptive.py reads the student's recent messages and picks a hint
 level (1-3). That level is added to the tutor's instructions. If Gemini
 cannot give a real reply, /chat answers 503 "tutor_unavailable" and NOTHING
 is saved (no fallback sentence in the database).
+
+Stage 5: scaffolding.py reads the student's EARLIER sessions from Supabase and, if
+the student needs less and less help, lowers the highest hint level the tutor may use
+(the "scaffold level"). If the database cannot be read, or the student is new, nothing
+changes (scaffold level 3 = full support).
 
 See docs/api_contract.md for the full request/reply format.
 
@@ -26,7 +31,7 @@ import uuid
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from app import adaptive, db
+from app import adaptive, db, scaffolding
 from app.models.socratic_agent import TutorUnavailable, socratic_response
 
 MAX_TEXT_LENGTH = 2000
@@ -88,11 +93,30 @@ def validate_chat_body(body):
     return None
 
 
-def log_turn(student_code, session_id, problem, history, reply, analysis):
+def load_scaffold_level(student_code, session_id):
+    """Stage 5: choose the scaffold level (1-3) from the student's earlier sessions.
+
+    Never raises. Any problem (no student_id, new student, no database, database error)
+    gives 3 = full support, which is the Stage 4 behaviour.
+    """
+    if not student_code or not db.is_configured():
+        return scaffolding.MAX_SCAFFOLD
+    try:
+        student_uuid = db.find_student(student_code)
+        if student_uuid is None:
+            return scaffolding.MAX_SCAFFOLD
+        averages = db.get_recent_session_levels(student_uuid, exclude_session_id=session_id)
+        return scaffolding.compute_scaffold_level(averages)
+    except Exception as err:
+        app.logger.error("Reading earlier sessions failed (using full support): %s", err)
+        return scaffolding.MAX_SCAFFOLD
+
+
+def log_turn(student_code, session_id, problem, history, reply, analysis, scaffold_level=scaffolding.MAX_SCAFFOLD):
     """Save this turn to the database and return the session id.
 
     Saves the student's newest message (if the history ends with one), the tutor's reply,
-    and the Stage 4 indicators. Raises an exception if anything fails; the caller handles it.
+    and the indicators (Stage 4 + the Stage 5 scaffold level). Raises an exception if anything fails; the caller handles it.
     """
     if not db.is_configured():
         app.logger.warning("Supabase is not configured; chat not saved.")
@@ -114,7 +138,10 @@ def log_turn(student_code, session_id, problem, history, reply, analysis):
 
     # Indicators are extra: if they fail, the messages above are already safe.
     try:
-        db.save_indicators(student_uuid, session_id, adaptive.indicator_rows(analysis))
+        rows = adaptive.indicator_rows(analysis)  # empty unless there is a NEW student message
+        if rows:
+            rows.append(("scaffold_level", scaffold_level))
+        db.save_indicators(student_uuid, session_id, rows)
     except Exception as err:
         app.logger.error("Saving indicators failed: %s", err)
 
@@ -140,7 +167,15 @@ def chat():
 
     # Stage 4: decide the hint level from the student's recent messages.
     analysis = adaptive.analyze_history(history)
+
+    # Stage 5: fade the help if earlier sessions show the student needs less of it.
+    scaffold_level = load_scaffold_level(body.get("student_id"), body.get("session_id"))
+    analysis = scaffolding.apply_scaffold(analysis, scaffold_level)
+
     extra_instruction = adaptive.build_instruction(analysis)
+    scaffold_note = scaffolding.build_scaffold_instruction(scaffold_level, analysis)
+    if scaffold_note:
+        extra_instruction += "\n" + scaffold_note
 
     try:
         reply = socratic_response(
@@ -162,11 +197,20 @@ def chat():
     student_code = body.get("student_id")
     if student_code:
         try:
-            session_id = log_turn(student_code, session_id, body["problem"], history, reply, analysis)
+            session_id = log_turn(
+                student_code, session_id, body["problem"], history, reply, analysis, scaffold_level
+            )
         except Exception as err:
             app.logger.error("Saving chat to database failed: %s", err)
 
-    return jsonify({"reply": reply, "session_id": session_id, "hint_level": analysis["hint_level"]})
+    return jsonify(
+        {
+            "reply": reply,
+            "session_id": session_id,
+            "hint_level": analysis["hint_level"],
+            "scaffold_level": scaffold_level,
+        }
+    )
 
 
 @app.errorhandler(404)

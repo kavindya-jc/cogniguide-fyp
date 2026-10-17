@@ -1,5 +1,5 @@
 """
-CogniGuide adaptive reasoning support - Phase 2, Stage 4
+CogniGuide adaptive reasoning support - Phase 2, Stages 4 and 5
 
 Looks at the student's recent messages and decides a HINT LEVEL (1, 2 or 3).
 It uses simple word rules. It does NOT call the AI, so it is free, fast,
@@ -123,6 +123,8 @@ def analyze_history(history):
 
     return {
         "hint_level": level,
+        # What the student needs. Stage 5 (scaffolding.py) may lower "hint_level" but never this number.
+        "needed_level": level,
         "struggle_count": struggle_count,
         "latest": latest,
         # True only when the chat ends with a student message (a NEW message to learn from).
@@ -147,7 +149,8 @@ def indicator_rows(analysis):
     """
     if not analysis["new_student_message"]:
         return []
-    rows = [("hint_level", analysis["hint_level"])]
+    # Save the level the student NEEDS (Stage 5 may use a lower level, but the data must show real need).
+    rows = [("hint_level", analysis.get("needed_level", analysis["hint_level"]))]
     latest = analysis["latest"]
     if latest["self_correct"]:
         rows.append(("self_correction", 1))
