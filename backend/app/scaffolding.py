@@ -44,13 +44,18 @@ REDUCED_AT = 1.8
 
 REDUCED_NOTE = (
     "SCAFFOLD NOTE: In earlier sessions this student needed little help, so keep your hints "
-    "smaller than usual. First ask the student what they would try, and only then add a small nudge."
+    "smaller than usual. Do NOT name the calculation to do or any numbers to use. "
+    "First ask the student what they would try, and only then add a small nudge. "
+    "Keep the reply to two short sentences at most. "
+    "Example of the right size: 'What do you think the next step is?'"
 )
 
 MINIMAL_NOTE = (
     "SCAFFOLD NOTE: This student has been working mostly on their own in earlier sessions. "
-    "Ask them to explain their own plan or reasoning first. Give only the smallest possible nudge, "
-    "and encourage them to check their own work."
+    "Ask them to explain their own plan or reasoning first. Give only the smallest possible nudge: "
+    "do NOT name the calculation to do or any numbers to use, and do not repeat facts from the problem. "
+    "Encourage them to check their own work. Keep the reply to two short sentences at most. "
+    "Example of the right size: 'What is your plan? Walk me through it.'"
 )
 
 

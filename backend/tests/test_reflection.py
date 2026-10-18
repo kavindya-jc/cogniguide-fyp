@@ -80,6 +80,12 @@ for kind in reflection.REFLECTION_TYPES:
           "do not give the answer" in text and "never quote" in text)
 check("unknown type -> empty text", reflection.build_reflection_instruction("nonsense") == "")
 check("indicator name", reflection.indicator_name("often_stuck") == "reflection_often_stuck")
+# Stage 8: softer wording, and short replies
+_asker = reflection.build_reflection_instruction("asks_for_answer")
+check("asks_for_answer: soft wording (about quick answers, no 'instead of asking')",
+      "quick answers" in _asker and "instead of asking" not in _asker and "Do not mention asking" in _asker)
+check("every reflection note asks for a short reply (at most three sentences)",
+      all("at most three short sentences" in reflection.build_reflection_instruction(k) for k in reflection.REFLECTION_TYPES))
 
 
 # ---- 4. A small pretend database (kept in memory) ----

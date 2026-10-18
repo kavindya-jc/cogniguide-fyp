@@ -81,6 +81,12 @@ check("no note at full support", scaffolding.build_scaffold_instruction(3, a) ==
 check("reduced note at scaffold 2", "SCAFFOLD NOTE" in scaffolding.build_scaffold_instruction(2, a))
 check("minimal note at scaffold 1", "own plan" in scaffolding.build_scaffold_instruction(1, a))
 check("no 'smaller hints' note for a clearly stuck student", scaffolding.build_scaffold_instruction(1, a3) == "")
+# Stage 8: stronger notes (tell the tutor not to name the calculation, keep it very short)
+for _lvl in (1, 2):
+    _t = scaffolding.build_scaffold_instruction(_lvl, a)
+    check(f"scaffold {_lvl} note: no calculation named, two short sentences, has an example",
+          "Do NOT name the calculation" in _t or "do NOT name the calculation" in _t)
+    check(f"scaffold {_lvl} note: short reply and example", "two short sentences" in _t and "Example" in _t)
 
 # ---- 5. Saved indicator is the NEED, not the limit ----
 a = adaptive.analyze_history(chat("I don't know how to start."))

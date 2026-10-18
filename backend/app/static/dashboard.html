@@ -238,8 +238,10 @@
 
   function render(data) {
     document.getElementById("growth").textContent = data.growth.message;
-    var small = el("small", "Based on your most recent sessions. It is a rough guide, not a grade.");
-    document.getElementById("growth").appendChild(small);
+    if (data.growth.trend !== "not_enough_data") {
+      var small = el("small", "Based on your most recent sessions. It is a rough guide, not a grade.");
+      document.getElementById("growth").appendChild(small);
+    }
     renderCards(data.totals);
     if (data.sessions.length) {
       renderChart(data.sessions);

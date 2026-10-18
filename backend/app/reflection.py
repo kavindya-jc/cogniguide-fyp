@@ -46,9 +46,9 @@ INDICATOR_PREFIX = "reflection_"  # saved in the indicators table, e.g. "reflect
 
 _TOPICS = {
     ASKS_FOR_ANSWER: (
-        "In earlier sessions this student often asked to be told the answer. Ask ONE short, kind question "
-        "about that habit, for example what they tried on their own before asking, or what would help them "
-        "try one more step alone. Do not scold."
+        "In earlier sessions this student often wanted quick answers. Ask ONE short, kind question about "
+        "what helps them take the next step on their own, for example what they could try first or what "
+        "helps them get started. Do not mention asking for the answer, and do not scold."
     ),
     OFTEN_STUCK: (
         "In earlier sessions this student often felt stuck. Ask ONE short question about how they get "
@@ -65,7 +65,7 @@ _TOPICS = {
 }
 
 _WRAPPER = (
-    "REFLECTION NOTE: {topic} Keep your normal guiding question too, but keep the whole reply short. "
+    "REFLECTION NOTE: {topic} Keep your normal guiding question too, but join the two so the whole reply is at most three short sentences with no more than two question marks. "
     "Speak naturally (for example 'before' or 'last time'). Never mention data, records, scores or numbers, "
     "never quote the student's old messages, and do not give the answer."
 )
