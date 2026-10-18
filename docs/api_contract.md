@@ -1,4 +1,4 @@
-# CogniGuide API Contract (Phase 2, Stages 1, 3, 4, 5 and 6)
+# CogniGuide API Contract (Phase 2, Stages 1, 3, 4, 5, 6 and 7)
 
 This is the agreement between the frontend and the Flask backend. The frontend only needs this file.
 
@@ -119,6 +119,39 @@ If the history cannot be read, the server asks no reflection question and the ch
 
 Known limits: the numbers (2, 3, 0.5, 3 messages) are first guesses and are not tested with real teenagers yet (Phase 3). The signs come from the word rules of Stage 4, which cannot check if an answer is right. Gemini does not always follow the reflection instruction closely; this will be checked in Stage 8.
 
+## 2d. GET /progress and the dashboard page (Stage 7)
+
+Stage 7 lets a student see how their own thinking is growing. It is **not a grade**.
+
+**Request:** `GET /progress?student_id=CODE` (the same anonymous code used in `/chat`: 1-64 letters, digits, `_` or `-`).
+
+**Success reply (200):**
+
+```json
+{
+  "student_id": "P001",
+  "sessions": [
+    {"started_at": "2026-10-01T10:00:00+00:00", "needed_level": 3.0, "allowed_level": 3,
+     "stuck": 1, "asked_for_answer": 1, "self_corrections": 0, "reflection_type": null}
+  ],
+  "totals": {"sessions": 1, "stuck": 1, "asked_for_answer": 1, "self_corrections": 0, "reflections": 0},
+  "growth": {"trend": "not_enough_data", "message": "Not enough sessions yet. ..."}
+}
+```
+
+- `sessions`: the student's newest 10 sessions, **oldest first**. A session with no student messages is left out.
+- `needed_level`: average hint level the student needed (1 = little help, 3 = a lot). `allowed_level`: the scaffold level used at the end of the session (or `null`).
+- `reflection_type`: `asks_for_answer`, `often_stuck`, `improving`, `self_checker` or `null`.
+- `growth.trend`: `less_help`, `more_help`, `steady` or `not_enough_data`. Needs at least 2 sessions. It compares the oldest and newest of the last 3 sessions; a change of 0.5 or more counts (the same rule as Stage 6). `growth.message` is a plain sentence for the student.
+- A student the server has never seen gets **200 with empty lists**, and nothing is created.
+- The reply has **numbers only**: no message text, no session ids, no names. It is sent with `Cache-Control: no-store`.
+
+**Errors:** 400 `invalid_request` (missing or bad `student_id`); 503 `progress_unavailable` (Supabase is not set up or cannot be read; the chat is not affected).
+
+**Page:** `GET /dashboard` is a simple web page served by the same server. The student types their code and sees the growth sentence, number cards, and a line chart of the help needed per session (with a table of the same numbers).
+
+Known limits: the numbers come from the word rules of Stage 4, so "growth" is a rough guide, not proof. The 0.5 rule and the 3-session window are first guesses (Phase 3). **There is no sign-in yet: anyone who knows an anonymous code can open that code's page.** This is fine for the prototype with pretend students; add a sign-in check and restrict CORS before real participants use it (Phase 3). The real Flutter screen can use the same `/progress` data.
+
 ## 3. GET /health
 
 Checks the server is running. Reply (200): `{"status": "ok"}`
@@ -137,6 +170,7 @@ Every error uses the same shape:
 | 404 | `not_found` | Unknown URL | Check the URL |
 | 405 | `method_not_allowed` | Wrong method (e.g. GET on /chat) | Use POST |
 | 500 | `server_error` | Unexpected failure, or the Gemini API key or model name is missing on the server | Show "Something went wrong, try again" |
+| 503 | `progress_unavailable` (Stage 7, `/progress` only) | Supabase is not set up or cannot be read | Show "Progress is not available right now" |
 | 503 | `tutor_unavailable` (new in Stage 4) | Gemini was busy or failed, even after the server tried again 3 times | Show "The tutor is busy, please try again" and let the student press send again. **Nothing was saved**, so it is safe to repeat the same request |
 
 Change in Stage 4: before, a failed Gemini call gave a 200 reply with a fallback sentence that was also saved as a real tutor message. Now it gives the 503 error above and saves nothing.

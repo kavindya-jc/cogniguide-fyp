@@ -1,5 +1,5 @@
 """
-CogniGuide database helper - Phase 2, Stages 2, 3, 4, 5 and 6
+CogniGuide database helper - Phase 2, Stages 2, 3, 4, 5, 6 and 7
 
 All Supabase code lives here, so api.py stays short.
 Every function raises an exception if the database call fails;
@@ -191,3 +191,52 @@ def session_has_reflection(session_id):
         .execute()
     )
     return bool(res.data)
+
+
+# Stage 7: how many of the newest sessions the progress dashboard shows.
+PROGRESS_MAX_SESSIONS = 10
+# Supabase gives at most 1000 rows per call, so we read the indicator rows page by page.
+_PAGE_SIZE = 1000
+_MAX_PAGES = 5
+
+
+def get_progress_rows(student_id, max_sessions=PROGRESS_MAX_SESSIONS):
+    """Stage 7: the raw rows the progress dashboard needs, for THIS student only.
+
+    Returns (sessions, indicators):
+        sessions   - the student's newest sessions, NEWEST first: [{"id": ..., "started_at": ...}, ...]
+        indicators - the indicator rows of those sessions, oldest first:
+                     [{"session_id": ..., "indicator_type": ..., "value": ...}, ...]
+    Numbers only: it never reads message text.
+    """
+    client = _get_client()
+    res = (
+        client.table("sessions")
+        .select("id, started_at")
+        .eq("student_id", student_id)
+        .order("started_at", desc=True)
+        .limit(max_sessions)
+        .execute()
+    )
+    sessions = res.data or []
+    if not sessions:
+        return [], []
+
+    session_ids = [s["id"] for s in sessions]
+    indicators = []
+    for page in range(_MAX_PAGES):
+        start = page * _PAGE_SIZE
+        res = (
+            client.table("indicators")
+            .select("session_id, indicator_type, value")
+            .eq("student_id", student_id)
+            .in_("session_id", session_ids)
+            .order("id")
+            .range(start, start + _PAGE_SIZE - 1)
+            .execute()
+        )
+        batch = res.data or []
+        indicators.extend(batch)
+        if len(batch) < _PAGE_SIZE:
+            break
+    return sessions, indicators

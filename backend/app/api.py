@@ -1,10 +1,12 @@
 """
-CogniGuide Flask API - Phase 2, Stages 1, 3, 4, 5 and 6
+CogniGuide Flask API - Phase 2, Stages 1, 3, 4, 5, 6 and 7
 
 Exposes the Socratic agent over HTTP:
     GET  /health  -> {"status": "ok"}
     POST /chat    -> {"reply": "...", "session_id": "..." or null, "hint_level": 1-3, "scaffold_level": 1-3,
                    "reflection_type": "..." or null}
+    GET  /progress?student_id=CODE -> that student's own progress numbers (Stage 7)
+    GET  /dashboard -> a simple web page that shows /progress as words, a chart and cards (Stage 7)
 
 Stage 3: if the request has a student_id, the chat is saved to Supabase
 (through db.py). Saving never breaks the chat: if it fails, the student
@@ -24,6 +26,11 @@ Stage 6: reflection.py can add ONE reflection question per session that refers t
 student worked in earlier sessions (numbers only, never old message text). If anything goes
 wrong while reading the history, no reflection question is asked and the chat works as before.
 
+Stage 7: progress.py sums up the numbers saved by Stages 4 to 6 for ONE student. GET /progress
+returns only numbers (never message text) and only for the anonymous code that was asked for.
+A new student gives empty lists. If the database cannot be read, /progress answers 503 and the
+chat is not affected. The dashboard page (static/dashboard.html) calls /progress from the same server.
+
 See docs/api_contract.md for the full request/reply format.
 
 Run from the backend/ folder:
@@ -36,7 +43,7 @@ import uuid
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from app import adaptive, db, reflection, scaffolding
+from app import adaptive, db, progress, reflection, scaffolding
 from app.models.socratic_agent import TutorUnavailable, socratic_response
 
 MAX_TEXT_LENGTH = 2000
@@ -251,6 +258,40 @@ def chat():
             "reflection_type": reflection_type,
         }
     )
+
+
+@app.get("/progress")
+def progress_view():
+    """Stage 7: this student's own progress numbers. Reads only; never creates a student."""
+    student_code = request.args.get("student_id", "")
+    if not STUDENT_ID_PATTERN.match(student_code):
+        return error_response(
+            400, "invalid_request",
+            "'student_id' is required: an anonymous code of 1-64 letters, digits, '_' or '-' (no names or emails)."
+        )
+    if not db.is_configured():
+        return error_response(503, "progress_unavailable", "Progress is not available right now.")
+
+    try:
+        student_uuid = db.find_student(student_code)
+        if student_uuid is None:
+            sessions, indicators = [], []  # a new student: empty lists, nothing is created
+        else:
+            sessions, indicators = db.get_progress_rows(student_uuid)
+        body = progress.build_progress(student_code, sessions, indicators)
+    except Exception as err:
+        app.logger.error("Reading progress failed: %s", err)
+        return error_response(503, "progress_unavailable", "Progress is not available right now.")
+
+    response = jsonify(body)
+    response.headers["Cache-Control"] = "no-store"  # personal numbers: do not let the browser keep a copy
+    return response
+
+
+@app.get("/dashboard")
+def dashboard():
+    """Stage 7: the simple progress page (a plain HTML file in app/static)."""
+    return app.send_static_file("dashboard.html")
 
 
 @app.errorhandler(404)
