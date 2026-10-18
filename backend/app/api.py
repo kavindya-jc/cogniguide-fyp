@@ -1,9 +1,10 @@
 """
-CogniGuide Flask API - Phase 2, Stages 1, 3, 4 and 5
+CogniGuide Flask API - Phase 2, Stages 1, 3, 4, 5 and 6
 
 Exposes the Socratic agent over HTTP:
     GET  /health  -> {"status": "ok"}
-    POST /chat    -> {"reply": "...", "session_id": "..." or null, "hint_level": 1-3, "scaffold_level": 1-3}
+    POST /chat    -> {"reply": "...", "session_id": "..." or null, "hint_level": 1-3, "scaffold_level": 1-3,
+                   "reflection_type": "..." or null}
 
 Stage 3: if the request has a student_id, the chat is saved to Supabase
 (through db.py). Saving never breaks the chat: if it fails, the student
@@ -19,6 +20,10 @@ the student needs less and less help, lowers the highest hint level the tutor ma
 (the "scaffold level"). If the database cannot be read, or the student is new, nothing
 changes (scaffold level 3 = full support).
 
+Stage 6: reflection.py can add ONE reflection question per session that refers to how the
+student worked in earlier sessions (numbers only, never old message text). If anything goes
+wrong while reading the history, no reflection question is asked and the chat works as before.
+
 See docs/api_contract.md for the full request/reply format.
 
 Run from the backend/ folder:
@@ -31,7 +36,7 @@ import uuid
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from app import adaptive, db, scaffolding
+from app import adaptive, db, reflection, scaffolding
 from app.models.socratic_agent import TutorUnavailable, socratic_response
 
 MAX_TEXT_LENGTH = 2000
@@ -112,11 +117,38 @@ def load_scaffold_level(student_code, session_id):
         return scaffolding.MAX_SCAFFOLD
 
 
-def log_turn(student_code, session_id, problem, history, reply, analysis, scaffold_level=scaffolding.MAX_SCAFFOLD):
+def load_reflection_type(student_code, session_id, history, analysis):
+    """Stage 6: choose a reflection type for this reply, or None for no reflection question.
+
+    Never raises. No student_id, no session_id, no database, a database error, a bad moment,
+    a new student, or a reflection already asked in this session all give None.
+    """
+    if not student_code or not session_id or not db.is_configured():
+        return None
+    # Cheap checks first, so most turns do not touch the database at all.
+    if not reflection.is_good_moment(analysis, reflection.count_student_messages(history)):
+        return None
+    try:
+        student_uuid = db.find_student(student_code)
+        if student_uuid is None:
+            return None
+        if not db.session_belongs_to(session_id, student_uuid):
+            return None  # never use another student's session
+        if db.session_has_reflection(session_id):
+            return None  # at most once per session
+        summary = db.get_history_summary(student_uuid, exclude_session_id=session_id)
+        return reflection.choose_reflection_type(summary)
+    except Exception as err:
+        app.logger.error("Reading history for reflection failed (no reflection): %s", err)
+        return None
+
+
+def log_turn(student_code, session_id, problem, history, reply, analysis,
+             scaffold_level=scaffolding.MAX_SCAFFOLD, reflection_type=None):
     """Save this turn to the database and return the session id.
 
     Saves the student's newest message (if the history ends with one), the tutor's reply,
-    and the indicators (Stage 4 + the Stage 5 scaffold level). Raises an exception if anything fails; the caller handles it.
+    and the indicators (Stage 4 + the Stage 5 scaffold level + the Stage 6 reflection type, if one was asked). Raises an exception if anything fails; the caller handles it.
     """
     if not db.is_configured():
         app.logger.warning("Supabase is not configured; chat not saved.")
@@ -141,6 +173,8 @@ def log_turn(student_code, session_id, problem, history, reply, analysis, scaffo
         rows = adaptive.indicator_rows(analysis)  # empty unless there is a NEW student message
         if rows:
             rows.append(("scaffold_level", scaffold_level))
+            if reflection_type:
+                rows.append((reflection.indicator_name(reflection_type), 1))
         db.save_indicators(student_uuid, session_id, rows)
     except Exception as err:
         app.logger.error("Saving indicators failed: %s", err)
@@ -172,10 +206,15 @@ def chat():
     scaffold_level = load_scaffold_level(body.get("student_id"), body.get("session_id"))
     analysis = scaffolding.apply_scaffold(analysis, scaffold_level)
 
+    # Stage 6: maybe ask one reflection question about the student's own way of working.
+    reflection_type = load_reflection_type(body.get("student_id"), body.get("session_id"), history, analysis)
+
     extra_instruction = adaptive.build_instruction(analysis)
     scaffold_note = scaffolding.build_scaffold_instruction(scaffold_level, analysis)
     if scaffold_note:
         extra_instruction += "\n" + scaffold_note
+    if reflection_type:
+        extra_instruction += "\n" + reflection.build_reflection_instruction(reflection_type)
 
     try:
         reply = socratic_response(
@@ -198,7 +237,7 @@ def chat():
     if student_code:
         try:
             session_id = log_turn(
-                student_code, session_id, body["problem"], history, reply, analysis, scaffold_level
+                student_code, session_id, body["problem"], history, reply, analysis, scaffold_level, reflection_type
             )
         except Exception as err:
             app.logger.error("Saving chat to database failed: %s", err)
@@ -209,6 +248,7 @@ def chat():
             "session_id": session_id,
             "hint_level": analysis["hint_level"],
             "scaffold_level": scaffold_level,
+            "reflection_type": reflection_type,
         }
     )
 

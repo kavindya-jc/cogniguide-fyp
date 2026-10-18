@@ -1,5 +1,5 @@
 """
-CogniGuide database helper - Phase 2, Stages 2, 3, 4 and 5
+CogniGuide database helper - Phase 2, Stages 2, 3, 4, 5 and 6
 
 All Supabase code lives here, so api.py stays short.
 Every function raises an exception if the database call fails;
@@ -131,3 +131,63 @@ def get_recent_session_levels(student_id, exclude_session_id=None, max_sessions=
 
     averages = [sum(levels) / len(levels) for levels in per_session.values()]
     return averages[:max_sessions]
+
+
+# The indicator types that describe how a student worked in an earlier session.
+HISTORY_INDICATORS = ["hint_level", "stuck", "asked_for_answer", "self_correction"]
+
+
+def get_history_summary(student_id, exclude_session_id=None, max_sessions=3):
+    """Stage 6: a short summary of this student's newest EARLIER sessions (numbers only).
+
+    Reads only this student's own indicator rows. It never reads message text.
+    Example result:
+        {"sessions": 3, "averages": [1.0, 1.5, 3.0],      # average hint level, newest session first
+         "stuck": 4, "asked_for_answer": 1, "self_correction": 2}   # totals over those sessions
+    The session in progress (exclude_session_id) is left out.
+    """
+    res = (
+        _get_client()
+        .table("indicators")
+        .select("session_id, indicator_type, value")
+        .eq("student_id", student_id)
+        .in_("indicator_type", HISTORY_INDICATORS)
+        .order("created_at", desc=True)
+        .order("id", desc=True)
+        .limit(600)
+        .execute()
+    )
+
+    per_session = {}  # session_id -> list of rows; dict keeps the newest-first order
+    for row in res.data or []:
+        sid = row.get("session_id")
+        if sid is None or sid == exclude_session_id or row.get("value") is None:
+            continue
+        per_session.setdefault(sid, []).append(row)
+
+    newest = list(per_session.values())[:max_sessions]
+    summary = {"sessions": len(newest), "averages": [], "stuck": 0, "asked_for_answer": 0, "self_correction": 0}
+    for rows in newest:
+        levels = [float(r["value"]) for r in rows if r.get("indicator_type") == "hint_level"]
+        if levels:
+            summary["averages"].append(sum(levels) / len(levels))
+        for kind in ("stuck", "asked_for_answer", "self_correction"):
+            summary[kind] += sum(1 for r in rows if r.get("indicator_type") == kind)
+    return summary
+
+
+def session_has_reflection(session_id):
+    """Stage 6: True if a reflection question was already asked in this session.
+
+    Every reflection that is asked is saved as an indicator whose type starts with "reflection_".
+    """
+    res = (
+        _get_client()
+        .table("indicators")
+        .select("id")
+        .eq("session_id", session_id)
+        .like("indicator_type", "reflection_%")
+        .limit(1)
+        .execute()
+    )
+    return bool(res.data)

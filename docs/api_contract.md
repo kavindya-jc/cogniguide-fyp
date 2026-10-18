@@ -1,4 +1,4 @@
-# CogniGuide API Contract (Phase 2, Stages 1, 3, 4 and 5)
+# CogniGuide API Contract (Phase 2, Stages 1, 3, 4, 5 and 6)
 
 This is the agreement between the frontend and the Flask backend. The frontend only needs this file.
 
@@ -43,12 +43,13 @@ Notes for the frontend:
 ### Success reply (200)
 
 ```json
-{"reply": "Nice start! What does 'half as many' tell you about May?", "session_id": "3f2b8c1e-5a47-4d6e-9b0a-1c2d3e4f5a6b", "hint_level": 1, "scaffold_level": 3}
+{"reply": "Nice start! What does 'half as many' tell you about May?", "session_id": "3f2b8c1e-5a47-4d6e-9b0a-1c2d3e4f5a6b", "hint_level": 1, "scaffold_level": 3, "reflection_type": null}
 ```
 
 - `session_id` is always present. It is `null` when nothing was saved (no `student_id` sent, or the database is not set up). **Saving never breaks the chat:** if saving fails, the reply is still returned (with the `session_id` you sent, or `null`), and the problem is only recorded in the server log.
 - `hint_level` (new in Stage 4) is a number from 1 to 3. It is the hint level the tutor **used** for this reply (see sections 2 and 2b). The frontend may ignore it, or show it later on the progress dashboard.
 - `scaffold_level` (new in Stage 5) is a number from 1 to 3: the **highest** hint level the tutor was allowed to use for this student (see section 2b). 3 = full support (the default, also for new students and when no `student_id` is sent). The frontend does not need to send anything new for this; it only needs the same `student_id` on every call. The frontend may ignore it, or show it later on the progress dashboard.
+- `reflection_type` (new in Stage 6) is `null` on most replies. On the one reply in a session where the tutor was asked to add a personal reflection question, it is a short word: `"asks_for_answer"`, `"often_stuck"`, `"improving"` or `"self_checker"` (see section 2c). The frontend does not need to send anything new for this; it only needs the same `student_id` and `session_id` on every call. The frontend may ignore it, or show it later on the progress dashboard.
 
 ## 2. How the hint level works (Stage 4)
 
@@ -64,7 +65,7 @@ If the student struggled earlier but the newest message is fine, the level goes 
 
 Known limit: the rules cannot check if a number is right or wrong. They only read the words the student uses.
 
-When the chat ends with a new student message and a `student_id` was sent, the server also saves rows in the database table `indicators`: `hint_level` (1-3), `scaffold_level` (1-3, new in Stage 5), and `self_correction`, `asked_for_answer`, `stuck` (value 1) when they were noticed.
+When the chat ends with a new student message and a `student_id` was sent, the server also saves rows in the database table `indicators`: `hint_level` (1-3), `scaffold_level` (1-3, new in Stage 5), and `self_correction`, `asked_for_answer`, `stuck` (value 1) when they were noticed, and (new in Stage 6) `reflection_asks_for_answer`, `reflection_often_stuck`, `reflection_improving` or `reflection_self_checker` (value 1) on the one turn where a reflection question was asked.
 
 ## 2b. How the scaffold level works (Stage 5)
 
@@ -89,6 +90,34 @@ If the database cannot be read, the server uses `scaffold_level` 3 and the chat 
 In the `indicators` table, the saved `hint_level` is the level the student **needed** (from Stage 4, before the limit), so the data keeps showing real need. A new indicator `scaffold_level` (1-3) is saved next to it, on the same turns.
 
 Known limits: the thresholds (1.3, 1.8, 2.5, 3 sessions) are first guesses and are not tested with real teenagers yet (Phase 3). They are based on the word rules of Stage 4, which cannot check if an answer is right.
+
+## 2c. How personalised reflection questions work (Stage 6)
+
+Stage 6 lets the tutor ask the student to think about their **own way of working**, using the student's **earlier sessions**. Example: "You asked for the answer a few times before. What did you try on your own this time?" This only happens when a `student_id` **and** a `session_id` are sent.
+
+**When (all must be true):**
+- The student has sent at least 3 messages in this session.
+- The newest message is a new student message that is **not** a struggle (not "I don't know", not "just tell me").
+- No reflection question has been asked in this session yet (**at most one per session**).
+- The student has at least 2 earlier sessions with data.
+
+**Which one** (from the last 3 earlier sessions; the first rule that fits wins):
+
+| Earlier sessions show | `reflection_type` | What the tutor asks about |
+|---|---|---|
+| Asked for the answer 2 or more times | `asks_for_answer` | What they tried on their own before asking |
+| Said they were stuck 3 or more times | `often_stuck` | How they got going or decided where to start |
+| Average hint level fell by 0.5 or more (oldest to newest) | `improving` | What is different for them now |
+| Fixed their own mistakes 2 or more times | `self_checker` | How they check their own work (after a short praise) |
+| None of these | `null` | No reflection question |
+
+The tutor still asks its normal guiding question and never gives the answer.
+
+**Privacy:** the server reads only **numbers** (the `indicators` table) of **this student's own** earlier sessions. It never reads old message text and never copies it into a prompt. A `session_id` that belongs to another student is never used.
+
+If the history cannot be read, the server asks no reflection question and the chat works as in Stage 5. Nothing for the frontend to handle. If saving the `reflection_...` indicator fails, the question could be asked once more in the same session.
+
+Known limits: the numbers (2, 3, 0.5, 3 messages) are first guesses and are not tested with real teenagers yet (Phase 3). The signs come from the word rules of Stage 4, which cannot check if an answer is right. Gemini does not always follow the reflection instruction closely; this will be checked in Stage 8.
 
 ## 3. GET /health
 
