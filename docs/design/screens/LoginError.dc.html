@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Log in – check your details</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/playfului/components/bundle.css">
+<script src="ds/playfului/components/bundle.js"></script>
+<link rel="stylesheet" href="cg-theme.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<main class="cg-screen" style="width: 390px; height: 844px; padding: 16px 24px 28px; gap: 20px">
+  <div style="display: flex; align-items: center; min-height: 48px">
+    <a class="pu-iconbtn pu-iconbtn-soft cg-ib" href="Main.dc.html" aria-label="Back">
+      <x-import component-from-global-scope="PlayfulUI.Icon" name="arrow-left" size="{{i22}}"></x-import>
+    </a>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <h1 class="h1">Welcome back</h1>
+    <p class="body muted" style="margin: 0">Log in with your code and password.</p>
+  </div>
+
+  <div id="login-err" class="cg-notice cg-nudge" role="alert">
+    <span class="cg-well" style="background: var(--mustard); color: var(--on-accent)" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+    </span>
+    <p class="body" style="margin: 0">That code and password don't match. Check them and try again.</p>
+  </div>
+
+  <form style="display: flex; flex-direction: column; gap: 16px; margin: 0">
+    <div class="cg-field">
+      <label for="code">Anonymous code</label>
+      <input id="code" class="cg-input" type="text" value="P01" aria-invalid="true" aria-describedby="login-err">
+    </div>
+    <div class="cg-field">
+      <label for="pw">Password</label>
+      <input id="pw" class="cg-input" type="password" value="password1" aria-invalid="true" aria-describedby="login-err">
+    </div>
+  </form>
+
+  <div class="cg-notice cg-notice-teal" role="note">
+    <span class="cg-well" style="background: var(--teal); color: var(--on-teal)" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+    </span>
+    <p class="body" style="margin: 0; font-size: 15px; line-height: 22px">Your code keeps your progress private. This is not a test and nobody grades you.</p>
+  </div>
+
+  <div style="flex: 1"></div>
+  <div style="display: flex; flex-direction: column; gap: 6px; align-items: center">
+    <a class="pu-btn pu-btn-dark cg-lg cg-block" href="LoggingIn.dc.html">Log in</a>
+    <a class="pu-btn pu-btn-ghost cg-lg" href="CreateAccount.dc.html" style="color: var(--teal-ink)">New here? Create an account</a>
+  </div>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { i22: 22 };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Help in each session, as a list</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/playfului/components/bundle.css">
+<script src="ds/playfului/components/bundle.js"></script>
+<link rel="stylesheet" href="cg-theme.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="cg-screen" style="width: 390px; height: 844px">
+  <main style="flex: 1; display: flex; flex-direction: column; padding: 16px 20px 104px; gap: 16px; overflow: hidden">
+    <div style="display: flex; align-items: center; gap: 12px">
+      <a class="pu-iconbtn pu-iconbtn-soft cg-ib" href="Progress.dc.html" aria-label="Back to my progress">
+        <x-import component-from-global-scope="PlayfulUI.Icon" name="arrow-left" size="{{i22}}"></x-import>
+      </a>
+      <h1 class="h1" style="font-size: 26px; line-height: 30px">Help in each session</h1>
+    </div>
+    <p class="body muted" style="margin: 0">The same numbers as the chart, written out.</p>
+
+    <div class="cg-card cg-rise" style="padding: 6px 8px; overflow-x: auto">
+      <table style="width: 100%; border-collapse: collapse; font-size: 16px">
+        <caption class="cg-sr">How much help you needed in each session</caption>
+        <thead>
+          <tr class="caption muted" style="text-align: left"><th scope="col" style="padding: 12px; font-size: 14px; font-weight: 600; border-bottom: 1.5px solid var(--line)">Session</th><th scope="col" style="padding: 12px; font-size: 14px; font-weight: 600; border-bottom: 1.5px solid var(--line)">Date</th><th scope="col" style="padding: 12px; font-size: 14px; font-weight: 600; border-bottom: 1.5px solid var(--line)">Help needed</th></tr>
+        </thead>
+        <tbody>
+          <tr class="cg-rise d1"><td style="padding: 14px 12px; font-weight: 700; border-bottom: 1px solid var(--line)">1</td><td style="padding: 14px 12px; border-bottom: 1px solid var(--line)">2 Oct</td><td style="padding: 14px 12px; border-bottom: 1px solid var(--line)"><span class="pu-chip pu-chip-orange" style="font-size: 14px">A lot</span></td></tr>
+          <tr class="cg-rise d2"><td style="padding: 14px 12px; font-weight: 700; border-bottom: 1px solid var(--line)">2</td><td style="padding: 14px 12px; border-bottom: 1px solid var(--line)">5 Oct</td><td style="padding: 14px 12px; border-bottom: 1px solid var(--line)"><span class="pu-chip pu-chip-orange" style="font-size: 14px">A lot</span></td></tr>
+          <tr class="cg-rise d3"><td style="padding: 14px 12px; font-weight: 700; border-bottom: 1px solid var(--line)">3</td><td style="padding: 14px 12px; border-bottom: 1px solid var(--line)">8 Oct</td><td style="padding: 14px 12px; border-bottom: 1px solid var(--line)"><span class="pu-chip pu-chip-mustard" style="font-size: 14px">Some</span></td></tr>
+          <tr class="cg-rise d4"><td style="padding: 14px 12px; font-weight: 700; border-bottom: 1px solid var(--line)">4</td><td style="padding: 14px 12px; border-bottom: 1px solid var(--line)">11 Oct</td><td style="padding: 14px 12px; border-bottom: 1px solid var(--line)"><span class="pu-chip pu-chip-orange" style="font-size: 14px">A lot</span></td></tr>
+          <tr class="cg-rise d5"><td style="padding: 14px 12px; font-weight: 700; border-bottom: 1px solid var(--line)">5</td><td style="padding: 14px 12px; border-bottom: 1px solid var(--line)">14 Oct</td><td style="padding: 14px 12px; border-bottom: 1px solid var(--line)"><span class="pu-chip pu-chip-mustard" style="font-size: 14px">Some</span></td></tr>
+          <tr class="cg-rise d6"><td style="padding: 14px 12px; font-weight: 700">6</td><td style="padding: 14px 12px">17 Oct</td><td style="padding: 14px 12px"><span class="pu-chip pu-chip-teal" style="font-size: 14px">A little</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption muted" style="margin: 0 4px; font-size: 14px; line-height: 20px">These numbers come from simple word rules, so they are a rough guide and not proof.</p>
+  </main>
+
+  <nav class="cg-nav" aria-label="Main">
+    <a href="Home.dc.html"><x-import component-from-global-scope="PlayfulUI.Icon" name="book" size="{{i22}}"></x-import>Practice</a>
+    <a href="Progress.dc.html" aria-current="page"><x-import component-from-global-scope="PlayfulUI.Icon" name="chart" size="{{i22}}"></x-import>My progress</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { i22: 22 };
+  }
+}
+</script>
+</body>
+</html>

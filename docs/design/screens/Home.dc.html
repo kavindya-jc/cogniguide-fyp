@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pick a problem</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/playfului/components/bundle.css">
+<script src="ds/playfului/components/bundle.js"></script>
+<link rel="stylesheet" href="cg-theme.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="cg-screen" style="width: 390px; height: 844px">
+  <main class="cg-scroll" style="display: flex; flex-direction: column; gap: 14px; padding-bottom: 104px">
+    <section class="cg-panel-teal cg-fade" style="padding: 12px 20px 24px; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; align-items: center; justify-content: space-between; min-height: 48px">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <sc-if value="{{hasItems}}" hint-placeholder-val="{{true}}">
+            <div style="width: 52px; height: 52px; border-radius: 26px; background: var(--teal-soft); display: grid; place-items: center; overflow: hidden">
+              <x-import component-from-global-scope="PlayfulUI.Mascot" mood="idle" size="{{m56}}" title="Your coach"></x-import>
+            </div>
+          </sc-if>
+          <span class="title">Hi, P001</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 4px">
+          <a class="pu-btn pu-btn-ghost cg-lg" href="LogoutSheet.dc.html" style="color: var(--on-teal); padding: 0 10px">Log out</a>
+          <a class="pu-iconbtn pu-iconbtn-light cg-ib" href="Settings.dc.html" aria-label="Settings">
+            <x-import component-from-global-scope="PlayfulUI.Icon" name="settings" size="{{i22}}"></x-import>
+          </a>
+        </div>
+      </div>
+      <h1 class="h1 cg-rise d1" style="font-size: 30px; line-height: 34px">What would you like to work on?</h1>
+    </section>
+
+    <div role="group" aria-label="Maths area" class="cg-rise d2" style="display: flex; gap: 8px; overflow-x: auto; padding: 2px 20px">
+      <sc-for list="{{areas}}" as="a" hint-placeholder-count="6">
+        <x-import component-from-global-scope="PlayfulUI.Chip" class-name="cg-lg" tone="light" icon="{{a.icon}}" selected="{{a.selected}}" on-click="{{a.pick}}">{{a.label}}</x-import>
+      </sc-for>
+    </div>
+
+    <div role="group" aria-label="Grade" class="cg-rise d3" style="display: flex; align-items: center; gap: 2px; padding: 0 20px; margin-top: -4px">
+      <span aria-hidden="true" class="label muted" style="margin-right: 8px">Grade</span>
+      <sc-for list="{{grades}}" as="g" hint-placeholder-count="5">
+        <sc-if value="{{g.selected}}" hint-placeholder-val="{{false}}">
+          <button type="button" class="cg-seg on cg-focus" aria-pressed="true" aria-label="{{g.aria}}" onClick="{{g.pick}}">{{g.label}}</button>
+        </sc-if>
+        <sc-if value="{{g.notSelected}}" hint-placeholder-val="{{true}}">
+          <button type="button" class="cg-seg cg-focus" aria-pressed="false" aria-label="{{g.aria}}" onClick="{{g.pick}}">{{g.label}}</button>
+        </sc-if>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{hasItems}}" hint-placeholder-val="{{true}}">
+      <ul style="list-style: none; margin: 0; padding: 0 20px; display: flex; flex-direction: column; gap: 10px">
+        <sc-for list="{{items}}" as="p" hint-placeholder-count="3">
+          <li class="cg-rise {{p.delay}}">
+            <a class="cg-pcard cg-focus {{p.tone}}" href="Chat.dc.html">
+              <span style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+                <span class="eyebrow">{{p.meta}}</span>
+                <span class="title" style="font-size: 18px; line-height: 25px">{{p.text}}</span>
+              </span>
+              <span class="cg-go" aria-hidden="true"><x-import component-from-global-scope="PlayfulUI.Icon" name="arrow-right" size="{{i20}}"></x-import></span>
+            </a>
+          </li>
+        </sc-for>
+      </ul>
+    </sc-if>
+    <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+      <div role="status" class="cg-rise" style="margin: 0 20px; border: 2px dashed var(--field-line); border-radius: var(--radius-lg); padding: 16px 20px 22px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center">
+        <x-import component-from-global-scope="PlayfulUI.Mascot" mood="thinking" size="{{m110}}" title="Your coach, thinking"></x-import>
+        <p class="body" style="margin: 0; font-size: 17px">No problems here yet. Try another area or type your own.</p>
+      </div>
+    </sc-if>
+
+    <form class="cg-rise d6" style="margin: 2px 20px 0; display: flex; flex-direction: column; gap: 8px">
+      <label for="own" class="title">Or type your own problem</label>
+      <div style="display: flex; gap: 8px; align-items: flex-end; background: var(--surface-raised); border-radius: var(--radius-lg); padding: 10px 10px 10px 18px; box-shadow: inset 0 0 0 1.5px var(--field-line)">
+        <textarea id="own" class="cg-text" placeholder="Type the whole question. Has a figure? Describe it in words, for example: triangle ABC, AB = 5 cm, angle B = 90°." style="height: 96px; border: 0; padding: 4px 0; background: transparent; font-size: 16px"></textarea>
+        <a class="pu-iconbtn pu-iconbtn-dark cg-ib" href="Chat.dc.html" aria-label="Start with this problem">
+          <x-import component-from-global-scope="PlayfulUI.Icon" name="arrow-right" size="{{i22}}"></x-import>
+        </a>
+      </div>
+    </form>
+  </main>
+
+  <nav class="cg-nav" aria-label="Main">
+    <a href="Home.dc.html" aria-current="page"><x-import component-from-global-scope="PlayfulUI.Icon" name="book" size="{{i22}}"></x-import>Practice</a>
+    <a href="Progress.dc.html"><x-import component-from-global-scope="PlayfulUI.Icon" name="chart" size="{{i22}}"></x-import>My progress</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"area":{"editor":"enum","options":["Number","Algebra","Geometry","Trigonometry","Graphs","Statistics"],"default":"Algebra"},"grade":{"editor":"enum","options":["All","8","9","10","11"],"default":"All"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  problems() {
+    return [
+      { area: 'Number', grade: '8', text: 'Find 3/4 of 240.' },
+      { area: 'Number', grade: '9', text: 'A bag costs Rs. 2400. The shop gives a 15% discount. What is the new price?' },
+      { area: 'Number', grade: '10', text: 'Write 0.000045 in scientific notation.' },
+      { area: 'Algebra', grade: '9', text: 'Solve: 3x − 5 = 2x + 7' },
+      { area: 'Algebra', grade: '10', text: 'Factorise: x² + 5x + 6' },
+      { area: 'Algebra', grade: '11', text: 'Solve together: 2x + y = 11 and x − y = 1' },
+      { area: 'Geometry', grade: '8', text: 'Two angles of a triangle are 48° and 67°. Find the third angle.' },
+      { area: 'Geometry', grade: '10', text: 'In triangle ABC, AB = AC and angle A = 40°. Find angle B.' },
+      { area: 'Geometry', grade: '11', text: 'Find the area of a circle with radius 7 cm. Use π = 22/7.' },
+      { area: 'Trigonometry', grade: '10', text: 'In a right-angled triangle, the side opposite θ is 6 cm and the hypotenuse is 10 cm. Find sin θ.' },
+      { area: 'Trigonometry', grade: '11', text: 'A 5 m ladder leans on a wall at 60° to the ground. How high up the wall does it reach?' },
+      { area: 'Graphs', grade: '9', text: 'For y = 2x + 1, find y when x = −2, 0 and 2. Where does the line cross the y-axis?' },
+      { area: 'Graphs', grade: '10', text: 'What is the gradient of the line through (1, 3) and (4, 9)?' },
+      { area: 'Statistics', grade: '8', text: 'Find the mean of 4, 7, 9, 10 and 15.' },
+      { area: 'Statistics', grade: '9', text: 'Find the median of 12, 5, 8, 20, 9 and 15.' }
+    ];
+  }
+  renderVals() {
+    const s = this.state || {};
+    const area = s.area || this.props.area || 'Algebra';
+    const grade = s.grade || this.props.grade || 'All';
+    const areas = ['Number', 'Algebra', 'Geometry', 'Trigonometry', 'Graphs', 'Statistics'];
+    const grades = ['All', '8', '9', '10', '11'];
+    const tones = ['tone-night', 'tone-lavender', 'tone-orange'];
+    const items = this.problems()
+      .filter((p) => p.area === area && (grade === 'All' || p.grade === grade))
+      .map((p, i) => ({ meta: 'Problem ' + (i + 1) + ' · ' + p.area + ' · Grade ' + p.grade, text: p.text, tone: tones[i % 3], delay: 'd' + (i + 4) }));
+    return {
+      m56: 56,
+      m110: 110,
+      i20: 20,
+      i22: 22,
+      areas: areas.map((a) => ({ label: a, icon: a === area ? 'check' : undefined, selected: a === area, pick: () => this.setState({ area: a }) })),
+      grades: grades.map((g) => ({ label: g, aria: g === 'All' ? 'All grades' : 'Grade ' + g, selected: g === grade, notSelected: g !== grade, pick: () => this.setState({ grade: g }) })),
+      items: items,
+      hasItems: items.length > 0,
+      isEmpty: items.length === 0
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Create your account – fix a few things</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/playfului/components/bundle.css">
+<script src="ds/playfului/components/bundle.js"></script>
+<link rel="stylesheet" href="cg-theme.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<main class="cg-screen" style="width: 390px; height: 844px; padding: 16px 24px 28px; gap: 18px">
+  <div style="display: flex; align-items: center; min-height: 48px">
+    <a class="pu-iconbtn pu-iconbtn-soft cg-ib" href="Main.dc.html" aria-label="Back">
+      <x-import component-from-global-scope="PlayfulUI.Icon" name="arrow-left" size="{{i22}}"></x-import>
+    </a>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <h1 class="h1">Create your account</h1>
+    <p class="body muted" style="margin: 0">Almost there. A few small things to fix.</p>
+  </div>
+
+  <form style="display: flex; flex-direction: column; gap: 16px; margin: 0">
+    <div class="cg-field">
+      <label for="code">Anonymous code</label>
+      <input id="code" class="cg-input" type="text" value="P001" aria-invalid="true" aria-describedby="code-err">
+      <p id="code-err" class="cg-fix cg-nudge d1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex: none; margin-top: 1px"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg><span>That code is taken. Try a different one, for example add a few more numbers.</span></p>
+    </div>
+    <div class="cg-field">
+      <label for="pw">Password</label>
+      <input id="pw" class="cg-input" type="password" value="abc123" aria-invalid="true" aria-describedby="pw-err">
+      <p id="pw-err" class="cg-fix cg-nudge d2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex: none; margin-top: 1px"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg><span>Your password needs at least 8 characters. Add 2 more.</span></p>
+    </div>
+    <div class="cg-field">
+      <label for="pw2">Type the password again</label>
+      <input id="pw2" class="cg-input" type="password" value="abc12" aria-invalid="true" aria-describedby="pw2-err">
+      <p id="pw2-err" class="cg-fix cg-nudge d3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex: none; margin-top: 1px"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg><span>The two passwords don't match yet. Type it again slowly.</span></p>
+    </div>
+  </form>
+
+  <div style="flex: 1"></div>
+  <div style="display: flex; flex-direction: column; gap: 6px; align-items: center">
+    <a class="pu-btn pu-btn-dark cg-lg cg-block" href="Home.dc.html">Create account</a>
+    <a class="pu-btn pu-btn-ghost cg-lg" href="Login.dc.html" style="color: var(--teal-ink)">I already have an account</a>
+  </div>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { i22: 22 };
+  }
+}
+</script>
+</body>
+</html>

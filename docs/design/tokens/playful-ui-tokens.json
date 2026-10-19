@@ -1,0 +1,416 @@
+{
+  "name": "Playful UI",
+  "version": 1,
+  "color": {
+    "themes": [
+      {
+        "id": "light",
+        "name": "Light"
+      },
+      {
+        "id": "dark",
+        "name": "Dark"
+      }
+    ],
+    "tokens": [
+      {
+        "name": "surface",
+        "value": {
+          "light": "#fbf8e6",
+          "dark": "#181715"
+        },
+        "usage": "Page background \u2014 the warm cream ground every screen sits on."
+      },
+      {
+        "name": "surface-raised",
+        "value": {
+          "light": "#ffffff",
+          "dark": "#24221f"
+        },
+        "usage": "Cards, sheets and the selected segment that sit on surface."
+      },
+      {
+        "name": "surface-sunken",
+        "value": {
+          "light": "#f2eed8",
+          "dark": "#2e2b27"
+        },
+        "usage": "Stat tiles, inactive segments and wells set into surface."
+      },
+      {
+        "name": "line",
+        "value": {
+          "light": "#e6e0c8",
+          "dark": "#433f38"
+        },
+        "usage": "Hairlines, dashed 'upcoming' outlines and quiet borders (decorative, never the only signal)."
+      },
+      {
+        "name": "ink",
+        "value": {
+          "light": "#1f1d1b",
+          "dark": "#f6f2e4"
+        },
+        "usage": "Primary text and icons on surface, surface-raised, surface-sunken and the -soft tints."
+      },
+      {
+        "name": "ink-muted",
+        "value": {
+          "light": "#5f5a51",
+          "dark": "#b8b2a3"
+        },
+        "usage": "Secondary text, labels and dates on surface, surface-raised and surface-sunken."
+      },
+      {
+        "name": "night",
+        "value": {
+          "light": "#23211f",
+          "dark": "#f6f2e4"
+        },
+        "usage": "Strong pills, the bottom nav, tooltips, the 'night' course card. Dark in light mode, cream in dark mode \u2014 always the opposite of surface."
+      },
+      {
+        "name": "on-night",
+        "value": {
+          "light": "#ffffff",
+          "dark": "#1f1d1b"
+        },
+        "usage": "Text and icons on night."
+      },
+      {
+        "name": "on-accent",
+        "value": {
+          "light": "#1f1d1b",
+          "dark": "#1f1d1b"
+        },
+        "usage": "Text, icons and the mascot's pupils on coral, mustard, orange and lavender fills \u2014 dark in both themes."
+      },
+      {
+        "name": "night-accent",
+        "value": {
+          "light": "#f4b23a",
+          "dark": "#8a5a00"
+        },
+        "usage": "Highlight text (eyebrows) on night."
+      },
+      {
+        "name": "coral",
+        "value": {
+          "light": "#e95a7a",
+          "dark": "#f06b89"
+        },
+        "usage": "Hero accent: header panels, the #1 rank, highlighted course cards. Text on it uses on-accent."
+      },
+      {
+        "name": "coral-soft",
+        "value": {
+          "light": "#fce0e6",
+          "dark": "#4a2530"
+        },
+        "usage": "Tinted chips and icon wells behind coral-ink."
+      },
+      {
+        "name": "coral-ink",
+        "value": {
+          "light": "#b0304f",
+          "dark": "#ff9db2"
+        },
+        "usage": "Coral as text (lesson counts, alerts) on surface, surface-raised and coral-soft."
+      },
+      {
+        "name": "teal",
+        "value": {
+          "light": "#2f7d6d",
+          "dark": "#4fae99"
+        },
+        "usage": "Hero accent: leaderboard panels, active state, progress fills. Text on it uses on-teal."
+      },
+      {
+        "name": "on-teal",
+        "value": {
+          "light": "#ffffff",
+          "dark": "#10201c"
+        },
+        "usage": "Text and icons on a teal fill."
+      },
+      {
+        "name": "teal-soft",
+        "value": {
+          "light": "#d7ebe4",
+          "dark": "#1f3a34"
+        },
+        "usage": "Tinted chips and icon wells behind teal-ink; inactive segment on teal."
+      },
+      {
+        "name": "teal-ink",
+        "value": {
+          "light": "#25685a",
+          "dark": "#82d4c0"
+        },
+        "usage": "Teal as text ('Active', success) on surface, surface-raised and teal-soft."
+      },
+      {
+        "name": "mustard",
+        "value": {
+          "light": "#f4b23a",
+          "dark": "#f6bd52"
+        },
+        "usage": "Warm accent: the #3 rank, rewards, stars and highlights. Text on it uses on-accent."
+      },
+      {
+        "name": "mustard-soft",
+        "value": {
+          "light": "#fcebc4",
+          "dark": "#3f3218"
+        },
+        "usage": "Tinted wells behind mustard-ink."
+      },
+      {
+        "name": "mustard-ink",
+        "value": {
+          "light": "#8a5a00",
+          "dark": "#f6c968"
+        },
+        "usage": "Mustard as text on surface, surface-raised and mustard-soft."
+      },
+      {
+        "name": "orange",
+        "value": {
+          "light": "#f4874b",
+          "dark": "#f6955d"
+        },
+        "usage": "Course and progress headers, chart bars, the mascot's feet. Text on it uses on-accent."
+      },
+      {
+        "name": "orange-soft",
+        "value": {
+          "light": "#fde3d2",
+          "dark": "#45291b"
+        },
+        "usage": "Tinted stat tiles and chart tracks behind orange-ink."
+      },
+      {
+        "name": "orange-ink",
+        "value": {
+          "light": "#a84a14",
+          "dark": "#ffae82"
+        },
+        "usage": "Orange as text on surface, surface-raised and orange-soft."
+      },
+      {
+        "name": "lavender",
+        "value": {
+          "light": "#8b89e8",
+          "dark": "#9d9bf2"
+        },
+        "usage": "Feature/promo cards, the active nav tab and the mascot's body. Text on it uses on-accent."
+      },
+      {
+        "name": "lavender-soft",
+        "value": {
+          "light": "#e3e2fb",
+          "dark": "#2c2b52"
+        },
+        "usage": "Tinted stat tiles behind lavender-ink."
+      },
+      {
+        "name": "lavender-ink",
+        "value": {
+          "light": "#524fc0",
+          "dark": "#bdbbff"
+        },
+        "usage": "Lavender as text on surface, surface-raised and lavender-soft."
+      },
+      {
+        "name": "sky",
+        "value": {
+          "light": "#6db3f2",
+          "dark": "#7cbcf5"
+        },
+        "usage": "Tears and sweat drops on the mascot only. Never text."
+      },
+      {
+        "name": "focus-ring",
+        "value": "{ink}",
+        "usage": "Focus outline: 3px solid, 2px offset \u2014 at least 3:1 on every surface and accent fill."
+      }
+    ]
+  },
+  "type": {
+    "fonts": [],
+    "families": {
+      "sans": "\"Outfit\", ui-rounded, system-ui, sans-serif"
+    },
+    "groups": [
+      {
+        "name": "Display",
+        "family": "sans",
+        "styles": [
+          {
+            "name": "display",
+            "fontSize": "64px",
+            "lineHeight": "64px",
+            "fontWeight": 700,
+            "letterSpacing": "-0.03em",
+            "sample": "78%",
+            "usage": "One hero number per screen (average progress)."
+          },
+          {
+            "name": "stat",
+            "fontSize": "36px",
+            "lineHeight": "40px",
+            "fontWeight": 700,
+            "letterSpacing": "-0.02em",
+            "sample": "44",
+            "usage": "Numbers in stat tiles and 'lessons / hours' totals."
+          },
+          {
+            "name": "h1",
+            "fontSize": "32px",
+            "lineHeight": "36px",
+            "fontWeight": 700,
+            "letterSpacing": "-0.02em",
+            "sample": "Learning plan",
+            "usage": "Screen titles."
+          },
+          {
+            "name": "h2",
+            "fontSize": "22px",
+            "lineHeight": "28px",
+            "fontWeight": 700,
+            "letterSpacing": "-0.01em",
+            "sample": "Creative approaches to plane shapes",
+            "usage": "Card titles."
+          }
+        ]
+      },
+      {
+        "name": "Text",
+        "family": "sans",
+        "styles": [
+          {
+            "name": "title",
+            "fontSize": "17px",
+            "lineHeight": "22px",
+            "fontWeight": 600,
+            "sample": "Hi, Elizabeth",
+            "usage": "Greetings, list-row titles, section headers."
+          },
+          {
+            "name": "body",
+            "fontSize": "15px",
+            "lineHeight": "22px",
+            "fontWeight": 400,
+            "sample": "A series of Olympiads for erudite people from all over the world.",
+            "usage": "Running text."
+          },
+          {
+            "name": "label",
+            "fontSize": "13px",
+            "lineHeight": "16px",
+            "fontWeight": 500,
+            "sample": "12 Subjects",
+            "usage": "Buttons, chips, segments, tile labels."
+          },
+          {
+            "name": "caption",
+            "fontSize": "11px",
+            "lineHeight": "14px",
+            "fontWeight": 500,
+            "sample": "Mon, 23 July",
+            "usage": "Dates, axis labels, metadata."
+          },
+          {
+            "name": "eyebrow",
+            "fontSize": "10px",
+            "lineHeight": "12px",
+            "fontWeight": 600,
+            "letterSpacing": "0.06em",
+            "sample": "GEOMETRY IN ACTION",
+            "usage": "Uppercase kicker above a card title."
+          }
+        ]
+      }
+    ]
+  },
+  "spacing": {
+    "tokens": [
+      {
+        "name": "space-1",
+        "value": "4px",
+        "usage": "Icon-to-text gaps inside chips."
+      },
+      {
+        "name": "space-2",
+        "value": "8px",
+        "usage": "Gaps between avatars, chips and tiles in a row."
+      },
+      {
+        "name": "space-3",
+        "value": "12px",
+        "usage": "Gaps between stacked cards; button icon gap."
+      },
+      {
+        "name": "space-4",
+        "value": "16px",
+        "usage": "Tile padding; gutters between tiles."
+      },
+      {
+        "name": "space-5",
+        "value": "20px",
+        "usage": "Card padding."
+      },
+      {
+        "name": "space-6",
+        "value": "24px",
+        "usage": "Screen side padding; panel padding."
+      },
+      {
+        "name": "space-8",
+        "value": "32px",
+        "usage": "Between screen sections."
+      }
+    ]
+  },
+  "radius": {
+    "tokens": [
+      {
+        "name": "radius-sm",
+        "value": "12px",
+        "usage": "Icon wells and small tags."
+      },
+      {
+        "name": "radius-md",
+        "value": "20px",
+        "usage": "Stat tiles, list rows."
+      },
+      {
+        "name": "radius-lg",
+        "value": "28px",
+        "usage": "Cards."
+      },
+      {
+        "name": "radius-xl",
+        "value": "40px",
+        "usage": "Full-bleed panels and the phone-sized sheets that overlap each other."
+      },
+      {
+        "name": "radius-pill",
+        "value": "999px",
+        "usage": "Buttons, chips, segments, the bottom nav, avatars."
+      }
+    ]
+  },
+  "shadow": {
+    "tokens": [
+      {
+        "name": "shadow-soft",
+        "value": {
+          "light": "0 8px 24px rgba(31, 29, 27, 0.08)",
+          "dark": "0 8px 24px rgba(0, 0, 0, 0.45)"
+        },
+        "usage": "Floating sheets and the bottom nav. Cards on surface stay flat."
+      }
+    ]
+  }
+}

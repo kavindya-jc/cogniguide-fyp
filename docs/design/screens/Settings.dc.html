@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/playfului/components/bundle.css">
+<script src="ds/playfului/components/bundle.js"></script>
+<link rel="stylesheet" href="cg-theme.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<main class="cg-screen" style="width: 390px; height: 844px; padding: 16px 20px 28px; gap: 20px">
+  <div style="display: flex; align-items: center; gap: 12px">
+    <a class="pu-iconbtn pu-iconbtn-soft cg-ib" href="Home.dc.html" aria-label="Back to problems">
+      <x-import component-from-global-scope="PlayfulUI.Icon" name="arrow-left" size="{{i22}}"></x-import>
+    </a>
+    <h1 class="h1">Settings</h1>
+  </div>
+
+  <section class="cg-rise d1" style="background: var(--teal-soft); border-radius: var(--radius-lg); padding: 18px 20px; display: flex; align-items: center; gap: 14px">
+    <span class="cg-well" aria-hidden="true" style="width: 44px; height: 44px; background: var(--teal); color: var(--on-teal)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3"/></svg>
+    </span>
+    <p class="title" style="margin: 0; font-size: 19px">Your code: P001</p>
+  </section>
+
+  <nav aria-label="Settings" class="cg-rise d2" style="background: var(--surface-raised); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; padding: 6px">
+    <a href="LanguageFromSettings.dc.html" class="cg-focus" style="display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 8px 14px; border-radius: var(--radius-md); text-decoration: none; color: var(--ink)">
+      <span class="cg-well" aria-hidden="true" style="background: var(--surface-sunken)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"/></svg></span>
+      <span class="title" style="flex: 1">Language</span>
+      <span class="label muted">English</span>
+      <x-import component-from-global-scope="PlayfulUI.Icon" name="arrow-right" size="{{i20}}"></x-import>
+    </a>
+    <div aria-hidden="true" style="height: 1px; background: var(--line); margin: 0 14px"></div>
+    <a href="LogoutSheet.dc.html" class="cg-focus" style="display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 8px 14px; border-radius: var(--radius-md); text-decoration: none; color: var(--ink)">
+      <span class="cg-well" aria-hidden="true" style="background: var(--surface-sunken)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5M5 12h11"/></svg></span>
+      <span class="title" style="flex: 1">Log out</span>
+      <x-import component-from-global-scope="PlayfulUI.Icon" name="arrow-right" size="{{i20}}"></x-import>
+    </a>
+  </nav>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { i20: 20, i22: 22 };
+  }
+}
+</script>
+</body>
+</html>

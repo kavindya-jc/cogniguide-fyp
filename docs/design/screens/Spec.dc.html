@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CogniGuide design spec</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/playfului/components/bundle.css">
+<script src="ds/playfului/components/bundle.js"></script>
+<link rel="stylesheet" href="cg-theme.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 1440px; height: 2400px; background: var(--surface); color: var(--ink); font-family: var(--font-sans); padding: 72px; display: flex; flex-direction: column; gap: 28px; box-sizing: border-box">
+  <header style="display: flex; align-items: center; gap: 24px">
+    <x-import component-from-global-scope="PlayfulUI.Mascot" mood="idle" size="{{m120}}" title="Pip, the coach character"></x-import>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <p class="eyebrow" style="margin: 0; color: var(--teal-ink)">Built on the Playful UI design system</p>
+      <h1 class="h1" style="font-size: 44px; line-height: 48px">CogniGuide design spec · Round 3</h1>
+      <p class="body muted" style="margin: 0; font-size: 18px">Cream ground, chunky rounded panels, Outfit type, Pip as the coach. Sizes raised to CogniGuide's accessibility rules.</p>
+    </div>
+  </header>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: start">
+    <section class="cg-card" style="display: flex; flex-direction: column; gap: 14px">
+      <h2 class="h2">Colours we use</h2>
+      <div style="display: flex; align-items: center; gap: 14px"><div style="width: 52px; height: 52px; border-radius: 16px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line)"></div><div><div class="title">surface #fbf8e6</div><div class="caption muted">Every screen</div></div></div>
+      <div style="display: flex; align-items: center; gap: 14px"><div style="width: 52px; height: 52px; border-radius: 16px; background: var(--surface-raised); box-shadow: inset 0 0 0 1px var(--line)"></div><div><div class="title">surface-raised #ffffff</div><div class="caption muted">Cards, coach bubble, inputs, sheets</div></div></div>
+      <div style="display: flex; align-items: center; gap: 14px"><div style="width: 52px; height: 52px; border-radius: 16px; background: var(--surface-sunken)"></div><div><div class="title">surface-sunken #f2eed8</div><div class="caption muted">Maths keys, soft buttons, skeletons</div></div></div>
+      <div style="display: flex; align-items: center; gap: 14px"><div style="width: 52px; height: 52px; border-radius: 16px; background: var(--teal)"></div><div><div class="title">teal #2f7d6d</div><div class="caption muted">Top panels, student bubble, chart line</div></div></div>
+      <div style="display: flex; align-items: center; gap: 14px"><div style="width: 52px; height: 52px; border-radius: 16px; background: var(--teal-soft)"></div><div><div class="title">teal-soft #d7ebe4</div><div class="caption muted">Growth card, privacy note, chosen grade</div></div></div>
+      <div style="display: flex; align-items: center; gap: 14px"><div style="width: 52px; height: 52px; border-radius: 16px; background: var(--night)"></div><div><div class="title">night #23211f</div><div class="caption muted">Main buttons, chosen chip, bottom nav</div></div></div>
+      <div style="display: flex; align-items: center; gap: 14px"><div style="width: 52px; height: 52px; border-radius: 16px; background: var(--lavender)"></div><div><div class="title">lavender #8b89e8</div><div class="caption muted">Active tab, problem cards</div></div></div>
+      <div style="display: flex; align-items: center; gap: 14px"><div style="width: 52px; height: 52px; border-radius: 16px; background: var(--orange)"></div><div><div class="title">orange #f4874b</div><div class="caption muted">Problem cards, "A lot" chip</div></div></div>
+      <div style="display: flex; align-items: center; gap: 14px"><div style="width: 52px; height: 52px; border-radius: 16px; background: var(--mustard-soft); box-shadow: inset 0 0 0 3px var(--mustard)"></div><div><div class="title">mustard / mustard-soft</div><div class="caption muted">All notices and errors. Text mustard-ink #8a5a00</div></div></div>
+      <p class="caption muted" style="margin: 0; font-size: 14px">Coral is not used for anything the student does (only Pip's cheeks). Never colour alone: always an icon and words.</p>
+    </section>
+
+    <section class="cg-card" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 class="h2">Type · Outfit</h2>
+      <div><div class="h1">h1 32 / 36</div><div class="caption muted">700, −0.02em · screen titles</div></div>
+      <div><div class="h2">h2 22 / 28</div><div class="caption muted">700 · card titles, sheet title</div></div>
+      <div><div class="stat">stat 36</div><div class="caption muted">700 · numbers in tiles</div></div>
+      <div><div class="title">title 17 / 22</div><div class="caption muted">600 · greetings, problem text, buttons in rows</div></div>
+      <div><div class="body">body 16 / 24 · chat bubbles 17 / 25</div><div class="caption muted">400 · raised from 15 to meet the 16px rule</div></div>
+      <div><div class="label">label 16 / 20</div><div class="caption muted">500 · buttons, chips (raised from 13)</div></div>
+      <div><div class="caption" style="font-size: 14px">caption 13–14</div><div class="caption muted">500 · dates, chart axis, tab labels 15</div></div>
+      <div><div class="eyebrow" style="color: var(--teal-ink)">Eyebrow 12</div><div class="caption muted">600, uppercase · "PROBLEM 1 · ALGEBRA · GRADE 9"</div></div>
+      <p class="caption muted" style="margin: 0; font-size: 14px">Sinhala and Tamil fall back to Noto Sans Sinhala / Tamil.</p>
+    </section>
+
+    <section class="cg-card" style="display: flex; flex-direction: column; gap: 14px">
+      <h2 class="h2">Shape and spacing</h2>
+      <p class="body" style="margin: 0">Spacing 4 · 8 · 12 · 16 · 20 · 24 · 32. Screen padding 20–24. Card padding 20.</p>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+        <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 52px; border-radius: 12px; background: var(--surface-sunken)"></div><span class="caption">12 key, icon well</span></div>
+        <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 52px; border-radius: 20px; background: var(--surface-sunken)"></div><span class="caption">20 input, tile, notice</span></div>
+        <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 52px; border-radius: 28px; background: var(--surface-sunken)"></div><span class="caption">28 card</span></div>
+        <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 52px; border-radius: 0 0 40px 40px; background: var(--teal)"></div><span class="caption">40 top panel</span></div>
+        <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 52px; border-radius: 40px 40px 0 0; background: var(--surface-raised); box-shadow: var(--shadow-soft)"></div><span class="caption">40 sheet</span></div>
+        <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 52px; border-radius: 999px; background: var(--night)"></div><span class="caption">pill: buttons, chips, nav</span></div>
+      </div>
+      <p class="caption muted" style="margin: 0; font-size: 14px">Stacked panels: a teal top panel with a 40 round bottom, content on cream below. Only floating things (nav, sheets, chat bar) get shadow-soft.</p>
+    </section>
+
+    <section class="cg-card" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 class="h2">Buttons</h2>
+      <span class="pu-btn pu-btn-dark cg-lg cg-block">Main action (dark)</span>
+      <span class="pu-btn pu-btn-soft cg-lg cg-block">Second action (soft)</span>
+      <div style="background: var(--teal); border-radius: var(--radius-md); padding: 12px; display: flex; gap: 8px"><span class="pu-btn pu-btn-light cg-lg" style="flex: 1">On teal (light)</span><span class="pu-btn cg-lg" style="flex: 1; color: var(--on-teal); box-shadow: inset 0 0 0 2px var(--on-teal)">Outline</span></div>
+      <div style="display: flex; align-items: center; gap: 12px">
+        <x-import component-from-global-scope="PlayfulUI.IconButton" icon="arrow-left" label="Back" tone="soft"></x-import>
+        <x-import component-from-global-scope="PlayfulUI.IconButton" icon="arrow-right" label="Send" tone="dark" size="{{n52}}"></x-import>
+        <span class="pu-btn pu-btn-ghost cg-lg" style="color: var(--teal-ink)">Text link</span>
+      </div>
+      <p class="caption muted" style="margin: 0; font-size: 14px">Playful UI Button and IconButton. Height raised 44 → 52, label 13 → 16. Pressed: scale 0.97. Focus: 3px ink ring.</p>
+    </section>
+
+    <section class="cg-card" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 class="h2">Filters and problem cards</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <x-import component-from-global-scope="PlayfulUI.Chip" class-name="cg-lg" tone="light" icon="check" selected="{{yes}}">Algebra</x-import>
+        <x-import component-from-global-scope="PlayfulUI.Chip" class-name="cg-lg" tone="light">Geometry</x-import>
+        <x-import component-from-global-scope="PlayfulUI.Chip" class-name="cg-lg" tone="light">Graphs</x-import>
+      </div>
+      <div style="display: flex; align-items: center; gap: 2px"><span class="label muted" style="margin-right: 8px">Grade</span><span class="cg-seg on" style="display: grid; place-items: center">All</span><span class="cg-seg" style="display: grid; place-items: center">8</span><span class="cg-seg" style="display: grid; place-items: center">9</span><span class="cg-seg" style="display: grid; place-items: center">10</span></div>
+      <div class="cg-pcard tone-night"><span style="flex: 1; display: flex; flex-direction: column; gap: 6px"><span class="eyebrow">Problem 1 · Algebra · Grade 9</span><span class="title">Solve: 3x − 5 = 2x + 7</span></span><span class="cg-go"><x-import component-from-global-scope="PlayfulUI.Icon" name="arrow-right" size="{{i20}}"></x-import></span></div>
+      <p class="caption muted" style="margin: 0; font-size: 14px">Chips 44 tall, chosen = night with tick. Cards cycle night → lavender → orange, radius 28, go-arrow on the right.</p>
+    </section>
+
+    <section class="cg-card" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 class="h2">Chat</h2>
+      <div style="background: var(--surface); border-radius: var(--radius-md); padding: 14px; display: flex; flex-direction: column; gap: 10px">
+        <p class="cg-coach">Coach: white, left, tail 8.</p>
+        <p class="cg-me">Student: teal, right.</p>
+        <p class="cg-me unsent">Unsent: soft teal + "Not sent".</p>
+        <div class="cg-typing" style="align-self: flex-start; background: var(--surface-raised); padding: 16px 18px; border-radius: 22px 22px 22px 8px; display: flex; gap: 6px"><span></span><span></span><span></span></div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px"><span class="cg-key" style="display: grid; place-items: center">−</span><span class="cg-key" style="display: grid; place-items: center">=</span><span class="cg-key" style="display: grid; place-items: center">²</span><span class="cg-key" style="display: grid; place-items: center">³</span><span class="cg-key" style="display: grid; place-items: center">√</span><span class="cg-key" style="display: grid; place-items: center">θ</span><span class="cg-key" style="display: grid; place-items: center">sin</span><span class="cg-key" style="display: grid; place-items: center">cos</span><span class="cg-key" style="display: grid; place-items: center">tan</span></div>
+      <p class="caption muted" style="margin: 0; font-size: 14px">Keys 44 min, radius 12. Message box grows 1 → 3 lines. Reply text only: no hint level, scaffold level or scores.</p>
+    </section>
+
+    <section class="cg-card" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 class="h2">Pip, the coach</h2>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center">
+        <div><x-import component-from-global-scope="PlayfulUI.Mascot" mood="idle" size="{{m88}}"></x-import><div class="caption">idle · welcome, home, empty</div></div>
+        <div><x-import component-from-global-scope="PlayfulUI.Mascot" mood="thinking" size="{{m88}}"></x-import><div class="caption">thinking · typing, loading</div></div>
+        <div><x-import component-from-global-scope="PlayfulUI.Mascot" mood="happy" size="{{m88}}"></x-import><div class="caption">happy · growth sentence</div></div>
+        <div><x-import component-from-global-scope="PlayfulUI.Mascot" mood="sleepy" size="{{m88}}"></x-import><div class="caption">sleepy · busy, log out</div></div>
+      </div>
+      <p class="caption muted" style="margin: 0; font-size: 14px">One Pip per screen, always with words. Not used: celebrate, oops, sad (no rewards, no "wrong" feeling). Stops moving with reduced motion.</p>
+    </section>
+
+    <section class="cg-card" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 class="h2">Motion</h2>
+      <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 16px; line-height: 23px">
+        <li><b>Rise in:</b> content fades up 14px, 0.55s, staggered 50ms per item.</li>
+        <li><b>Pop:</b> new chat bubbles scale from 0.94, 0.35s with a small spring.</li>
+        <li><b>Typing:</b> three teal dots bounce, 1.2s loop. Pip switches to thinking.</li>
+        <li><b>Chart:</b> line draws in 1.4s, then points pop one by one.</li>
+        <li><b>Sheet:</b> slides up 0.45s over a fading backdrop.</li>
+        <li><b>Press:</b> buttons, chips and keys scale to 0.97 (keys 0.92).</li>
+        <li><b>Fix messages:</b> drop in gently, no shaking.</li>
+        <li>All motion stops under the phone's reduce-motion setting.</li>
+      </ul>
+      <p class="caption muted" style="margin: 0; font-size: 14px">Flutter: AnimatedSlide + AnimatedOpacity, or flutter_animate; Curves.easeOutCubic.</p>
+    </section>
+
+    <section class="cg-card" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 class="h2">Notices and nav</h2>
+      <div class="cg-notice"><span class="cg-well" style="background: var(--mustard); color: var(--on-accent)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="body">Mustard: busy, went wrong, offline, write-it-down.</span></div>
+      <div class="cg-notice cg-notice-teal"><span class="cg-well" style="background: var(--teal); color: var(--on-teal)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><span class="body">Teal-soft: privacy and language notes.</span></div>
+      <div style="position: relative; height: 72px"><nav class="cg-nav" aria-label="Example" style="left: 0; right: 0; bottom: 0"><a aria-current="page">Practice</a><a>My progress</a></nav></div>
+      <p class="caption muted" style="margin: 0; font-size: 14px">Bottom nav: floating night pill, 2 tabs with icon + label, active = lavender.</p>
+    </section>
+  </div>
+
+  <section class="cg-card" style="display: flex; flex-direction: column; gap: 12px">
+    <h2 class="h2">Screens and their states</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 32px; font-size: 16px; line-height: 23px">
+      <div><b>0 Welcome</b> · Pip hero · language button · teal steps panel</div>
+      <div><b>0b Choose a language</b> · tick on chosen · test note</div>
+      <div><b>1 Create account</b> · code taken · too short · don't match</div>
+      <div><b>2 Log in</b> · details don't match · "Logging you in" button</div>
+      <div><b>3 Pick a problem</b> · area chips · grade filter · loading · empty area</div>
+      <div><b>3d Settings</b> · your code · language · log out</div>
+      <div><b>3f Log out?</b> sheet with sleepy Pip · Log out · Stay</div>
+      <div><b>4 Chat</b> · area label · maths keys · typing · 3-line box</div>
+      <div><b>5 Chat errors</b> · busy · something went wrong · no internet</div>
+      <div><b>6 My progress</b> · growth card · 4 stat tiles · drawn chart · loading</div>
+      <div><b>6b Numbers as a list</b> · session, date, help needed</div>
+      <div><b>7 New student</b> · dashed zero tiles · empty chart · Start a problem</div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2400}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { m120: 120, m88: 88, n52: 52, i20: 20, yes: true };
+  }
+}
+</script>
+</body>
+</html>

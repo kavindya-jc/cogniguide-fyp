@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>My progress – getting started</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/playfului/components/bundle.css">
+<script src="ds/playfului/components/bundle.js"></script>
+<link rel="stylesheet" href="cg-theme.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="cg-screen" style="width: 390px; height: 844px">
+  <main style="flex: 1; display: flex; flex-direction: column; padding: 24px 20px 100px; gap: 14px; overflow: hidden">
+    <div class="cg-rise" style="display: flex; flex-direction: column; gap: 4px">
+      <h1 class="h1">My progress</h1>
+      <p class="body muted" style="margin: 0">Only you can see this. It is not a grade.</p>
+    </div>
+
+    <section class="cg-rise d1" style="background: var(--teal-soft); border-radius: var(--radius-lg); padding: 14px 18px 14px 10px; display: flex; align-items: center; gap: 6px">
+      <div style="flex: none"><x-import component-from-global-scope="PlayfulUI.Mascot" mood="idle" size="{{m88}}" title="Your coach, ready when you are"></x-import></div>
+      <p class="title" style="margin: 0; line-height: 23px">Not enough sessions yet. Practise with the coach a couple more times and your progress will show up here.</p>
+    </section>
+
+    <section aria-label="Your numbers" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+      <div class="cg-rise d2"><x-import component-from-global-scope="PlayfulUI.StatTile" value="0" label="Sessions" dashed="{{yes}}" style="width: 100%"></x-import></div>
+      <div class="cg-rise d3"><x-import component-from-global-scope="PlayfulUI.StatTile" value="0" label="Times you fixed your own mistake" dashed="{{yes}}" style="width: 100%"></x-import></div>
+      <div class="cg-rise d4"><x-import component-from-global-scope="PlayfulUI.StatTile" value="0" label="Times you felt stuck" dashed="{{yes}}" style="width: 100%"></x-import></div>
+      <div class="cg-rise d5"><x-import component-from-global-scope="PlayfulUI.StatTile" value="0" label="Reflection questions" dashed="{{yes}}" style="width: 100%"></x-import></div>
+    </section>
+
+    <section class="cg-rise d6" style="border: 2px dashed var(--field-line); border-radius: var(--radius-lg); min-height: 104px; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px; text-align: center">
+      <x-import component-from-global-scope="PlayfulUI.Icon" name="chart" size="{{i24}}"></x-import>
+      <p class="body" style="margin: 0">Your chart will appear here after two sessions.</p>
+    </section>
+
+    <div style="flex: 1"></div>
+    <a class="pu-btn pu-btn-dark cg-lg cg-block cg-rise d7" href="Home.dc.html">Start a problem</a>
+  </main>
+
+  <nav class="cg-nav" aria-label="Main">
+    <a href="Home.dc.html"><x-import component-from-global-scope="PlayfulUI.Icon" name="book" size="{{i22}}"></x-import>Practice</a>
+    <a href="ProgressEmpty.dc.html" aria-current="page"><x-import component-from-global-scope="PlayfulUI.Icon" name="chart" size="{{i22}}"></x-import>My progress</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { m88: 88, i22: 22, i24: 24, yes: true };
+  }
+}
+</script>
+</body>
+</html>

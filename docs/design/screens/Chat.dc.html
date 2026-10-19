@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Your thinking coach</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/playfului/components/bundle.css">
+<script src="ds/playfului/components/bundle.js"></script>
+<link rel="stylesheet" href="cg-theme.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="cg-screen" style="width: 390px; height: 844px">
+  <header class="cg-panel-teal" style="padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px; border-radius: 0 0 32px 32px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <a class="pu-iconbtn pu-iconbtn-light cg-ib" href="Home.dc.html" aria-label="Back to problems">
+        <x-import component-from-global-scope="PlayfulUI.Icon" name="arrow-left" size="{{i22}}"></x-import>
+      </a>
+      <div style="width: 48px; height: 48px; border-radius: 24px; background: var(--teal-soft); display: grid; place-items: center; overflow: hidden; flex: none">
+        <x-import component-from-global-scope="PlayfulUI.Mascot" mood="{{pipMood}}" size="{{m52}}" title="Your coach"></x-import>
+      </div>
+      <div style="display: flex; flex-direction: column">
+        <h1 class="title" style="margin: 0; font-size: 19px">Your thinking coach</h1>
+        <p class="caption" style="margin: 0; font-size: 14px">Here to ask, not to tell</p>
+      </div>
+    </div>
+    <button type="button" class="cg-focus" aria-expanded="{{expandedStr}}" onClick="{{toggle}}" style="width: 100%; min-height: 56px; display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; background: var(--surface-raised); border: 0; border-radius: var(--radius-md); font-family: var(--font-sans); color: var(--ink); text-align: left; cursor: pointer">
+      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+        <span class="eyebrow" style="color: var(--teal-ink)">Problem 1 · Algebra · Grade 9</span>
+        <sc-if value="{{collapsed}}" hint-placeholder-val="{{true}}">
+          <span class="title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Solve: 3x − 5 = 2x + 7</span>
+        </sc-if>
+        <sc-if value="{{expanded}}" hint-placeholder-val="{{false}}">
+          <span class="title cg-fade" style="line-height: 24px">Solve: 3x − 5 = 2x + 7. Show each step you take.</span>
+        </sc-if>
+      </span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 10px; transition: transform .25s ease; transform: {{chevron}}"><path d="M6 9l6 6 6-6"/></svg>
+      <span class="cg-sr">Show or hide the whole problem</span>
+    </button>
+  </header>
+
+  <section ref="{{listRef}}" aria-label="Conversation" aria-live="polite" style="flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 16px">
+    <div aria-hidden="true" style="flex: 1"></div>
+    <sc-for list="{{messages}}" as="m" hint-placeholder-count="5">
+      <sc-if value="{{m.isCoach}}" hint-placeholder-val="{{true}}"><p class="cg-coach cg-pop">{{m.text}}</p></sc-if>
+      <sc-if value="{{m.isMe}}" hint-placeholder-val="{{false}}"><p class="cg-me cg-pop" style="transform-origin: right bottom">{{m.text}}</p></sc-if>
+    </sc-for>
+    <sc-if value="{{typing}}" hint-placeholder-val="{{false}}">
+      <div role="status" class="cg-pop cg-typing" style="align-self: flex-start; background: var(--surface-raised); padding: 16px 18px; border-radius: 22px 22px 22px 8px; display: flex; gap: 6px; align-items: center">
+        <span></span><span></span><span></span>
+        <b class="cg-sr">Your coach is thinking</b>
+      </div>
+    </sc-if>
+  </section>
+
+  <div style="background: var(--surface-raised); border-radius: 28px 28px 0 0; box-shadow: var(--shadow-soft); padding: 10px 0 22px; display: flex; flex-direction: column; gap: 10px">
+    <div role="toolbar" aria-label="Maths keys" style="display: flex; gap: 6px; overflow-x: auto; padding: 0 12px">
+      <sc-for list="{{keys}}" as="k" hint-placeholder-count="10">
+        <button type="button" class="cg-key cg-focus" aria-label="{{k.aria}}" onClick="{{k.press}}">{{k.label}}</button>
+      </sc-for>
+    </div>
+    <form style="margin: 0; display: flex; gap: 8px; align-items: flex-end; padding: 0 12px">
+      <label for="msg" class="cg-sr">Message your coach</label>
+      <textarea id="msg" class="cg-text" rows="{{rows}}" value="{{draft}}" onChange="{{onDraft}}" placeholder="Type your thinking…" style="overflow-y: auto; transition: height .15s ease"></textarea>
+      <x-import component-from-global-scope="PlayfulUI.IconButton" icon="arrow-right" label="Send" tone="dark" size="{{n52}}" on-click="{{send}}"></x-import>
+    </form>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  startMessages() {
+    return [
+      { who: 'coach', text: "Let's work through it together. What do you notice about both sides of the equation?" },
+      { who: 'me', text: 'Both sides have x in them.' },
+      { who: 'coach', text: 'Good. What could you do so that x is only on one side?' },
+      { who: 'me', text: 'Take 2x from both sides. So x − 5 = 7.' },
+      { who: 'coach', text: "Nice step. What's next to get x by itself?" }
+    ];
+  }
+  replies() {
+    return [
+      'How do you know that step keeps both sides equal?',
+      'How could you check your answer is right?',
+      'You worked that out yourself. Which step helped you most today?',
+      'Tell me a bit more about how you got there.'
+    ];
+  }
+  keyList() {
+    return [
+      { l: '+', a: 'plus', i: ' + ' }, { l: '−', a: 'minus', i: ' − ' }, { l: '×', a: 'times', i: ' × ' },
+      { l: '÷', a: 'divided by', i: ' ÷ ' }, { l: '=', a: 'equals', i: ' = ' }, { l: '(', a: 'open bracket', i: '(' },
+      { l: ')', a: 'close bracket', i: ')' }, { l: '²', a: 'squared', i: '²' }, { l: '³', a: 'cubed', i: '³' },
+      { l: '√', a: 'square root', i: '√' }, { l: 'π', a: 'pi', i: 'π' }, { l: 'θ', a: 'theta', i: 'θ' },
+      { l: '°', a: 'degrees', i: '°' }, { l: 'sin', a: 'sine', i: 'sin ' }, { l: 'cos', a: 'cosine', i: 'cos ' },
+      { l: 'tan', a: 'tangent', i: 'tan ' }
+    ];
+  }
+  componentDidMount() { this.scrollDown(); }
+  componentDidUpdate() { this.scrollDown(); }
+  componentWillUnmount() { if (this.timer) clearTimeout(this.timer); }
+  scrollDown() { if (this.listEl) this.listEl.scrollTop = this.listEl.scrollHeight; }
+  send() {
+    const s = this.state || {};
+    const text = (s.draft || '').trim();
+    if (!text || s.typing) return;
+    const msgs = (s.msgs || this.startMessages()).concat([{ who: 'me', text: text }]);
+    this.setState({ msgs: msgs, draft: '', typing: true });
+    const n = this.replyIndex || 0;
+    this.replyIndex = n + 1;
+    const replies = this.replies();
+    this.timer = setTimeout(() => {
+      const cur = (this.state && this.state.msgs) || msgs;
+      this.setState({ msgs: cur.concat([{ who: 'coach', text: replies[n % replies.length] }]), typing: false });
+    }, 1800);
+  }
+  renderVals() {
+    const s = this.state || {};
+    const msgs = s.msgs || this.startMessages();
+    const draft = s.draft || '';
+    const lines = draft.split('\n').reduce((sum, line) => sum + Math.max(1, Math.ceil(line.length / 24)), 0);
+    return {
+      m52: 52,
+      n52: 52,
+      i22: 22,
+      pipMood: s.typing ? 'thinking' : 'idle',
+      messages: msgs.map((m) => ({ text: m.text, isCoach: m.who === 'coach', isMe: m.who === 'me' })),
+      typing: !!s.typing,
+      draft: draft,
+      rows: Math.min(3, Math.max(1, lines)),
+      expanded: !!s.expanded,
+      collapsed: !s.expanded,
+      expandedStr: s.expanded ? 'true' : 'false',
+      chevron: s.expanded ? 'rotate(180deg)' : 'none',
+      toggle: () => this.setState({ expanded: !(this.state && this.state.expanded) }),
+      onDraft: (e) => this.setState({ draft: e.target.value }),
+      keys: this.keyList().map((k) => ({
+        label: k.l,
+        aria: k.a,
+        press: () => this.setState({ draft: ((this.state && this.state.draft) || '') + k.i })
+      })),
+      send: () => this.send(),
+      listRef: (el) => { this.listEl = el; }
+    };
+  }
+}
+</script>
+</body>
+</html>
