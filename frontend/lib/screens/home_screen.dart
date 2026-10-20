@@ -37,7 +37,11 @@ class _HomeScreenState extends State<HomeScreen> {
             index: _tab.index,
             children: [
               PickProblemTab(code: _code),
-              ProgressTab(onStartProblem: () => _go(AppTab.practice)),
+              ProgressTab(
+                code: _code,
+                active: _tab == AppTab.progress,
+                onStartProblem: () => _go(AppTab.practice),
+              ),
             ],
           ),
           Positioned(

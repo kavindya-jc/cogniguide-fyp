@@ -4,6 +4,7 @@ import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
+import 'glass_surface.dart';
 import 'tap_surface.dart';
 
 /// The two main tabs.
@@ -25,39 +26,38 @@ class AppBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = AppColors.of(context);
     final l10n = AppLocalizations.of(context);
 
     return Semantics(
       container: true,
       label: l10n.navMain,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpace.s2),
-        decoration: BoxDecoration(
-          color: c.night,
-          borderRadius: BorderRadius.circular(AppRadius.pill),
-          boxShadow: AppShadow.soft(c),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: _Tab(
-                icon: Icons.menu_book_rounded,
-                label: l10n.navPractice,
-                active: current == AppTab.practice,
-                onTap: () => onChanged(AppTab.practice),
+      // Dark frosted glass: the page shows softly through as it scrolls.
+      child: GlassSurface(
+        tone: GlassTone.dark,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpace.s2),
+          child: Row(
+            children: [
+              Expanded(
+                child: _Tab(
+                  icon: Icons.menu_book_rounded,
+                  label: l10n.navPractice,
+                  active: current == AppTab.practice,
+                  onTap: () => onChanged(AppTab.practice),
+                ),
               ),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: _Tab(
-                icon: Icons.show_chart_rounded,
-                label: l10n.navProgress,
-                active: current == AppTab.progress,
-                onTap: () => onChanged(AppTab.progress),
+              const SizedBox(width: 6),
+              Expanded(
+                child: _Tab(
+                  icon: Icons.show_chart_rounded,
+                  label: l10n.navProgress,
+                  active: current == AppTab.progress,
+                  onTap: () => onChanged(AppTab.progress),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

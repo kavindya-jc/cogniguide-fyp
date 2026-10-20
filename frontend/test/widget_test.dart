@@ -1,10 +1,16 @@
 import 'package:cogniguide/main.dart';
 import 'package:cogniguide/models/maths_area.dart';
 import 'package:cogniguide/services/auth_service.dart';
+import 'package:cogniguide/services/chat_api.dart';
 import 'package:cogniguide/services/problem_repository.dart';
+import 'package:cogniguide/services/progress_api.dart';
 import 'package:cogniguide/services/settings_store.dart';
 import 'package:cogniguide/theme/app_colors.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,6 +18,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<SharedPreferences> startApp(
   WidgetTester tester, {
   Map<String, Object> saved = const {},
+  ChatApi? chat,
+  ProgressApi? progress,
 }) async {
   // A phone-sized screen (the design's 390 × 844).
   tester.view.physicalSize = const Size(390 * 3, 844 * 3);
@@ -32,6 +40,11 @@ Future<SharedPreferences> startApp(
       auth: auth,
       settings: SettingsStore(prefs),
       problems: problems,
+      // A pretend server, so tests never call the real one.
+      chat: chat ?? ChatApi(client: pretendServer((_) => coachSays('Hello!'))),
+      progress:
+          progress ??
+          ProgressApi(client: pretendServer((_) => progressSays(newStudent))),
       loggedIn: await auth.currentCode() != null,
     ),
   );
@@ -155,3 +168,46 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   await tester.pumpAndSettle();
   await tester.tap(finder);
 }
+
+/// A pretend CogniGuide server for tests. [answer] gets each request.
+http.Client pretendServer(http.Response Function(http.Request) answer) =>
+    MockClient((request) async => answer(request));
+
+/// A normal `/chat` reply. The extra numbers are there on purpose:
+/// the app must never show them.
+http.Response coachSays(String reply, {String session = 'S-1'}) =>
+    http.Response(
+      jsonEncode({
+        'reply': reply,
+        'session_id': session,
+        'hint_level': 2,
+        'scaffold_level': 3,
+        'reflection_type': 'improving',
+      }),
+      200,
+      headers: {'content-type': 'application/json; charset=utf-8'},
+    );
+
+/// A `/progress` reply with [body] as JSON.
+http.Response progressSays(Map<String, Object?> body) => http.Response(
+  jsonEncode(body),
+  200,
+  headers: {'content-type': 'application/json; charset=utf-8'},
+);
+
+/// What the server sends for a code it has never seen.
+const Map<String, Object?> newStudent = {
+  'student_id': 'P001',
+  'sessions': <Object>[],
+  'totals': {
+    'sessions': 0,
+    'stuck': 0,
+    'asked_for_answer': 0,
+    'self_corrections': 0,
+    'reflections': 0,
+  },
+  'growth': {
+    'trend': 'not_enough_data',
+    'message': 'Not enough sessions yet. Come back after a couple more.',
+  },
+};

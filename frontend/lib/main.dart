@@ -6,7 +6,9 @@ import 'screens/home_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'services/app_services.dart';
 import 'services/auth_service.dart';
+import 'services/chat_api.dart';
 import 'services/problem_repository.dart';
+import 'services/progress_api.dart';
 import 'services/settings_store.dart';
 import 'theme/app_theme.dart';
 
@@ -20,6 +22,8 @@ Future<void> main() async {
       auth: auth,
       settings: SettingsStore(prefs),
       problems: LocalProblemRepository(),
+      chat: ChatApi(),
+      progress: ProgressApi(),
       // A student who is still logged in goes straight to Pick a problem.
       loggedIn: await auth.currentCode() != null,
     ),
@@ -33,12 +37,16 @@ class CogniGuideApp extends StatelessWidget {
     required this.auth,
     required this.settings,
     required this.problems,
+    required this.chat,
+    required this.progress,
     required this.loggedIn,
   });
 
   final AuthService auth;
   final SettingsStore settings;
   final ProblemRepository problems;
+  final ChatApi chat;
+  final ProgressApi progress;
   final bool loggedIn;
 
   @override
@@ -47,6 +55,8 @@ class CogniGuideApp extends StatelessWidget {
       auth: auth,
       settings: settings,
       problems: problems,
+      chat: chat,
+      progress: progress,
       child: MaterialApp(
         onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
         debugShowCheckedModeBanner: false,

@@ -39,4 +39,15 @@ class SettingsStore extends ChangeNotifier {
     await _prefs.setString(_languageKey, language.code);
     notifyListeners();
   }
+
+  static const _glassKey = 'glass_effects';
+
+  /// The frosted glass look (blur). On by default. Students with a slow
+  /// phone can turn it off in Settings to keep the app smooth.
+  bool get glassEffects => _prefs.getBool(_glassKey) ?? true;
+
+  Future<void> setGlassEffects(bool on) async {
+    await _prefs.setBool(_glassKey, on);
+    notifyListeners();
+  }
 }

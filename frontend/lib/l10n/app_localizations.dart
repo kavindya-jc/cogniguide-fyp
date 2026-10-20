@@ -466,6 +466,18 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get settingsLanguage;
 
+  /// No description provided for @settingsGlass.
+  ///
+  /// In en, this message translates to:
+  /// **'Glass effects'**
+  String get settingsGlass;
+
+  /// No description provided for @settingsGlassHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off on a slow phone to keep the app smooth and save battery.'**
+  String get settingsGlassHelp;
+
   /// No description provided for @logoutTitle.
   ///
   /// In en, this message translates to:
@@ -484,17 +496,257 @@ abstract class AppLocalizations {
   /// **'Stay'**
   String get logoutStay;
 
-  /// TEMPORARY placeholder until the chat screen is built.
+  /// No description provided for @chatCoachTitle.
   ///
   /// In en, this message translates to:
-  /// **'The chat with your coach comes in Step 4.'**
-  String get comingChat;
+  /// **'Your thinking coach'**
+  String get chatCoachTitle;
 
-  /// TEMPORARY placeholder until the progress screen is built.
+  /// No description provided for @chatCoachSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'My progress comes in Step 5.'**
-  String get comingProgress;
+  /// **'Here to ask, not to tell'**
+  String get chatCoachSubtitle;
+
+  /// No description provided for @chatBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to problems'**
+  String get chatBack;
+
+  /// No description provided for @chatToggleProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Show or hide the whole problem'**
+  String get chatToggleProblem;
+
+  /// No description provided for @chatConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation'**
+  String get chatConversation;
+
+  /// No description provided for @chatMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message your coach'**
+  String get chatMessageLabel;
+
+  /// No description provided for @chatMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your thinking…'**
+  String get chatMessageHint;
+
+  /// No description provided for @chatSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get chatSend;
+
+  /// No description provided for @chatBusyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your coach is busy right now'**
+  String get chatBusyTitle;
+
+  /// No description provided for @chatBusyText.
+  ///
+  /// In en, this message translates to:
+  /// **'Lots of people are asking at once. Nothing is lost. Wait a moment, then try again.'**
+  String get chatBusyText;
+
+  /// No description provided for @chatErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get chatErrorTitle;
+
+  /// No description provided for @chatErrorText.
+  ///
+  /// In en, this message translates to:
+  /// **'Please try again. Nothing is lost.'**
+  String get chatErrorText;
+
+  /// No description provided for @chatOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet'**
+  String get chatOfflineTitle;
+
+  /// No description provided for @chatOfflineText.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again. Your message is kept here.'**
+  String get chatOfflineText;
+
+  /// No description provided for @chatMessageTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'That message is too long. Keep it under 2000 characters.'**
+  String get chatMessageTooLong;
+
+  /// Shown when the chat reaches the server's 50-message history limit.
+  ///
+  /// In en, this message translates to:
+  /// **'This chat is very long now. Go back and start the problem again to keep going.'**
+  String get chatLimitReached;
+
+  /// No description provided for @progressSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Only you can see this. It is not a grade.'**
+  String get progressSubtitle;
+
+  /// No description provided for @progressLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding up your sessions…'**
+  String get progressLoading;
+
+  /// No description provided for @progressBasedOnRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on your most recent sessions'**
+  String get progressBasedOnRecent;
+
+  /// No description provided for @progressNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Your numbers'**
+  String get progressNumbers;
+
+  /// No description provided for @tileSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions'**
+  String get tileSessions;
+
+  /// No description provided for @tileSelfCorrections.
+  ///
+  /// In en, this message translates to:
+  /// **'Times you fixed your own mistake'**
+  String get tileSelfCorrections;
+
+  /// No description provided for @tileStuck.
+  ///
+  /// In en, this message translates to:
+  /// **'Times you felt stuck'**
+  String get tileStuck;
+
+  /// No description provided for @tileReflections.
+  ///
+  /// In en, this message translates to:
+  /// **'Reflection questions'**
+  String get tileReflections;
+
+  /// No description provided for @chartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How much help you needed in each session'**
+  String get chartTitle;
+
+  /// No description provided for @chartALot.
+  ///
+  /// In en, this message translates to:
+  /// **'A lot'**
+  String get chartALot;
+
+  /// No description provided for @chartSome.
+  ///
+  /// In en, this message translates to:
+  /// **'Some'**
+  String get chartSome;
+
+  /// No description provided for @chartALittle.
+  ///
+  /// In en, this message translates to:
+  /// **'A little'**
+  String get chartALittle;
+
+  /// No description provided for @chartSessionAxis.
+  ///
+  /// In en, this message translates to:
+  /// **'Session'**
+  String get chartSessionAxis;
+
+  /// No description provided for @chartLowerIsGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower on the chart is good. It means you needed less help to work things out.'**
+  String get chartLowerIsGood;
+
+  /// No description provided for @chartSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Line chart of help needed in sessions 1 to {count}: {levels}. The same numbers are in the list view.'**
+  String chartSemantics(int count, String levels);
+
+  /// No description provided for @chartEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Your chart will appear here after two sessions.'**
+  String get chartEmpty;
+
+  /// No description provided for @chartShowList.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the same numbers as a list'**
+  String get chartShowList;
+
+  /// No description provided for @progressRoughGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'These numbers come from simple word rules, so they are a rough guide and not proof.'**
+  String get progressRoughGuide;
+
+  /// No description provided for @progressStartProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a problem'**
+  String get progressStartProblem;
+
+  /// No description provided for @progressUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress is not available right now. Please try again later.'**
+  String get progressUnavailable;
+
+  /// No description provided for @listTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help in each session'**
+  String get listTitle;
+
+  /// No description provided for @listSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The same numbers as the chart, written out.'**
+  String get listSubtitle;
+
+  /// No description provided for @listBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to my progress'**
+  String get listBack;
+
+  /// No description provided for @listSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Session'**
+  String get listSession;
+
+  /// No description provided for @listDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get listDate;
+
+  /// No description provided for @listHelpNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Help needed'**
+  String get listHelpNeeded;
 
   /// No description provided for @ownProblemEyebrow.
   ///

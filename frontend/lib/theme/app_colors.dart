@@ -36,6 +36,9 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.mustardInk,
     required this.focusRing,
     required this.shadow,
+    required this.glassLight,
+    required this.glassDark,
+    required this.glassEdge,
   });
 
   /// Every screen background (cream).
@@ -100,6 +103,16 @@ class AppColors extends ThemeExtension<AppColors> {
   /// Colour of the soft shadow under floating things.
   final Color shadow;
 
+  /// Frosted glass for floating light things (chat bar, sheets).
+  /// About 76% solid, so ink text on it stays easy to read.
+  final Color glassLight;
+
+  /// Frosted glass for the floating night pill (bottom nav).
+  final Color glassDark;
+
+  /// The thin bright edge along the top of a glass surface.
+  final Color glassEdge;
+
   static const light = AppColors(
     surface: Color(0xFFFBF8E6),
     surfaceRaised: Color(0xFFFFFFFF),
@@ -127,6 +140,9 @@ class AppColors extends ThemeExtension<AppColors> {
     mustardInk: Color(0xFF8A5A00),
     focusRing: Color(0xFF1F1D1B),
     shadow: Color(0x141F1D1B), // rgba(31, 29, 27, 0.08)
+    glassLight: Color(0xC2FFFFFF), // surface-raised at 76%
+    glassDark: Color(0xD123211F), // night at 82%
+    glassEdge: Color(0x99FFFFFF),
   );
 
   /// Ready for later. Not switched on yet.
@@ -157,6 +173,9 @@ class AppColors extends ThemeExtension<AppColors> {
     mustardInk: Color(0xFFF6C968),
     focusRing: Color(0xFFF6F2E4),
     shadow: Color(0x73000000), // rgba(0, 0, 0, 0.45)
+    glassLight: Color(0xC224221F), // surface-raised at 76%
+    glassDark: Color(0xD1F6F2E4), // night (cream in dark mode) at 82%
+    glassEdge: Color(0x1FFFFFFF),
   );
 
   /// The colours of the current theme.
