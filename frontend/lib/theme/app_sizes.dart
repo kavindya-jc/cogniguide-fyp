@@ -62,10 +62,6 @@ abstract final class AppSizes {
 /// The soft shadow, only for floating things: bottom nav, sheets, chat bar.
 abstract final class AppShadow {
   static List<BoxShadow> soft(AppColors colors) => [
-        BoxShadow(
-          color: colors.shadow,
-          offset: const Offset(0, 8),
-          blurRadius: 24,
-        ),
-      ];
+    BoxShadow(color: colors.shadow, offset: const Offset(0, 8), blurRadius: 24),
+  ];
 }
