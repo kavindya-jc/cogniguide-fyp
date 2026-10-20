@@ -112,7 +112,10 @@ void main() {
 
     await tester.tap(find.text('My progress'));
     await tester.pumpAndSettle();
-    expect(find.text('My progress comes in Step 5.'), findsOneWidget);
+    expect(
+      find.text('Only you can see this. It is not a grade.'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Practice'));
     await tester.pumpAndSettle();

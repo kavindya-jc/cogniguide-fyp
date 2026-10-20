@@ -223,6 +223,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguage => 'Language';
 
   @override
+  String get settingsGlass => 'Glass effects';
+
+  @override
+  String get settingsGlassHelp =>
+      'Turn off on a slow phone to keep the app smooth and save battery.';
+
+  @override
   String get logoutTitle => 'Log out?';
 
   @override
@@ -233,10 +240,139 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logoutStay => 'Stay';
 
   @override
-  String get comingChat => 'The chat with your coach comes in Step 4.';
+  String get chatCoachTitle => 'Your thinking coach';
 
   @override
-  String get comingProgress => 'My progress comes in Step 5.';
+  String get chatCoachSubtitle => 'Here to ask, not to tell';
+
+  @override
+  String get chatBack => 'Back to problems';
+
+  @override
+  String get chatToggleProblem => 'Show or hide the whole problem';
+
+  @override
+  String get chatConversation => 'Conversation';
+
+  @override
+  String get chatMessageLabel => 'Message your coach';
+
+  @override
+  String get chatMessageHint => 'Type your thinking…';
+
+  @override
+  String get chatSend => 'Send';
+
+  @override
+  String get chatBusyTitle => 'Your coach is busy right now';
+
+  @override
+  String get chatBusyText =>
+      'Lots of people are asking at once. Nothing is lost. Wait a moment, then try again.';
+
+  @override
+  String get chatErrorTitle => 'Something went wrong';
+
+  @override
+  String get chatErrorText => 'Please try again. Nothing is lost.';
+
+  @override
+  String get chatOfflineTitle => 'No internet';
+
+  @override
+  String get chatOfflineText =>
+      'Check your connection and try again. Your message is kept here.';
+
+  @override
+  String get chatMessageTooLong =>
+      'That message is too long. Keep it under 2000 characters.';
+
+  @override
+  String get chatLimitReached =>
+      'This chat is very long now. Go back and start the problem again to keep going.';
+
+  @override
+  String get progressSubtitle => 'Only you can see this. It is not a grade.';
+
+  @override
+  String get progressLoading => 'Adding up your sessions…';
+
+  @override
+  String get progressBasedOnRecent => 'Based on your most recent sessions';
+
+  @override
+  String get progressNumbers => 'Your numbers';
+
+  @override
+  String get tileSessions => 'Sessions';
+
+  @override
+  String get tileSelfCorrections => 'Times you fixed your own mistake';
+
+  @override
+  String get tileStuck => 'Times you felt stuck';
+
+  @override
+  String get tileReflections => 'Reflection questions';
+
+  @override
+  String get chartTitle => 'How much help you needed in each session';
+
+  @override
+  String get chartALot => 'A lot';
+
+  @override
+  String get chartSome => 'Some';
+
+  @override
+  String get chartALittle => 'A little';
+
+  @override
+  String get chartSessionAxis => 'Session';
+
+  @override
+  String get chartLowerIsGood =>
+      'Lower on the chart is good. It means you needed less help to work things out.';
+
+  @override
+  String chartSemantics(int count, String levels) {
+    return 'Line chart of help needed in sessions 1 to $count: $levels. The same numbers are in the list view.';
+  }
+
+  @override
+  String get chartEmpty => 'Your chart will appear here after two sessions.';
+
+  @override
+  String get chartShowList => 'Show the same numbers as a list';
+
+  @override
+  String get progressRoughGuide =>
+      'These numbers come from simple word rules, so they are a rough guide and not proof.';
+
+  @override
+  String get progressStartProblem => 'Start a problem';
+
+  @override
+  String get progressUnavailable =>
+      'Progress is not available right now. Please try again later.';
+
+  @override
+  String get listTitle => 'Help in each session';
+
+  @override
+  String get listSubtitle => 'The same numbers as the chart, written out.';
+
+  @override
+  String get listBack => 'Back to my progress';
+
+  @override
+  String get listSession => 'Session';
+
+  @override
+  String get listDate => 'Date';
+
+  @override
+  String get listHelpNeeded => 'Help needed';
 
   @override
   String get ownProblemEyebrow => 'Your own problem';

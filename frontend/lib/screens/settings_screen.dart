@@ -114,6 +114,20 @@ class SettingsScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 14),
                         child: Divider(height: 1, color: c.line),
                       ),
+                      ListenableBuilder(
+                        listenable: settings,
+                        builder: (context, _) => _SwitchRow(
+                          icon: Icons.blur_on_rounded,
+                          label: l10n.settingsGlass,
+                          help: l10n.settingsGlassHelp,
+                          value: settings.glassEffects,
+                          onChanged: settings.setGlassEffects,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        child: Divider(height: 1, color: c.line),
+                      ),
                       _Row(
                         icon: Icons.logout_rounded,
                         label: l10n.logOut,
@@ -184,6 +198,82 @@ class _Row extends StatelessWidget {
                   const SizedBox(width: AppSpace.s2),
                 ],
                 Icon(Icons.arrow_forward_rounded, size: 20, color: c.ink),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A Settings row with an on/off switch. The whole row can be tapped,
+/// and a screen reader hears the label, the help line and on or off.
+class _SwitchRow extends StatelessWidget {
+  const _SwitchRow({
+    required this.icon,
+    required this.label,
+    required this.help,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final IconData icon;
+  final String label;
+  final String help;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+
+    return MergeSemantics(
+      child: TapSurface(
+        onTap: () => onChanged(!value),
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 64),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: c.surfaceSunken,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 20, color: c.ink),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(label, style: AppText.title),
+                      const SizedBox(height: 2),
+                      Text(
+                        help,
+                        style: AppText.help.copyWith(color: c.inkMuted),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSpace.s2),
+                Switch(
+                  value: value,
+                  onChanged: onChanged,
+                  activeThumbColor: c.onTeal,
+                  activeTrackColor: c.teal,
+                  inactiveThumbColor: c.inkMuted,
+                  inactiveTrackColor: c.surfaceSunken,
+                  trackOutlineColor: WidgetStatePropertyAll(c.fieldLine),
+                ),
               ],
             ),
           ),
