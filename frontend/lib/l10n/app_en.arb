@@ -1,0 +1,40 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "CogniGuide",
+
+  "pipIdle": "Your coach",
+  "@pipIdle": { "description": "Screen reader name for Pip, the coach mascot (idle mood)." },
+  "pipThinking": "Your coach, thinking",
+  "pipHappy": "Your coach, happy",
+  "pipSleepy": "Your coach, resting",
+
+  "areaGroup": "Maths area",
+  "@areaGroup": { "description": "Screen reader name for the row of area chips." },
+  "areaNumber": "Number",
+  "areaAlgebra": "Algebra",
+  "areaGeometry": "Geometry",
+  "areaTrigonometry": "Trigonometry",
+  "areaGraphs": "Graphs",
+  "areaStatistics": "Statistics",
+
+  "gradeLabel": "Grade",
+  "@gradeLabel": { "description": "Small label before the grade filter buttons." },
+  "gradeAll": "All",
+  "gradeAllSemantics": "All grades",
+  "gradeSemantics": "Grade {grade}",
+  "@gradeSemantics": {
+    "description": "Screen reader name for one grade filter button.",
+    "placeholders": { "grade": { "type": "int" } }
+  },
+
+  "problemEyebrow": "Problem {number} · {area} · Grade {grade}",
+  "@problemEyebrow": {
+    "description": "Small line above a problem. Shown in capitals.",
+    "placeholders": {
+      "number": { "type": "int" },
+      "area": { "type": "String" },
+      "grade": { "type": "int" }
+    }
+  }
+}

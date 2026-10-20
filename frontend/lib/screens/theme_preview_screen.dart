@@ -40,8 +40,11 @@ class ThemePreviewScreen extends StatelessWidget {
       ('h2 · 22', AppText.h2, 'Log out?'),
       ('stat · 36', AppText.stat, '12'),
       ('title · 17', AppText.title, 'Hi, P001'),
-      ('body · 16', AppText.body,
-          'The coach never gives the answer. It asks short questions.'),
+      (
+        'body · 16',
+        AppText.body,
+        'The coach never gives the answer. It asks short questions.',
+      ),
       ('chat · 17', AppText.chat, 'What does "half as many" tell you?'),
       ('label · 16', AppText.label, 'Start a problem'),
       ('caption · 13', AppText.caption, 'Mon, 19 Oct'),
@@ -77,7 +80,10 @@ class ThemePreviewScreen extends StatelessWidget {
                 Text('Text styles', style: AppText.h2),
                 const SizedBox(height: AppSpace.s3),
                 for (final (name, style, sample) in styles) ...[
-                  Text(name, style: AppText.caption.copyWith(color: c.inkMuted)),
+                  Text(
+                    name,
+                    style: AppText.caption.copyWith(color: c.inkMuted),
+                  ),
                   const SizedBox(height: AppSpace.s1),
                   Text(sample, style: style),
                   const SizedBox(height: AppSpace.s4),
@@ -91,7 +97,10 @@ class ThemePreviewScreen extends StatelessWidget {
                   decoration: InputDecoration(hintText: 'For example P001'),
                 ),
                 const SizedBox(height: AppSpace.s4),
-                FilledButton(onPressed: () {}, child: const Text('Main button')),
+                FilledButton(
+                  onPressed: () {},
+                  child: const Text('Main button'),
+                ),
                 const SizedBox(height: AppSpace.s2),
                 TextButton(onPressed: () {}, child: const Text('Text link')),
                 const SizedBox(height: AppSpace.s8),
