@@ -4,8 +4,10 @@ import '../l10n/app_localizations.dart';
 import '../services/app_services.dart';
 import '../services/chat_api.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_motion.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
+import '../widgets/appear.dart';
 import '../widgets/chat_bubble.dart';
 import '../widgets/glass_surface.dart';
 import '../widgets/maths_keys.dart';
@@ -221,23 +223,42 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                       children: [
                         for (final m in _messages) ...[
-                          ChatBubble(
-                            // Coach maths like $x$ is shown as plain x (the original
-                            // text is still what goes back to the server).
-                            text: m.role == ChatRole.teacher
-                                ? readableMaths(m.text)
-                                : m.text,
-                            kind: m.role == ChatRole.teacher
-                                ? BubbleKind.coach
-                                : m.unsent
-                                ? BubbleKind.unsent
-                                : BubbleKind.student,
+                          // Each new bubble pops in once (the key stops it
+                          // replaying when the list rebuilds).
+                          Appear(
+                            key: ObjectKey(m),
+                            style: m.role == ChatRole.teacher
+                                ? AppearStyle.popLeft
+                                : AppearStyle.popRight,
+                            child: ChatBubble(
+                              // Coach maths like $x$ is shown as plain x (the
+                              // original text is what goes back to the server).
+                              text: m.role == ChatRole.teacher
+                                  ? readableMaths(m.text)
+                                  : m.text,
+                              kind: m.role == ChatRole.teacher
+                                  ? BubbleKind.coach
+                                  : m.unsent
+                                  ? BubbleKind.unsent
+                                  : BubbleKind.student,
+                            ),
                           ),
                           const SizedBox(height: 10),
                         ],
-                        if (_waiting) const TypingDots(),
+                        if (_waiting)
+                          const Appear(
+                            style: AppearStyle.popLeft,
+                            child: TypingDots(),
+                          ),
                         if (_problem != null)
-                          _ProblemNotice(problem: _problem!, onRetry: _ask),
+                          Appear(
+                            key: ValueKey(_problem),
+                            style: AppearStyle.drop,
+                            child: _ProblemNotice(
+                              problem: _problem!,
+                              onRetry: _ask,
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -406,13 +427,23 @@ class _Header extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(height: 2),
-                                Text(
-                                  problem,
-                                  maxLines: expanded ? null : 1,
-                                  overflow: expanded
-                                      ? TextOverflow.visible
-                                      : TextOverflow.ellipsis,
-                                  style: AppText.title.copyWith(color: c.ink),
+                                // Grows open smoothly to show the whole
+                                // problem (one small size animation).
+                                AnimatedSize(
+                                  duration: AppMotion.of(
+                                    context,
+                                    AppMotion.medium,
+                                  ),
+                                  curve: AppMotion.ease,
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    problem,
+                                    maxLines: expanded ? null : 1,
+                                    overflow: expanded
+                                        ? TextOverflow.visible
+                                        : TextOverflow.ellipsis,
+                                    style: AppText.title.copyWith(color: c.ink),
+                                  ),
                                 ),
                               ],
                             ),
@@ -420,11 +451,15 @@ class _Header extends StatelessWidget {
                           const SizedBox(width: 10),
                           Padding(
                             padding: const EdgeInsets.only(top: 6),
-                            child: Icon(
-                              expanded
-                                  ? Icons.keyboard_arrow_up_rounded
-                                  : Icons.keyboard_arrow_down_rounded,
-                              color: c.ink,
+                            // The arrow turns to point up when open.
+                            child: AnimatedRotation(
+                              turns: expanded ? 0.5 : 0,
+                              duration: AppMotion.of(context, AppMotion.medium),
+                              curve: AppMotion.ease,
+                              child: Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                color: c.ink,
+                              ),
                             ),
                           ),
                         ],

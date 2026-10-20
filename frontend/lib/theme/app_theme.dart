@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
@@ -109,6 +110,43 @@ abstract final class AppTheme {
       ),
       iconTheme: IconThemeData(color: c.ink, size: 24),
       dividerTheme: DividerThemeData(color: c.line, thickness: 1),
+      // iOS-style page slides on every platform (swipe back on iPhone).
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: _AppPageTransitions(),
+          TargetPlatform.iOS: _AppPageTransitions(),
+          TargetPlatform.windows: _AppPageTransitions(),
+          TargetPlatform.macOS: _AppPageTransitions(),
+          TargetPlatform.linux: _AppPageTransitions(),
+          TargetPlatform.fuchsia: _AppPageTransitions(),
+        },
+      ),
+    );
+  }
+}
+
+/// iOS-style slide between screens, or no movement at all when the
+/// phone's "reduce motion" setting is on.
+class _AppPageTransitions extends PageTransitionsBuilder {
+  const _AppPageTransitions();
+
+  static const _cupertino = CupertinoPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (MediaQuery.disableAnimationsOf(context)) return child;
+    return _cupertino.buildTransitions(
+      route,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
     );
   }
 }
