@@ -4,7 +4,7 @@
     {
       "name": "cogniguide-web",
       "runtimeExecutable": "cmd",
-      "runtimeArgs": ["/c", "cd frontend && flutter run -d web-server --web-hostname 127.0.0.1 --web-port 8080"],
+      "runtimeArgs": ["/c", "cd frontend && flutter run -d web-server --release --web-hostname 127.0.0.1 --web-port 8080"],
       "port": 8080
     }
   ]

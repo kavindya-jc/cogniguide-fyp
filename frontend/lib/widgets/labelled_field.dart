@@ -17,6 +17,7 @@ class LabelledField extends StatefulWidget {
     this.hint,
     this.helper,
     this.fixMessage,
+    this.markForFix = false,
     this.obscureText = false,
     this.enabled = true,
     this.keyboardType,
@@ -35,6 +36,10 @@ class LabelledField extends StatefulWidget {
 
   /// When set, the field shows the "needs a fix" look with this message.
   final String? fixMessage;
+
+  /// Shows the "needs a fix" look without a message under the field
+  /// (the message is in a notice above, as on Log in).
+  final bool markForFix;
 
   final bool obscureText;
   final bool enabled;
@@ -66,7 +71,7 @@ class _LabelledFieldState extends State<LabelledField> {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final needsFix = widget.fixMessage != null;
+    final needsFix = widget.fixMessage != null || widget.markForFix;
     final focused = _focus.hasFocus;
 
     final border = needsFix
@@ -134,7 +139,7 @@ class _LabelledFieldState extends State<LabelledField> {
               ),
             ),
           ),
-          if (needsFix) ...[
+          if (widget.fixMessage != null) ...[
             const SizedBox(height: 6),
             Semantics(
               liveRegion: true,

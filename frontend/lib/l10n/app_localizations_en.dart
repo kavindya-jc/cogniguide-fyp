@@ -12,6 +12,236 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'CogniGuide';
 
   @override
+  String get back => 'Back';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String welcomeLanguageButton(String language) {
+    return 'Language: $language. Change language';
+  }
+
+  @override
+  String get welcomeTitle => 'Think it through, your way.';
+
+  @override
+  String get welcomeSubtitle =>
+      'A coach that asks good questions, so you find the answers yourself.';
+
+  @override
+  String get welcomeStep1 => 'Pick a problem';
+
+  @override
+  String get welcomeStep2 => 'Chat with your coach';
+
+  @override
+  String get welcomeStep3 => 'Watch your own thinking grow';
+
+  @override
+  String get welcomeCreateAccount => 'Create an account';
+
+  @override
+  String get welcomeLogIn => 'Log in';
+
+  @override
+  String get pipWaving => 'Your thinking coach, waving hello';
+
+  @override
+  String get languageTitle => 'Choose a language';
+
+  @override
+  String get languageSubtitle => 'You can change this any time in Settings.';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get languageSinhala => 'Sinhala';
+
+  @override
+  String get languageTamil => 'Tamil';
+
+  @override
+  String get languageNote =>
+      'Your coach may answer in English first while we test Sinhala and Tamil.';
+
+  @override
+  String get fieldCode => 'Anonymous code';
+
+  @override
+  String get fieldCodeHint => 'For example P001';
+
+  @override
+  String get fieldPassword => 'Password';
+
+  @override
+  String get fieldPasswordAgain => 'Type the password again';
+
+  @override
+  String get createTitle => 'Create your account';
+
+  @override
+  String get createSubtitle =>
+      'No name or email needed. Just a code and a password.';
+
+  @override
+  String get createSubtitleFix => 'Almost there. A few small things to fix.';
+
+  @override
+  String get createCodeHelp =>
+      'Letters and numbers only. Please don\'t use your real name.';
+
+  @override
+  String get createPasswordHelp => 'At least 8 characters.';
+
+  @override
+  String get createWriteItDown =>
+      'Write your code and password down. Because we don\'t know who you are, we can\'t recover them.';
+
+  @override
+  String get createButton => 'Create account';
+
+  @override
+  String get createHaveAccount => 'I already have an account';
+
+  @override
+  String get creatingAccount => 'Creating your account';
+
+  @override
+  String get fixCodeEmpty => 'Type a code first, for example P001.';
+
+  @override
+  String get fixCodeFormat =>
+      'Use only letters, numbers, _ or -, with no spaces.';
+
+  @override
+  String get fixCodeTaken =>
+      'That code is taken. Try a different one, for example add a few more numbers.';
+
+  @override
+  String fixPasswordShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Your password needs at least 8 characters. Add $count more.',
+      one: 'Your password needs at least 8 characters. Add 1 more.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get fixPasswordsDontMatch =>
+      'The two passwords don\'t match yet. Type it again slowly.';
+
+  @override
+  String get fixPasswordEmpty => 'Type your password.';
+
+  @override
+  String get fixDetailsDontMatch =>
+      'That code and password don\'t match. Check them and try again.';
+
+  @override
+  String get fixSomethingWrong => 'Something went wrong. Please try again.';
+
+  @override
+  String get loginTitle => 'Welcome back';
+
+  @override
+  String get loginSubtitle => 'Log in with your code and password.';
+
+  @override
+  String get loginPrivacy =>
+      'Your code keeps your progress private. This is not a test and nobody grades you.';
+
+  @override
+  String get loginButton => 'Log in';
+
+  @override
+  String get loginNewHere => 'New here? Create an account';
+
+  @override
+  String get loggingIn => 'Logging you in';
+
+  @override
+  String homeGreeting(String code) {
+    return 'Hi, $code';
+  }
+
+  @override
+  String get logOut => 'Log out';
+
+  @override
+  String get homeTitle => 'What would you like to work on?';
+
+  @override
+  String get homeSettings => 'Settings';
+
+  @override
+  String get homeLoading => 'Getting your problems ready';
+
+  @override
+  String get homeEmpty =>
+      'No problems here yet. Try another area or type your own.';
+
+  @override
+  String get homeLoadFailed =>
+      'The problems could not be loaded. Please try again.';
+
+  @override
+  String get tryAgain => 'Try again';
+
+  @override
+  String get homeOwnLabel => 'Or type your own problem';
+
+  @override
+  String get homeOwnHint =>
+      'Type the whole question. Has a figure? Describe it in words, for example: triangle ABC, AB = 5 cm, angle B = 90°.';
+
+  @override
+  String get homeOwnStart => 'Start with this problem';
+
+  @override
+  String get homeOwnEmpty => 'Type your problem first.';
+
+  @override
+  String get homeOwnTooLong =>
+      'That is too long. Keep it under 2000 characters.';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsBack => 'Back to problems';
+
+  @override
+  String settingsYourCode(String code) {
+    return 'Your code: $code';
+  }
+
+  @override
+  String get settingsLanguage => 'Language';
+
+  @override
+  String get logoutTitle => 'Log out?';
+
+  @override
+  String get logoutText =>
+      'You\'ll need your code and password to log back in. Your progress stays saved.';
+
+  @override
+  String get logoutStay => 'Stay';
+
+  @override
+  String get comingChat => 'The chat with your coach comes in Step 4.';
+
+  @override
+  String get comingProgress => 'My progress comes in Step 5.';
+
+  @override
+  String get ownProblemEyebrow => 'Your own problem';
+
+  @override
   String get pipIdle => 'Your coach';
 
   @override
@@ -57,6 +287,78 @@ class AppLocalizationsEn extends AppLocalizations {
   String gradeSemantics(int grade) {
     return 'Grade $grade';
   }
+
+  @override
+  String get navMain => 'Main';
+
+  @override
+  String get navPractice => 'Practice';
+
+  @override
+  String get navProgress => 'My progress';
+
+  @override
+  String get chatNotSent => 'Not sent';
+
+  @override
+  String get chatCoachThinking => 'Your coach is thinking';
+
+  @override
+  String get chatFromCoach => 'Coach';
+
+  @override
+  String get chatFromYou => 'You';
+
+  @override
+  String get mathsKeys => 'Maths keys';
+
+  @override
+  String get keyPlus => 'plus';
+
+  @override
+  String get keyMinus => 'minus';
+
+  @override
+  String get keyTimes => 'times';
+
+  @override
+  String get keyDivide => 'divided by';
+
+  @override
+  String get keyEquals => 'equals';
+
+  @override
+  String get keyOpenBracket => 'open bracket';
+
+  @override
+  String get keyCloseBracket => 'close bracket';
+
+  @override
+  String get keySquared => 'squared';
+
+  @override
+  String get keyCubed => 'cubed';
+
+  @override
+  String get keySquareRoot => 'square root';
+
+  @override
+  String get keyPi => 'pi';
+
+  @override
+  String get keyTheta => 'theta';
+
+  @override
+  String get keyDegrees => 'degrees';
+
+  @override
+  String get keySin => 'sine';
+
+  @override
+  String get keyCos => 'cosine';
+
+  @override
+  String get keyTan => 'tangent';
 
   @override
   String problemEyebrow(int number, String area, int grade) {
