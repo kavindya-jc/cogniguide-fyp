@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../services/app_services.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_motion.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
 import '../widgets/glass_surface.dart';
@@ -23,6 +24,15 @@ Future<void> showLogoutSheet(BuildContext context) {
     // Lighter than before, so the page shows through the frosted sheet.
     barrierColor: c.night.withValues(alpha: 0.3),
     constraints: const BoxConstraints(maxWidth: 480),
+    // Slides up softly (0.45 s, as in the design spec); no movement with
+    // reduce motion.
+    sheetAnimationStyle: AppMotion.reduced(context)
+        ? AnimationStyle.noAnimation
+        : AnimationStyle(
+            duration: AppMotion.sheet,
+            reverseDuration: AppMotion.medium,
+            curve: AppMotion.ease,
+          ),
     builder: (_) => const _LogoutSheet(),
   );
 }
