@@ -29,30 +29,35 @@ class GradeFilter extends StatelessWidget {
     return Semantics(
       label: l10n.gradeLabel,
       container: true,
-      child: Row(
+      // Wrap, not Row: with large system text the buttons move onto a
+      // second line instead of running off the screen.
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 2,
+        runSpacing: AppSpace.s1,
         children: [
-          ExcludeSemantics(
-            child: Text(
-              l10n.gradeLabel,
-              style: AppText.label.copyWith(color: c.inkMuted),
+          Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: ExcludeSemantics(
+              child: Text(
+                l10n.gradeLabel,
+                style: AppText.label.copyWith(color: c.inkMuted),
+              ),
             ),
           ),
-          const SizedBox(width: AppSpace.s2),
           _GradeButton(
             text: l10n.gradeAll,
             semanticLabel: l10n.gradeAllSemantics,
             selected: selected == null,
             onTap: () => onChanged(null),
           ),
-          for (final g in appGrades) ...[
-            const SizedBox(width: 2),
+          for (final g in appGrades)
             _GradeButton(
               text: '$g',
               semanticLabel: l10n.gradeSemantics(g),
               selected: selected == g,
               onTap: () => onChanged(g),
             ),
-          ],
         ],
       ),
     );

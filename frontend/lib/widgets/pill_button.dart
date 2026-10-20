@@ -19,6 +19,9 @@ enum PillTone {
   /// Text link: no fill, teal-ink text.
   ghost,
 
+  /// Text link on a teal panel: no fill, white text.
+  ghostOnTeal,
+
   /// On a teal panel: white outline.
   outlineOnTeal,
 }
@@ -55,6 +58,7 @@ class PillButton extends StatelessWidget {
       PillTone.soft => (c.surfaceSunken, c.ink, BorderSide.none),
       PillTone.light => (c.surfaceRaised, c.ink, BorderSide.none),
       PillTone.ghost => (Colors.transparent, c.tealInk, BorderSide.none),
+      PillTone.ghostOnTeal => (Colors.transparent, c.onTeal, BorderSide.none),
       PillTone.outlineOnTeal => (
         Colors.transparent,
         c.onTeal,
@@ -79,7 +83,9 @@ class PillButton extends StatelessWidget {
       ),
       padding: WidgetStatePropertyAll(
         EdgeInsets.symmetric(
-          horizontal: tone == PillTone.ghost ? AppSpace.s3 : AppSpace.s6,
+          horizontal: tone == PillTone.ghost || tone == PillTone.ghostOnTeal
+              ? AppSpace.s3
+              : AppSpace.s6,
         ),
       ),
       shape: const WidgetStatePropertyAll(StadiumBorder()),

@@ -3,6 +3,102 @@
 
   "appTitle": "CogniGuide",
 
+  "back": "Back",
+  "done": "Done",
+
+  "welcomeLanguageButton": "Language: {language}. Change language",
+  "@welcomeLanguageButton": {
+    "description": "Screen reader name for the language button on Welcome.",
+    "placeholders": { "language": { "type": "String" } }
+  },
+  "welcomeTitle": "Think it through, your way.",
+  "welcomeSubtitle": "A coach that asks good questions, so you find the answers yourself.",
+  "welcomeStep1": "Pick a problem",
+  "welcomeStep2": "Chat with your coach",
+  "welcomeStep3": "Watch your own thinking grow",
+  "welcomeCreateAccount": "Create an account",
+  "welcomeLogIn": "Log in",
+  "pipWaving": "Your thinking coach, waving hello",
+
+  "languageTitle": "Choose a language",
+  "languageSubtitle": "You can change this any time in Settings.",
+  "languageEnglish": "English",
+  "languageSinhala": "Sinhala",
+  "languageTamil": "Tamil",
+  "languageNote": "Your coach may answer in English first while we test Sinhala and Tamil.",
+
+  "fieldCode": "Anonymous code",
+  "fieldCodeHint": "For example P001",
+  "fieldPassword": "Password",
+  "fieldPasswordAgain": "Type the password again",
+
+  "createTitle": "Create your account",
+  "createSubtitle": "No name or email needed. Just a code and a password.",
+  "createSubtitleFix": "Almost there. A few small things to fix.",
+  "createCodeHelp": "Letters and numbers only. Please don't use your real name.",
+  "createPasswordHelp": "At least 8 characters.",
+  "createWriteItDown": "Write your code and password down. Because we don't know who you are, we can't recover them.",
+  "createButton": "Create account",
+  "createHaveAccount": "I already have an account",
+  "creatingAccount": "Creating your account",
+
+  "fixCodeEmpty": "Type a code first, for example P001.",
+  "fixCodeFormat": "Use only letters, numbers, _ or -, with no spaces.",
+  "@fixCodeFormat": { "description": "Shown when the code has spaces, @, or other characters (so names and emails are not used)." },
+  "fixCodeTaken": "That code is taken. Try a different one, for example add a few more numbers.",
+  "fixPasswordShort": "{count, plural, =1{Your password needs at least 8 characters. Add 1 more.} other{Your password needs at least 8 characters. Add {count} more.}}",
+  "@fixPasswordShort": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "fixPasswordsDontMatch": "The two passwords don't match yet. Type it again slowly.",
+  "fixPasswordEmpty": "Type your password.",
+  "fixDetailsDontMatch": "That code and password don't match. Check them and try again.",
+  "fixSomethingWrong": "Something went wrong. Please try again.",
+
+  "loginTitle": "Welcome back",
+  "loginSubtitle": "Log in with your code and password.",
+  "loginPrivacy": "Your code keeps your progress private. This is not a test and nobody grades you.",
+  "loginButton": "Log in",
+  "loginNewHere": "New here? Create an account",
+  "loggingIn": "Logging you in",
+
+  "homeGreeting": "Hi, {code}",
+  "@homeGreeting": {
+    "description": "Greeting with the anonymous code (never a name).",
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "logOut": "Log out",
+
+  "homeTitle": "What would you like to work on?",
+  "homeSettings": "Settings",
+  "homeLoading": "Getting your problems ready",
+  "homeEmpty": "No problems here yet. Try another area or type your own.",
+  "homeLoadFailed": "The problems could not be loaded. Please try again.",
+  "tryAgain": "Try again",
+  "homeOwnLabel": "Or type your own problem",
+  "homeOwnHint": "Type the whole question. Has a figure? Describe it in words, for example: triangle ABC, AB = 5 cm, angle B = 90°.",
+  "homeOwnStart": "Start with this problem",
+  "homeOwnEmpty": "Type your problem first.",
+  "homeOwnTooLong": "That is too long. Keep it under 2000 characters.",
+
+  "settingsTitle": "Settings",
+  "settingsBack": "Back to problems",
+  "settingsYourCode": "Your code: {code}",
+  "@settingsYourCode": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "settingsLanguage": "Language",
+
+  "logoutTitle": "Log out?",
+  "logoutText": "You'll need your code and password to log back in. Your progress stays saved.",
+  "logoutStay": "Stay",
+
+  "comingChat": "The chat with your coach comes in Step 4.",
+  "@comingChat": { "description": "TEMPORARY placeholder until the chat screen is built." },
+  "comingProgress": "My progress comes in Step 5.",
+  "@comingProgress": { "description": "TEMPORARY placeholder until the progress screen is built." },
+  "ownProblemEyebrow": "Your own problem",
+
   "pipIdle": "Your coach",
   "@pipIdle": { "description": "Screen reader name for Pip, the coach mascot (idle mood)." },
   "pipThinking": "Your coach, thinking",
@@ -27,6 +123,38 @@
     "description": "Screen reader name for one grade filter button.",
     "placeholders": { "grade": { "type": "int" } }
   },
+
+  "navMain": "Main",
+  "@navMain": { "description": "Screen reader name for the bottom tab bar." },
+  "navPractice": "Practice",
+  "navProgress": "My progress",
+
+  "chatNotSent": "Not sent",
+  "@chatNotSent": { "description": "Label on a student message that could not be sent." },
+  "chatCoachThinking": "Your coach is thinking",
+  "@chatCoachThinking": { "description": "Screen reader text for the typing dots." },
+  "chatFromCoach": "Coach",
+  "@chatFromCoach": { "description": "Screen reader prefix before a coach message." },
+  "chatFromYou": "You",
+  "@chatFromYou": { "description": "Screen reader prefix before the student's own message." },
+
+  "mathsKeys": "Maths keys",
+  "keyPlus": "plus",
+  "keyMinus": "minus",
+  "keyTimes": "times",
+  "keyDivide": "divided by",
+  "keyEquals": "equals",
+  "keyOpenBracket": "open bracket",
+  "keyCloseBracket": "close bracket",
+  "keySquared": "squared",
+  "keyCubed": "cubed",
+  "keySquareRoot": "square root",
+  "keyPi": "pi",
+  "keyTheta": "theta",
+  "keyDegrees": "degrees",
+  "keySin": "sine",
+  "keyCos": "cosine",
+  "keyTan": "tangent",
 
   "problemEyebrow": "Problem {number} · {area} · Grade {grade}",
   "@problemEyebrow": {

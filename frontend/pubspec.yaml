@@ -71,6 +71,7 @@ flutter:
   # Pip the coach and the logo (copied from docs/design/assets/).
   assets:
     - assets/pip/
+    - assets/problems/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
