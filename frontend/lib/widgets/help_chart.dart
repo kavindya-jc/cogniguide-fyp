@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../services/progress_api.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_motion.dart';
 import '../theme/app_text.dart';
 
 /// The line chart on My progress: how much help each session needed.
@@ -10,7 +13,13 @@ import '../theme/app_text.dart';
 /// One point per session, oldest on the left. "A lot" is at the top and
 /// "A little" at the bottom, so lower is better. The newest point is
 /// mustard. Screen readers hear the same numbers as one sentence.
-class HelpChart extends StatelessWidget {
+///
+/// When it first appears, the line draws itself from left to right
+/// (1.4 s), then the points pop in one by one, the newest last.
+/// PERFORMANCE: only the chart repaints while it plays (its own layer, and
+/// the painter listens to the animation instead of rebuilding widgets).
+/// With "reduce motion" on, the finished chart is shown at once.
+class HelpChart extends StatefulWidget {
   const HelpChart({super.key, required this.sessions});
 
   /// Oldest first.
@@ -24,11 +33,53 @@ class HelpChart extends StatelessWidget {
       };
 
   @override
+  State<HelpChart> createState() => _HelpChartState();
+}
+
+class _HelpChartState extends State<HelpChart>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _draw;
+
+  /// The line takes 1.4 s, then each point pops 0.2 s after the last.
+  static const _lineMs = 1400;
+  static const _pointGapMs = 200;
+  static const _popMs = 300;
+
+  @override
+  void initState() {
+    super.initState();
+    final n = math.max(widget.sessions.length, 1);
+    _draw = AnimationController(
+      vsync: this,
+      duration: Duration(
+        milliseconds: _lineMs + _pointGapMs * (n - 1) + _popMs,
+      ),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (AppMotion.reduced(context)) {
+      _draw.value = 1;
+    } else if (_draw.value == 0 && !_draw.isAnimating) {
+      _draw.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _draw.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final l10n = AppLocalizations.of(context);
+    final sessions = widget.sessions;
     final levels = [
-      for (final s in sessions) helpWord(l10n, s.help).toLowerCase(),
+      for (final s in sessions) HelpChart.helpWord(l10n, s.help).toLowerCase(),
     ].join(', ');
 
     return Semantics(
@@ -38,16 +89,20 @@ class HelpChart extends StatelessWidget {
       child: SizedBox(
         height: 196,
         width: double.infinity,
-        child: CustomPaint(
-          painter: _ChartPainter(
-            levels: [for (final s in sessions) s.neededLevel],
-            colors: c,
-            labelStyle: AppText.caption.copyWith(
-              color: c.inkMuted,
-              fontSize: 14,
+        child: RepaintBoundary(
+          child: CustomPaint(
+            painter: _ChartPainter(
+              progress: _draw,
+              totalMs: _draw.duration!.inMilliseconds,
+              levels: [for (final s in sessions) s.neededLevel],
+              colors: c,
+              labelStyle: AppText.caption.copyWith(
+                color: c.inkMuted,
+                fontSize: 14,
+              ),
+              yLabels: [l10n.chartALot, l10n.chartSome, l10n.chartALittle],
+              xTitle: l10n.chartSessionAxis,
             ),
-            yLabels: [l10n.chartALot, l10n.chartSome, l10n.chartALittle],
-            xTitle: l10n.chartSessionAxis,
           ),
         ),
       ),
@@ -57,12 +112,18 @@ class HelpChart extends StatelessWidget {
 
 class _ChartPainter extends CustomPainter {
   _ChartPainter({
+    required this.progress,
+    required this.totalMs,
     required this.levels,
     required this.colors,
     required this.labelStyle,
     required this.yLabels,
     required this.xTitle,
-  });
+  }) : super(repaint: progress);
+
+  /// 0 to 1 over the whole drawing (line, then points).
+  final Animation<double> progress;
+  final int totalMs;
 
   final List<double> levels;
   final AppColors colors;
@@ -112,43 +173,63 @@ class _ChartPainter extends CustomPainter {
       for (var i = 0; i < n; i++) Offset(_left + 18 + i * step, _y(levels[i])),
     ];
 
-    // The line.
+    // How far the drawing has got, in milliseconds.
+    final ms = progress.value * totalMs;
+    final lineShown = Curves.easeOut.transform(
+      (ms / _HelpChartState._lineMs).clamp(0.0, 1.0),
+    );
+
+    // The line, drawn from the left up to [lineShown] of its length.
     final line = Paint()
       ..color = colors.teal
       ..strokeWidth = 4
       ..style = PaintingStyle.stroke
       ..strokeJoin = StrokeJoin.round
       ..strokeCap = StrokeCap.round;
-    canvas.drawPath(Path()..addPolygon(points, false), line);
+    final path = Path()..addPolygon(points, false);
+    if (lineShown >= 1) {
+      canvas.drawPath(path, line);
+    } else if (lineShown > 0) {
+      for (final metric in path.computeMetrics()) {
+        canvas.drawPath(metric.extractPath(0, metric.length * lineShown), line);
+      }
+    }
 
     // The points: white with a teal ring; the newest is mustard.
     for (var i = 0; i < n; i++) {
       final p = points[i];
+
+      // Session number under each point (always shown).
+      final number = _text('${i + 1}', labelStyle);
+      number.paint(canvas, Offset(p.dx - number.width / 2, 154));
+
+      // Each point pops in after the line, one after another.
+      final start = _HelpChartState._lineMs + _HelpChartState._pointGapMs * i;
+      final pop = ((ms - start) / _HelpChartState._popMs).clamp(0.0, 1.0);
+      if (pop <= 0) continue;
+      final grow = Curves.easeOutBack.transform(pop);
+
       if (i == n - 1) {
-        canvas.drawCircle(p, 9, Paint()..color = colors.mustard);
+        canvas.drawCircle(p, 9 * grow, Paint()..color = colors.mustard);
         canvas.drawCircle(
           p,
-          9,
+          9 * grow,
           Paint()
             ..color = colors.ink
             ..style = PaintingStyle.stroke
             ..strokeWidth = 2.5,
         );
       } else {
-        canvas.drawCircle(p, 6, Paint()..color = colors.surfaceRaised);
+        canvas.drawCircle(p, 6 * grow, Paint()..color = colors.surfaceRaised);
         canvas.drawCircle(
           p,
-          6,
+          6 * grow,
           Paint()
             ..color = colors.teal
             ..style = PaintingStyle.stroke
             ..strokeWidth = 3.5,
         );
       }
-
-      // Session number under each point.
-      final number = _text('${i + 1}', labelStyle);
-      number.paint(canvas, Offset(p.dx - number.width / 2, 154));
     }
 
     // "Session" under the numbers.
@@ -161,5 +242,5 @@ class _ChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_ChartPainter old) =>
-      old.levels != levels || old.colors != colors;
+      old.levels != levels || old.colors != colors || old.progress != progress;
 }

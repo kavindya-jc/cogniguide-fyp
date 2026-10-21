@@ -6,6 +6,7 @@ import '../services/app_services.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
+import '../widgets/entrance.dart';
 import '../widgets/pill_button.dart';
 import '../widgets/pip.dart';
 import 'create_account_screen.dart';
@@ -91,25 +92,36 @@ class WelcomeScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Semantics(
-                            label: l10n.pipWaving,
-                            excludeSemantics: true,
-                            child: const Pip(size: 170),
-                          ),
-                          const SizedBox(height: AppSpace.s2),
-                          Semantics(
-                            header: true,
-                            child: Text(
-                              l10n.welcomeTitle,
-                              textAlign: TextAlign.center,
-                              style: AppText.h1,
+                          // The welcome moment: Pip drops in first, then
+                          // the words rise, then the teal panel slides up.
+                          Entrance(
+                            style: EntranceStyle.drop,
+                            child: Semantics(
+                              label: l10n.pipWaving,
+                              excludeSemantics: true,
+                              child: const Pip(size: 170, breathe: true),
                             ),
                           ),
                           const SizedBox(height: AppSpace.s2),
-                          Text(
-                            l10n.welcomeSubtitle,
-                            textAlign: TextAlign.center,
-                            style: AppText.body.copyWith(color: c.inkMuted),
+                          Entrance(
+                            delay: const Duration(milliseconds: 150),
+                            child: Semantics(
+                              header: true,
+                              child: Text(
+                                l10n.welcomeTitle,
+                                textAlign: TextAlign.center,
+                                style: AppText.h1,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpace.s2),
+                          Entrance(
+                            delay: const Duration(milliseconds: 200),
+                            child: Text(
+                              l10n.welcomeSubtitle,
+                              textAlign: TextAlign.center,
+                              style: AppText.body.copyWith(color: c.inkMuted),
+                            ),
                           ),
                         ],
                       ),
@@ -117,49 +129,67 @@ class WelcomeScreen extends StatelessWidget {
                   ),
 
                   // Teal panel: the 3 steps and the buttons.
-                  Container(
-                    decoration: BoxDecoration(
-                      color: c.teal,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(AppRadius.xl),
-                      ),
-                    ),
-                    child: SafeArea(
-                      top: false,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpace.screen,
-                          28,
-                          AppSpace.screen,
-                          AppSpace.s8,
+                  Entrance(
+                    style: EntranceStyle.slideUp,
+                    delay: const Duration(milliseconds: 250),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: c.teal,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(AppRadius.xl),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            for (final (i, step) in [
-                              l10n.welcomeStep1,
-                              l10n.welcomeStep2,
-                              l10n.welcomeStep3,
-                            ].indexed) ...[
-                              if (i > 0) const SizedBox(height: 14),
-                              _Step(number: i + 1, text: step),
+                      ),
+                      child: SafeArea(
+                        top: false,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpace.screen,
+                            28,
+                            AppSpace.screen,
+                            AppSpace.s8,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              for (final (i, step) in [
+                                l10n.welcomeStep1,
+                                l10n.welcomeStep2,
+                                l10n.welcomeStep3,
+                              ].indexed) ...[
+                                if (i > 0) const SizedBox(height: 14),
+                                Entrance(
+                                  // One after another, 50 ms apart.
+                                  delay: Duration(milliseconds: 400 + 50 * i),
+                                  child: _Step(number: i + 1, text: step),
+                                ),
+                              ],
+                              const SizedBox(height: AppSpace.s5),
+                              Entrance(
+                                delay: const Duration(milliseconds: 550),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    PillButton(
+                                      label: l10n.welcomeCreateAccount,
+                                      tone: PillTone.light,
+                                      expand: true,
+                                      onPressed: () =>
+                                          open(const CreateAccountScreen()),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    PillButton(
+                                      label: l10n.welcomeLogIn,
+                                      tone: PillTone.outlineOnTeal,
+                                      expand: true,
+                                      onPressed: () =>
+                                          open(const LoginScreen()),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
-                            const SizedBox(height: AppSpace.s5),
-                            PillButton(
-                              label: l10n.welcomeCreateAccount,
-                              tone: PillTone.light,
-                              expand: true,
-                              onPressed: () =>
-                                  open(const CreateAccountScreen()),
-                            ),
-                            const SizedBox(height: 10),
-                            PillButton(
-                              label: l10n.welcomeLogIn,
-                              tone: PillTone.outlineOnTeal,
-                              expand: true,
-                              onPressed: () => open(const LoginScreen()),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
