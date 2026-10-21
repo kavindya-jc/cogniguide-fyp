@@ -7,6 +7,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
 import '../widgets/dashed_box.dart';
+import '../widgets/entrance.dart';
 import '../widgets/help_chart.dart';
 import '../widgets/notice_card.dart';
 import '../widgets/pill_button.dart';
@@ -68,6 +69,10 @@ class _ProgressTabState extends State<ProgressTab> {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final l10n = AppLocalizations.of(context);
+
+    // Not opened yet (the tab is built in the background): draw nothing,
+    // so no loading pulse runs where nobody can see it.
+    if (_result == null) return const SizedBox.shrink();
 
     return SafeArea(
       bottom: false,
@@ -333,7 +338,7 @@ class _NewStudent extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Pip(size: 88),
+              const Pip(size: 88, breathe: true),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -418,27 +423,30 @@ class _Loading extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpace.s4),
+          // Soft pulse only while loading.
           ExcludeSemantics(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(child: block(120)),
-                    const SizedBox(width: 10),
-                    Expanded(child: block(120)),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(child: block(120)),
-                    const SizedBox(width: 10),
-                    Expanded(child: block(120)),
-                  ],
-                ),
-                const SizedBox(height: AppSpace.s4),
-                block(220),
-              ],
+            child: Pulse(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: block(120)),
+                      const SizedBox(width: 10),
+                      Expanded(child: block(120)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(child: block(120)),
+                      const SizedBox(width: 10),
+                      Expanded(child: block(120)),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpace.s4),
+                  block(220),
+                ],
+              ),
             ),
           ),
         ],

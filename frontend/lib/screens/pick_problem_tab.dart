@@ -9,6 +9,7 @@ import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
 import '../widgets/area_chip.dart';
 import '../widgets/dashed_box.dart';
+import '../widgets/entrance.dart';
 import '../widgets/grade_filter.dart';
 import '../widgets/notice_card.dart';
 import '../widgets/pill_button.dart';
@@ -293,7 +294,10 @@ class _Loading extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpace.s4),
-          ExcludeSemantics(child: Column(children: [block(), block()])),
+          // Soft pulse only while loading.
+          ExcludeSemantics(
+            child: Pulse(child: Column(children: [block(), block()])),
+          ),
         ],
       ),
     );
