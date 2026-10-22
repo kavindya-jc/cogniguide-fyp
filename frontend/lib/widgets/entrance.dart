@@ -11,7 +11,7 @@ enum EntranceStyle {
   /// Grows in with a small bounce (Pip).
   drop,
 
-  /// Slides up from the bottom edge (the teal panel).
+  /// Slides up from the bottom edge (the violet panel).
   slideUp,
 }
 

@@ -5,21 +5,33 @@ import 'package:flutter_test/flutter_test.dart';
 import 'progress_test.dart' show fourSessions, serverSays;
 import 'widget_test.dart' show startApp, tapVisible;
 
-/// Checks that nothing is cut off ("overflowed") with the app's REAL font,
+/// Checks that nothing is cut off ("overflowed") with the app's REAL fonts,
 /// on a phone 360 wide (a common small Android size), at normal text size
-/// and at large text (1.3x). Normal tests use a stand-in font, so they
+/// and at large text (1.3x), in light and dark. Normal tests use a stand-in font, so they
 /// cannot catch this.
 void main() {
   setUpAll(() async {
     final font = FontLoader('PlusJakartaSans')
       ..addFont(rootBundle.load('assets/fonts/PlusJakartaSans-Variable.ttf'));
     await font.load();
+    final headings = FontLoader(
+      'BricolageGrotesque',
+    )..addFont(rootBundle.load('assets/fonts/BricolageGrotesque-Variable.ttf'));
+    await headings.load();
   });
 
-  for (final scale in [1.0, 1.3]) {
-    testWidgets('no text is cut off at text size $scale', (tester) async {
+  for (final (scale, brightness) in [
+    (1.0, Brightness.light),
+    (1.3, Brightness.light),
+    (1.3, Brightness.dark),
+  ]) {
+    testWidgets('no text is cut off at text size $scale, ${brightness.name}', (
+      tester,
+    ) async {
       tester.platformDispatcher.textScaleFactorTestValue = scale;
       addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      tester.platformDispatcher.platformBrightnessTestValue = brightness;
+      addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
 
       // Welcome, Create account, Log in.
       await startApp(tester);

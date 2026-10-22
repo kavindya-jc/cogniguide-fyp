@@ -13,17 +13,17 @@ enum PillTone {
   /// Second action: sunken fill.
   soft,
 
-  /// On a teal panel: white fill.
+  /// On a violet panel: white fill.
   light,
 
-  /// Text link: no fill, teal-ink text.
+  /// Text link: no fill, violet-ink text.
   ghost,
 
-  /// Text link on a teal panel: no fill, white text.
-  ghostOnTeal,
+  /// Text link on a violet panel: no fill, white text.
+  ghostOnPrimary,
 
-  /// On a teal panel: white outline.
-  outlineOnTeal,
+  /// On a violet panel: white outline.
+  outlineOnPrimary,
 }
 
 /// The round "pill" button from the design. 52px tall.
@@ -57,12 +57,16 @@ class PillButton extends StatelessWidget {
       PillTone.dark => (c.night, c.onNight, BorderSide.none),
       PillTone.soft => (c.surfaceSunken, c.ink, BorderSide.none),
       PillTone.light => (c.surfaceRaised, c.ink, BorderSide.none),
-      PillTone.ghost => (Colors.transparent, c.tealInk, BorderSide.none),
-      PillTone.ghostOnTeal => (Colors.transparent, c.onTeal, BorderSide.none),
-      PillTone.outlineOnTeal => (
+      PillTone.ghost => (Colors.transparent, c.primaryInk, BorderSide.none),
+      PillTone.ghostOnPrimary => (
         Colors.transparent,
-        c.onTeal,
-        BorderSide(color: c.onTeal, width: 2),
+        c.onPrimary,
+        BorderSide.none,
+      ),
+      PillTone.outlineOnPrimary => (
+        Colors.transparent,
+        c.onPrimary,
+        BorderSide(color: c.onPrimary, width: 2),
       ),
     };
 
@@ -83,7 +87,7 @@ class PillButton extends StatelessWidget {
       ),
       padding: WidgetStatePropertyAll(
         EdgeInsets.symmetric(
-          horizontal: tone == PillTone.ghost || tone == PillTone.ghostOnTeal
+          horizontal: tone == PillTone.ghost || tone == PillTone.ghostOnPrimary
               ? AppSpace.s3
               : AppSpace.s6,
         ),

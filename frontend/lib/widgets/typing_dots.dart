@@ -4,7 +4,7 @@ import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 
-/// Three teal dots in a coach bubble while the coach is writing.
+/// Three violet dots in a coach bubble while the coach is writing.
 ///
 /// Each dot rises 4px and brightens, one after another (1.2s loop).
 /// With "reduce motion" on, the dots stand still.
@@ -97,7 +97,7 @@ class _TypingDotsState extends State<TypingDots>
         child: Container(
           width: 8,
           height: 8,
-          decoration: BoxDecoration(color: c.teal, shape: BoxShape.circle),
+          decoration: BoxDecoration(color: c.primary, shape: BoxShape.circle),
         ),
       ),
     );

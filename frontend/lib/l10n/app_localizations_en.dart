@@ -390,6 +390,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pipSleepy => 'Your coach, resting';
 
   @override
+  String get pipCheering => 'Your coach, cheering you on';
+
+  @override
+  String get pipSurprised => 'Your coach, surprised';
+
+  @override
+  String get pipDetermined => 'Your coach, ready to think';
+
+  @override
+  String get pipWink => 'Your coach, winking';
+
+  @override
   String get areaGroup => 'Maths area';
 
   @override

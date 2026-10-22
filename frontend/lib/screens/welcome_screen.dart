@@ -93,7 +93,7 @@ class WelcomeScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // The welcome moment: Pip drops in first, then
-                          // the words rise, then the teal panel slides up.
+                          // the words rise, then the violet panel slides up.
                           Entrance(
                             style: EntranceStyle.drop,
                             child: Semantics(
@@ -134,7 +134,7 @@ class WelcomeScreen extends StatelessWidget {
                     delay: const Duration(milliseconds: 250),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: c.teal,
+                        color: c.primary,
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(AppRadius.xl),
                         ),
@@ -180,7 +180,7 @@ class WelcomeScreen extends StatelessWidget {
                                     const SizedBox(height: 10),
                                     PillButton(
                                       label: l10n.welcomeLogIn,
-                                      tone: PillTone.outlineOnTeal,
+                                      tone: PillTone.outlineOnPrimary,
                                       expand: true,
                                       onPressed: () =>
                                           open(const LoginScreen()),
@@ -204,7 +204,7 @@ class WelcomeScreen extends StatelessWidget {
   }
 }
 
-/// One numbered step on the teal panel.
+/// One numbered step on the violet panel.
 class _Step extends StatelessWidget {
   const _Step({required this.number, required this.text});
 
@@ -230,7 +230,7 @@ class _Step extends StatelessWidget {
         ),
         const SizedBox(width: 14),
         Expanded(
-          child: Text(text, style: AppText.title.copyWith(color: c.onTeal)),
+          child: Text(text, style: AppText.title.copyWith(color: c.onPrimary)),
         ),
       ],
     );

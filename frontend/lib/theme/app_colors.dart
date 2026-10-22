@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 
-/// Every colour in the app, from docs/design/tokens/.
+/// Every colour in the app: the soft violet + pastel palette from the
+/// playful concept mockup (2026-10-22), in light and dark.
 ///
-/// Widgets read colours with `AppColors.of(context).teal` (never a raw hex),
-/// so dark mode only needs [AppColors.dark] to be switched on later.
+/// Widgets read colours with `AppColors.of(context).primary` (never a raw
+/// hex), so light and dark mode switch by themselves.
 ///
-/// Coral and sky are left out on purpose: the design uses them only inside
-/// Pip's SVG pictures, never for anything the student does.
+/// Each pastel comes in three shades:
+/// * the plain name (`lilac`) is the strong colour, for shapes and edges;
+/// * `...Soft` is the gentle background for cards and chips;
+/// * `...Ink` is text and icons on the soft background (4.5:1 or more).
+///
+/// There is no red anywhere: notices and errors use butter.
 @immutable
 class AppColors extends ThemeExtension<AppColors> {
   const AppColors({
@@ -21,19 +26,26 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.onNight,
     required this.nightAccent,
     required this.onAccent,
-    required this.teal,
-    required this.onTeal,
-    required this.tealSoft,
-    required this.tealInk,
-    required this.lavender,
-    required this.lavenderSoft,
-    required this.lavenderInk,
-    required this.orange,
-    required this.orangeSoft,
-    required this.orangeInk,
-    required this.mustard,
-    required this.mustardSoft,
-    required this.mustardInk,
+    required this.primary,
+    required this.onPrimary,
+    required this.primaryEdge,
+    required this.primarySoft,
+    required this.primaryInk,
+    required this.lilac,
+    required this.lilacSoft,
+    required this.lilacInk,
+    required this.butter,
+    required this.butterSoft,
+    required this.butterInk,
+    required this.peach,
+    required this.peachSoft,
+    required this.peachInk,
+    required this.sky,
+    required this.skySoft,
+    required this.skyInk,
+    required this.mint,
+    required this.mintSoft,
+    required this.mintInk,
     required this.focusRing,
     required this.shadow,
     required this.glassLight,
@@ -41,7 +53,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.glassEdge,
   });
 
-  /// Every screen background (cream).
+  /// Every screen background.
   final Color surface;
 
   /// Cards, coach bubble, inputs, sheets, chat bar.
@@ -62,40 +74,53 @@ class AppColors extends ThemeExtension<AppColors> {
   /// Helper text, dates, chart labels.
   final Color inkMuted;
 
-  /// Main buttons, chosen chip, bottom nav.
+  /// Dark pill buttons, chosen chip, bottom nav.
   final Color night;
   final Color onNight;
 
-  /// Eyebrow text on night.
+  /// Small kicker text on night.
   final Color nightAccent;
 
-  /// Text on lavender, orange and mustard.
+  /// Text on the strong pastel colours (lilac, butter, peach, sky, mint).
   final Color onAccent;
 
-  /// Top panels, student bubble, chart line.
-  final Color teal;
-  final Color onTeal;
+  /// The main violet: main buttons, top panels, student bubble, chart line.
+  final Color primary;
+  final Color onPrimary;
+
+  /// The darker band under a chunky 3D button.
+  final Color primaryEdge;
 
   /// Growth card, privacy note, chosen grade.
-  final Color tealSoft;
+  final Color primarySoft;
 
-  /// Teal as text and links.
-  final Color tealInk;
+  /// Violet as text and links.
+  final Color primaryInk;
 
   /// Active tab, problem cards.
-  final Color lavender;
-  final Color lavenderSoft;
-  final Color lavenderInk;
+  final Color lilac;
+  final Color lilacSoft;
+  final Color lilacInk;
+
+  /// All notices and errors (never red), growth card.
+  final Color butter;
+  final Color butterSoft;
+  final Color butterInk;
 
   /// Problem cards, "A lot" chip.
-  final Color orange;
-  final Color orangeSoft;
-  final Color orangeInk;
+  final Color peach;
+  final Color peachSoft;
+  final Color peachInk;
 
-  /// All notices and errors (never red).
-  final Color mustard;
-  final Color mustardSoft;
-  final Color mustardInk;
+  /// Problem cards, stat tiles.
+  final Color sky;
+  final Color skySoft;
+  final Color skyInk;
+
+  /// Problem cards, "fixed your own mistake" tile.
+  final Color mint;
+  final Color mintSoft;
+  final Color mintInk;
 
   /// Focus outline.
   final Color focusRing;
@@ -114,67 +139,81 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color glassEdge;
 
   static const light = AppColors(
-    surface: Color(0xFFFBF8E6),
+    surface: Color(0xFFF5F4F8),
     surfaceRaised: Color(0xFFFFFFFF),
-    surfaceSunken: Color(0xFFF2EED8),
-    line: Color(0xFFE6E0C8),
-    fieldLine: Color(0xFF8F887A),
-    ink: Color(0xFF1F1D1B),
-    inkMuted: Color(0xFF5F5A51),
-    night: Color(0xFF23211F),
+    surfaceSunken: Color(0xFFECEAF2),
+    line: Color(0xFFE3E0EC),
+    fieldLine: Color(0xFF8A859C),
+    ink: Color(0xFF26233A),
+    inkMuted: Color(0xFF5F5A74),
+    night: Color(0xFF26233A),
     onNight: Color(0xFFFFFFFF),
-    nightAccent: Color(0xFFF4B23A),
-    onAccent: Color(0xFF1F1D1B),
-    teal: Color(0xFF2F7D6D),
-    onTeal: Color(0xFFFFFFFF),
-    tealSoft: Color(0xFFD7EBE4),
-    tealInk: Color(0xFF25685A),
-    lavender: Color(0xFF8B89E8),
-    lavenderSoft: Color(0xFFE3E2FB),
-    lavenderInk: Color(0xFF524FC0),
-    orange: Color(0xFFF4874B),
-    orangeSoft: Color(0xFFFDE3D2),
-    orangeInk: Color(0xFFA84A14),
-    mustard: Color(0xFFF4B23A),
-    mustardSoft: Color(0xFFFCEBC4),
-    mustardInk: Color(0xFF8A5A00),
-    focusRing: Color(0xFF1F1D1B),
-    shadow: Color(0x141F1D1B), // rgba(31, 29, 27, 0.08)
+    nightAccent: Color(0xFFFFD36B),
+    onAccent: Color(0xFF1B1830),
+    primary: Color(0xFF6656DD),
+    onPrimary: Color(0xFFFFFFFF),
+    primaryEdge: Color(0xFF4636B8),
+    primarySoft: Color(0xFFECE8FF),
+    primaryInk: Color(0xFF4B3FC0),
+    lilac: Color(0xFFA99BFF),
+    lilacSoft: Color(0xFFE7E3FF),
+    lilacInk: Color(0xFF3E3399),
+    butter: Color(0xFFFFC94D),
+    butterSoft: Color(0xFFFFF1C2),
+    butterInk: Color(0xFF6E5400),
+    peach: Color(0xFFFF9E6B),
+    peachSoft: Color(0xFFFFE0D2),
+    peachInk: Color(0xFF8A3B16),
+    sky: Color(0xFF7DB8F2),
+    skySoft: Color(0xFFDCEBFF),
+    skyInk: Color(0xFF1F4C85),
+    mint: Color(0xFF6FD3A4),
+    mintSoft: Color(0xFFD8F2E6),
+    mintInk: Color(0xFF1D6447),
+    focusRing: Color(0xFF26233A),
+    shadow: Color(0x1A26233A), // ink at 10%
     glassLight: Color(0xC2FFFFFF), // surface-raised at 76%
-    glassDark: Color(0xD123211F), // night at 82%
+    glassDark: Color(0xD126233A), // night at 82%
     glassEdge: Color(0x99FFFFFF),
   );
 
-  /// Ready for later. Not switched on yet.
+  /// Deep violet-black (not pure black) so it is gentle on the eyes at night.
   static const dark = AppColors(
-    surface: Color(0xFF181715),
-    surfaceRaised: Color(0xFF24221F),
-    surfaceSunken: Color(0xFF2E2B27),
-    line: Color(0xFF433F38),
-    fieldLine: Color(0xFF8A8478),
-    ink: Color(0xFFF6F2E4),
-    inkMuted: Color(0xFFB8B2A3),
-    night: Color(0xFFF6F2E4),
-    onNight: Color(0xFF1F1D1B),
-    nightAccent: Color(0xFF8A5A00),
-    onAccent: Color(0xFF1F1D1B),
-    teal: Color(0xFF4FAE99),
-    onTeal: Color(0xFF10201C),
-    tealSoft: Color(0xFF1F3A34),
-    tealInk: Color(0xFF82D4C0),
-    lavender: Color(0xFF9D9BF2),
-    lavenderSoft: Color(0xFF2C2B52),
-    lavenderInk: Color(0xFFBDBBFF),
-    orange: Color(0xFFF6955D),
-    orangeSoft: Color(0xFF45291B),
-    orangeInk: Color(0xFFFFAE82),
-    mustard: Color(0xFFF6BD52),
-    mustardSoft: Color(0xFF3F3218),
-    mustardInk: Color(0xFFF6C968),
-    focusRing: Color(0xFFF6F2E4),
+    surface: Color(0xFF12111C),
+    surfaceRaised: Color(0xFF1E1C2A),
+    surfaceSunken: Color(0xFF2A2738),
+    line: Color(0xFF3A3547),
+    fieldLine: Color(0xFF8A8499),
+    ink: Color(0xFFECE9F5),
+    inkMuted: Color(0xFFB3AEC6),
+    night: Color(0xFFECE9F5),
+    onNight: Color(0xFF16141F),
+    nightAccent: Color(0xFF4B3FC0),
+    onAccent: Color(0xFF14121D),
+    primary: Color(0xFFA99EFF),
+    onPrimary: Color(0xFF16141F),
+    primaryEdge: Color(0xFF6F5FE0),
+    primarySoft: Color(0xFF2C2750),
+    primaryInk: Color(0xFFC9C1FF),
+    lilac: Color(0xFFA99BFF),
+    lilacSoft: Color(0xFF2C2750),
+    lilacInk: Color(0xFFD2CBFF),
+    butter: Color(0xFFFFD36B),
+    butterSoft: Color(0xFF3A3322),
+    butterInk: Color(0xFFFFE29A),
+    peach: Color(0xFFFF9E6B),
+    peachSoft: Color(0xFF3E2B25),
+    peachInk: Color(0xFFFFC6AE),
+    sky: Color(0xFF7DB8F2),
+    skySoft: Color(0xFF1F2C40),
+    skyInk: Color(0xFFBBD8FF),
+    mint: Color(0xFF6FD3A4),
+    mintSoft: Color(0xFF1E3329),
+    mintInk: Color(0xFFA9E6C9),
+    focusRing: Color(0xFFECE9F5),
     shadow: Color(0x73000000), // rgba(0, 0, 0, 0.45)
-    glassLight: Color(0xC224221F), // surface-raised at 76%
-    glassDark: Color(0xD1F6F2E4), // night (cream in dark mode) at 82%
+    glassLight: Color(0xC21E1C2A), // surface-raised at 76%
+    glassDark: Color(0xD1ECE9F5), // night (light in dark mode) at 82%
     glassEdge: Color(0x1FFFFFFF),
   );
 

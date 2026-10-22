@@ -111,3 +111,8 @@ flutter:
     - family: PlusJakartaSans
       fonts:
         - asset: assets/fonts/PlusJakartaSans-Variable.ttf
+    # Bricolage Grotesque (variable font, SIL Open Font Licence, see
+    # assets/fonts/OFL-BricolageGrotesque.txt) for big headings and numbers.
+    - family: BricolageGrotesque
+      fonts:
+        - asset: assets/fonts/BricolageGrotesque-Variable.ttf

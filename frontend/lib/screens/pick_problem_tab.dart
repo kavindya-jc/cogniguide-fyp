@@ -171,7 +171,7 @@ class _PickProblemTabState extends State<PickProblemTab> {
   }
 }
 
-/// The teal panel: Pip, "Hi, P001", Log out, Settings and the title.
+/// The violet panel: Pip, "Hi, P001", Log out, Settings and the title.
 class _Header extends StatelessWidget {
   const _Header({required this.code, required this.showPip});
 
@@ -187,7 +187,7 @@ class _Header extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: c.teal,
+        color: c.primary,
         borderRadius: const BorderRadius.vertical(
           bottom: Radius.circular(AppRadius.xl),
         ),
@@ -211,7 +211,7 @@ class _Header extends StatelessWidget {
                       width: 52,
                       height: 52,
                       decoration: BoxDecoration(
-                        color: c.tealSoft,
+                        color: c.primarySoft,
                         shape: BoxShape.circle,
                       ),
                       clipBehavior: Clip.antiAlias,
@@ -222,12 +222,12 @@ class _Header extends StatelessWidget {
                   Expanded(
                     child: Text(
                       l10n.homeGreeting(code),
-                      style: AppText.title.copyWith(color: c.onTeal),
+                      style: AppText.title.copyWith(color: c.onPrimary),
                     ),
                   ),
                   PillButton(
                     label: l10n.logOut,
-                    tone: PillTone.ghostOnTeal,
+                    tone: PillTone.ghostOnPrimary,
                     onPressed: () => showLogoutSheet(context),
                   ),
                   const SizedBox(width: AppSpace.s1),
@@ -249,7 +249,7 @@ class _Header extends StatelessWidget {
                 child: Text(
                   l10n.homeTitle,
                   style: AppText.h1.copyWith(
-                    color: c.onTeal,
+                    color: c.onPrimary,
                     fontSize: 30,
                     height: 34 / 30,
                   ),
@@ -371,10 +371,10 @@ class _OwnProblemBox extends StatelessWidget {
         Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 10, 10),
           decoration: BoxDecoration(
-            color: needsFix ? c.mustardSoft : c.surfaceRaised,
+            color: needsFix ? c.butterSoft : c.surfaceRaised,
             borderRadius: BorderRadius.circular(AppRadius.lg),
             border: Border.all(
-              color: needsFix ? c.mustardInk : c.fieldLine,
+              color: needsFix ? c.butterInk : c.fieldLine,
               width: needsFix ? 2 : 1.5,
             ),
           ),
@@ -421,16 +421,12 @@ class _OwnProblemBox extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.error_outline_rounded,
-                  size: 18,
-                  color: c.mustardInk,
-                ),
+                Icon(Icons.error_outline_rounded, size: 18, color: c.butterInk),
                 const SizedBox(width: AppSpace.s2),
                 Expanded(
                   child: Text(
                     fixMessage!,
-                    style: AppText.help.copyWith(color: c.mustardInk),
+                    style: AppText.help.copyWith(color: c.butterInk),
                   ),
                 ),
               ],

@@ -61,6 +61,8 @@ class CogniGuideApp extends StatelessWidget {
         onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
+        // Follows the phone: dark when the phone is in dark mode.
+        darkTheme: AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: loggedIn ? const HomeScreen() : const WelcomeScreen(),

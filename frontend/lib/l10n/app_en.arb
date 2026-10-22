@@ -151,6 +151,10 @@
   "pipThinking": "Your coach, thinking",
   "pipHappy": "Your coach, happy",
   "pipSleepy": "Your coach, resting",
+  "pipCheering": "Your coach, cheering you on",
+  "pipSurprised": "Your coach, surprised",
+  "pipDetermined": "Your coach, ready to think",
+  "pipWink": "Your coach, winking",
 
   "areaGroup": "Maths area",
   "@areaGroup": { "description": "Screen reader name for the row of area chips." },

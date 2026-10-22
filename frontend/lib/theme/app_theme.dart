@@ -7,7 +7,7 @@ import 'app_text.dart';
 
 /// Puts the colours, text styles and sizes together into one Flutter theme.
 ///
-/// Use [AppTheme.light] now. [AppTheme.dark] is ready for later.
+/// [AppTheme.light] and [AppTheme.dark]; the app follows the phone setting.
 abstract final class AppTheme {
   static ThemeData get light => _build(AppColors.light, Brightness.light);
 
@@ -18,14 +18,14 @@ abstract final class AppTheme {
       brightness: brightness,
       primary: c.night,
       onPrimary: c.onNight,
-      secondary: c.teal,
-      onSecondary: c.onTeal,
-      tertiary: c.lavender,
+      secondary: c.primary,
+      onSecondary: c.onPrimary,
+      tertiary: c.lilac,
       onTertiary: c.onAccent,
-      // No red anywhere: Flutter's "error" colours are mustard.
-      error: c.mustardInk,
+      // No red anywhere: Flutter's "error" colours are butter.
+      error: c.butterInk,
       onError: c.surfaceRaised,
-      errorContainer: c.mustardSoft,
+      errorContainer: c.butterSoft,
       onErrorContainer: c.ink,
       surface: c.surface,
       onSurface: c.ink,
@@ -77,17 +77,17 @@ abstract final class AppTheme {
         hintStyle: AppText.input.copyWith(color: c.inkMuted),
         labelStyle: AppText.fieldLabel.copyWith(color: c.ink),
         helperStyle: AppText.help.copyWith(color: c.inkMuted),
-        errorStyle: AppText.help.copyWith(color: c.mustardInk),
+        errorStyle: AppText.help.copyWith(color: c.butterInk),
         border: fieldBorder,
         enabledBorder: fieldBorder,
         focusedBorder: fieldBorder.copyWith(
           borderSide: BorderSide(color: c.ink, width: 2),
         ),
         errorBorder: fieldBorder.copyWith(
-          borderSide: BorderSide(color: c.mustardInk, width: 2),
+          borderSide: BorderSide(color: c.butterInk, width: 2),
         ),
         focusedErrorBorder: fieldBorder.copyWith(
-          borderSide: BorderSide(color: c.mustardInk, width: 2),
+          borderSide: BorderSide(color: c.butterInk, width: 2),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -102,7 +102,7 @@ abstract final class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: c.tealInk,
+          foregroundColor: c.primaryInk,
           minimumSize: const Size(AppSizes.tap, AppSizes.tap),
           shape: const StadiumBorder(),
           textStyle: AppText.label,

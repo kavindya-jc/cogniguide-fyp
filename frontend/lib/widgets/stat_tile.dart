@@ -6,7 +6,7 @@ import '../theme/app_text.dart';
 import 'dashed_box.dart';
 
 /// The colour of a [StatTile]'s icon circle.
-enum StatTone { teal, mustard, orange, lavender }
+enum StatTone { primary, butter, peach, lilac }
 
 /// One of the 4 numbers on My progress, for example "6 · Sessions".
 ///
@@ -18,7 +18,7 @@ class StatTile extends StatelessWidget {
     required this.value,
     required this.label,
     this.icon,
-    this.tone = StatTone.teal,
+    this.tone = StatTone.primary,
     this.dashed = false,
   });
 
@@ -32,10 +32,10 @@ class StatTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final (Color bg, Color well, Color onWell) = switch (tone) {
-      StatTone.teal => (c.surfaceSunken, c.teal, c.onTeal),
-      StatTone.mustard => (c.surfaceSunken, c.mustard, c.onAccent),
-      StatTone.orange => (c.orangeSoft, c.orange, c.onAccent),
-      StatTone.lavender => (c.lavenderSoft, c.lavender, c.onAccent),
+      StatTone.primary => (c.surfaceSunken, c.primary, c.onPrimary),
+      StatTone.butter => (c.surfaceSunken, c.butter, c.onAccent),
+      StatTone.peach => (c.peachSoft, c.peach, c.onAccent),
+      StatTone.lilac => (c.lilacSoft, c.lilac, c.onAccent),
     };
 
     // Centred, so tiles of the same height line up in a grid.
