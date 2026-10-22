@@ -26,6 +26,7 @@ enum AppIcon {
   chart,
   star,
   sparkle,
+  sun,
 }
 
 const _soft = 'fill="currentColor" fill-opacity="0.2"';
@@ -68,6 +69,8 @@ const Map<AppIcon, String> _shapes = {
       '<rect x="3" y="3" width="18" height="18" rx="5" $_soft/><path d="M7 15l3-3 3 2 4-5"/>',
   AppIcon.star:
       '<path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" $_soft/>',
+  AppIcon.sun:
+      '<circle cx="12" cy="12" r="4.5" $_soft/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
   AppIcon.sparkle:
       '<path d="M12 3l2 5.5L19.5 10 14 12l-2 6-2-6-5.5-2L10 8.5z" $_soft/><path d="M19 16l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
 };

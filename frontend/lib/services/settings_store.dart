@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -37,6 +38,20 @@ class SettingsStore extends ChangeNotifier {
 
   Future<void> setLanguage(AppLanguage language) async {
     await _prefs.setString(_languageKey, language.code);
+    notifyListeners();
+  }
+
+  static const _themeKey = 'theme_mode';
+
+  /// Light, dark, or the same as the phone (the default).
+  ThemeMode get themeMode => switch (_prefs.getString(_themeKey)) {
+    'light' => ThemeMode.light,
+    'dark' => ThemeMode.dark,
+    _ => ThemeMode.system,
+  };
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    await _prefs.setString(_themeKey, mode.name);
     notifyListeners();
   }
 

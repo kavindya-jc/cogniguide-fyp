@@ -8,7 +8,7 @@ import 'glass_test.dart' show navBlur;
 import 'widget_test.dart' show startApp, tapVisible;
 
 const _fast = Duration(milliseconds: 9);
-const _slow = Duration(milliseconds: 26);
+const _slow = Duration(milliseconds: 30);
 
 /// Feeds [count] frames, [slowEvery]th one slow. True if judged too slow.
 bool feed(GlassSpeedJudge judge, int count, {required int slowEvery}) {
@@ -26,15 +26,32 @@ void main() {
     });
 
     test('a slow phone loses glass (1 slow frame in 2)', () {
-      expect(feed(GlassSpeedJudge(), 200, slowEvery: 2), isTrue);
+      expect(feed(GlassSpeedJudge(), 400, slowEvery: 2), isTrue);
     });
 
     test('the warm-up frames at the start are not counted', () {
       final judge = GlassSpeedJudge();
-      for (var i = 0; i < 30; i++) {
+      for (var i = 0; i < 60; i++) {
         expect(judge.addFrame(_slow), isFalse);
       }
-      expect(feed(judge, 120, slowEvery: 10), isFalse);
+      expect(feed(judge, 240, slowEvery: 10), isFalse);
+    });
+
+    test('one busy moment is not enough (needs 2 bad groups in a row)', () {
+      final judge = GlassSpeedJudge();
+      feed(judge, 60, slowEvery: 10); // warm-up
+      expect(feed(judge, 120, slowEvery: 1), isFalse); // 1 bad group
+      expect(feed(judge, 120, slowEvery: 10), isFalse); // then smooth
+      expect(feed(judge, 120, slowEvery: 1), isFalse); // bad again, alone
+    });
+
+    test('frames just over one frame time are not "slow" (20 ms)', () {
+      final judge = GlassSpeedJudge();
+      var tooSlow = false;
+      for (var i = 0; i < 600; i++) {
+        tooSlow |= judge.addFrame(const Duration(milliseconds: 20));
+      }
+      expect(tooSlow, isFalse);
     });
   });
 
