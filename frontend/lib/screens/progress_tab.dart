@@ -140,13 +140,14 @@ class _Tiles extends StatelessWidget {
         value: dashed ? 0 : progress.sessionCount,
         label: l10n.tileSessions,
         icon: AppIcon.book,
+        tone: StatTone.sky,
         dashed: dashed,
       ),
       StatTile(
         value: dashed ? 0 : progress.selfCorrections,
         label: l10n.tileSelfCorrections,
         icon: AppIcon.check,
-        tone: StatTone.butter,
+        tone: StatTone.mint,
         dashed: dashed,
       ),
       StatTile(
@@ -207,30 +208,38 @@ class _WithData extends StatelessWidget {
       children: [
         // Growth card: the server's sentence, never a score.
         Container(
-          padding: const EdgeInsets.fromLTRB(12, 16, 20, 16),
+          padding: const EdgeInsets.fromLTRB(4, 10, 18, 10),
           decoration: BoxDecoration(
-            color: c.primarySoft,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
+            color: c.butterSoft,
+            borderRadius: BorderRadius.circular(26),
           ),
           child: Row(
             children: [
-              const Pip(mood: PipMood.happy, size: 96),
-              const SizedBox(width: AppSpace.s2),
+              const Pip(mood: PipMood.happy, size: 104),
+              const SizedBox(width: AppSpace.s1),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       progress.growthMessage,
-                      style: AppText.h2.copyWith(fontSize: 20, height: 26 / 20),
+                      style: AppText.title.copyWith(
+                        fontSize: 19,
+                        height: 25 / 19,
+                        fontWeight: FontWeight.w800,
+                        fontVariations: const [FontVariation('wght', 800)],
+                      ),
                     ),
                     if (progress.enoughData) ...[
                       const SizedBox(height: 6),
                       Text(
                         l10n.progressBasedOnRecent,
                         style: AppText.caption.copyWith(
-                          color: c.primaryInk,
+                          color: c.butterInk,
                           fontSize: 14,
+                          height: 18 / 14,
+                          fontWeight: FontWeight.w600,
+                          fontVariations: const [FontVariation('wght', 600)],
                         ),
                       ),
                     ],
@@ -246,17 +255,17 @@ class _WithData extends StatelessWidget {
 
         // Chart card.
         Container(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 14),
+          padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
           decoration: BoxDecoration(
             color: c.surfaceRaised,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
+            borderRadius: BorderRadius.circular(26),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 l10n.chartTitle,
-                style: AppText.h2.copyWith(fontSize: 19, height: 24 / 19),
+                style: AppText.h2.copyWith(fontSize: 18, height: 24 / 18),
               ),
               const SizedBox(height: 10),
               HelpChart(sessions: progress.sessions),
@@ -296,16 +305,10 @@ class _WithData extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpace.s4),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpace.s1),
-          child: Text(
-            l10n.progressRoughGuide,
-            style: AppText.caption.copyWith(
-              color: c.inkMuted,
-              fontSize: 14,
-              height: 20 / 14,
-            ),
-          ),
+        NoticeCard(
+          icon: AppIcon.alert,
+          tone: NoticeTone.sky,
+          text: l10n.progressRoughGuide,
         ),
       ],
     );
@@ -328,10 +331,10 @@ class _NewStudent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Container(
-          padding: const EdgeInsets.fromLTRB(10, 14, 18, 14),
+          padding: const EdgeInsets.fromLTRB(4, 10, 18, 10),
           decoration: BoxDecoration(
-            color: c.primarySoft,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
+            color: c.butterSoft,
+            borderRadius: BorderRadius.circular(26),
           ),
           child: Row(
             children: [
@@ -340,7 +343,11 @@ class _NewStudent extends StatelessWidget {
               Expanded(
                 child: Text(
                   progress.growthMessage,
-                  style: AppText.title.copyWith(height: 23 / 17),
+                  style: AppText.title.copyWith(
+                    height: 23 / 17,
+                    fontWeight: FontWeight.w700,
+                    fontVariations: const [FontVariation('wght', 700)],
+                  ),
                 ),
               ),
             ],
