@@ -51,6 +51,10 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.glassLight,
     required this.glassDark,
     required this.glassEdge,
+    required this.glassClearTop,
+    required this.glassClearMid,
+    required this.glassClearBottom,
+    required this.glassHighlight,
   });
 
   /// Every screen background.
@@ -135,8 +139,17 @@ class AppColors extends ThemeExtension<AppColors> {
   /// Frosted glass for the floating night pill (bottom nav).
   final Color glassDark;
 
-  /// The thin bright edge along the top of a glass surface.
+  /// The thin bright edge around a glass surface.
   final Color glassEdge;
+
+  /// See-through "liquid" glass (header, nav, chat bar): a soft gradient
+  /// from the top, through the middle, to the bottom.
+  final Color glassClearTop;
+  final Color glassClearMid;
+  final Color glassClearBottom;
+
+  /// The light catching the top of the glass.
+  final Color glassHighlight;
 
   static const light = AppColors(
     surface: Color(0xFFF5F4F8),
@@ -172,9 +185,13 @@ class AppColors extends ThemeExtension<AppColors> {
     mintInk: Color(0xFF1D6447),
     focusRing: Color(0xFF26233A),
     shadow: Color(0x1A26233A), // ink at 10%
-    glassLight: Color(0xC2FFFFFF), // surface-raised at 76%
+    glassLight: Color(0xB8FFFFFF), // surface-raised at 72%
     glassDark: Color(0xD126233A), // night at 82%
-    glassEdge: Color(0x99FFFFFF),
+    glassEdge: Color(0x80FFFFFF),
+    glassClearTop: Color(0x75FFFFFF), // white at 46%
+    glassClearMid: Color(0x24FFFFFF), // white at 14%
+    glassClearBottom: Color(0x42FFFFFF), // white at 26%
+    glassHighlight: Color(0xFFFFFFFF),
   );
 
   /// Deep violet-black (not pure black) so it is gentle on the eyes at night.
@@ -212,9 +229,13 @@ class AppColors extends ThemeExtension<AppColors> {
     mintInk: Color(0xFFA9E6C9),
     focusRing: Color(0xFFECE9F5),
     shadow: Color(0x73000000), // rgba(0, 0, 0, 0.45)
-    glassLight: Color(0xC21E1C2A), // surface-raised at 76%
+    glassLight: Color(0xB81E1C2A), // surface-raised at 72%
     glassDark: Color(0xD1ECE9F5), // night (light in dark mode) at 82%
     glassEdge: Color(0x1FFFFFFF),
+    glassClearTop: Color(0x24FFFFFF), // white at 14%
+    glassClearMid: Color(0x08FFFFFF), // white at 3%
+    glassClearBottom: Color(0x14FFFFFF), // white at 8%
+    glassHighlight: Color(0x4DFFFFFF),
   );
 
   /// The colours of the current theme.

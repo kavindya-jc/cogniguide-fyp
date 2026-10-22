@@ -4,6 +4,7 @@ import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
+import 'duo_icon.dart';
 
 /// Who a chat bubble is from.
 enum BubbleKind {
@@ -89,8 +90,8 @@ class ChatBubble extends StatelessWidget {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.cloud_off_rounded,
+                        DuoIcon(
+                          AppIcon.cloudOff,
                           size: 16,
                           color: c.primaryInk,
                         ),

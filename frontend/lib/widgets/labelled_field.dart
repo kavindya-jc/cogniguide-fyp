@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
+import 'duo_icon.dart';
 
 /// A text field with a visible label above it.
 ///
@@ -148,11 +149,7 @@ class _LabelledFieldState extends State<LabelledField> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 1),
-                    child: Icon(
-                      Icons.error_outline_rounded,
-                      size: 18,
-                      color: c.butterInk,
-                    ),
+                    child: DuoIcon(AppIcon.alert, size: 18, color: c.butterInk),
                   ),
                   const SizedBox(width: AppSpace.s2),
                   Expanded(

@@ -4,6 +4,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
 import 'dashed_box.dart';
+import 'duo_icon.dart';
 
 /// The colour of a [StatTile]'s icon circle.
 enum StatTone { primary, butter, peach, lilac }
@@ -24,7 +25,7 @@ class StatTile extends StatelessWidget {
 
   final int value;
   final String label;
-  final IconData? icon;
+  final AppIcon? icon;
   final StatTone tone;
   final bool dashed;
 
@@ -53,7 +54,7 @@ class StatTile extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(color: well, shape: BoxShape.circle),
-              child: Icon(icon, size: 20, color: onWell),
+              child: DuoIcon(icon!, size: 20, color: onWell),
             ),
             const SizedBox(height: AppSpace.s2),
           ],

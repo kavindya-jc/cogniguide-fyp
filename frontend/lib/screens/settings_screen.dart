@@ -9,6 +9,7 @@ import '../widgets/round_icon_button.dart';
 import '../widgets/tap_surface.dart';
 import 'language_screen.dart';
 import 'logout_sheet.dart';
+import '../widgets/duo_icon.dart';
 
 /// Screen 3d: Settings. Your code, Language and Log out.
 class SettingsScreen extends StatelessWidget {
@@ -38,7 +39,7 @@ class SettingsScreen extends StatelessWidget {
                 Row(
                   children: [
                     RoundIconButton(
-                      icon: Icons.arrow_back_rounded,
+                      icon: AppIcon.back,
                       semanticLabel: l10n.settingsBack,
                       onPressed: () => Navigator.of(context).maybePop(),
                     ),
@@ -70,8 +71,8 @@ class SettingsScreen extends StatelessWidget {
                           color: c.primary,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
-                          Icons.key_rounded,
+                        child: DuoIcon(
+                          AppIcon.key,
                           size: 22,
                           color: c.onPrimary,
                         ),
@@ -100,7 +101,7 @@ class SettingsScreen extends StatelessWidget {
                       ListenableBuilder(
                         listenable: settings,
                         builder: (context, _) => _Row(
-                          icon: Icons.language_rounded,
+                          icon: AppIcon.globe,
                           label: l10n.settingsLanguage,
                           value: settings.language.nativeName,
                           onTap: () => Navigator.of(context).push(
@@ -117,7 +118,7 @@ class SettingsScreen extends StatelessWidget {
                       ListenableBuilder(
                         listenable: settings,
                         builder: (context, _) => _SwitchRow(
-                          icon: Icons.blur_on_rounded,
+                          icon: AppIcon.sparkle,
                           label: l10n.settingsGlass,
                           help: l10n.settingsGlassHelp,
                           value: settings.glassEffects,
@@ -129,7 +130,7 @@ class SettingsScreen extends StatelessWidget {
                         child: Divider(height: 1, color: c.line),
                       ),
                       _Row(
-                        icon: Icons.logout_rounded,
+                        icon: AppIcon.logout,
                         label: l10n.logOut,
                         onTap: () => showLogoutSheet(context),
                       ),
@@ -154,7 +155,7 @@ class _Row extends StatelessWidget {
     this.value,
   });
 
-  final IconData icon;
+  final AppIcon icon;
   final String label;
   final String? value;
   final VoidCallback onTap;
@@ -186,7 +187,7 @@ class _Row extends StatelessWidget {
                     color: c.surfaceSunken,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, size: 20, color: c.ink),
+                  child: DuoIcon(icon, size: 20, color: c.ink),
                 ),
                 const SizedBox(width: 14),
                 Expanded(child: Text(label, style: AppText.title)),
@@ -197,7 +198,7 @@ class _Row extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpace.s2),
                 ],
-                Icon(Icons.arrow_forward_rounded, size: 20, color: c.ink),
+                DuoIcon(AppIcon.forward, size: 20, color: c.ink),
               ],
             ),
           ),
@@ -218,7 +219,7 @@ class _SwitchRow extends StatelessWidget {
     required this.onChanged,
   });
 
-  final IconData icon;
+  final AppIcon icon;
   final String label;
   final String help;
   final bool value;
@@ -248,7 +249,7 @@ class _SwitchRow extends StatelessWidget {
                     color: c.surfaceSunken,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, size: 20, color: c.ink),
+                  child: DuoIcon(icon, size: 20, color: c.ink),
                 ),
                 const SizedBox(width: 14),
                 Expanded(

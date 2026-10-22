@@ -14,6 +14,7 @@ import '../widgets/pill_button.dart';
 import '../widgets/pip.dart';
 import '../widgets/stat_tile.dart';
 import 'progress_list_screen.dart';
+import '../widgets/duo_icon.dart';
 
 /// Tab 2: My progress, from `GET /progress`.
 ///
@@ -138,27 +139,27 @@ class _Tiles extends StatelessWidget {
       StatTile(
         value: dashed ? 0 : progress.sessionCount,
         label: l10n.tileSessions,
-        icon: Icons.menu_book_rounded,
+        icon: AppIcon.book,
         dashed: dashed,
       ),
       StatTile(
         value: dashed ? 0 : progress.selfCorrections,
         label: l10n.tileSelfCorrections,
-        icon: Icons.check_rounded,
+        icon: AppIcon.check,
         tone: StatTone.butter,
         dashed: dashed,
       ),
       StatTile(
         value: dashed ? 0 : progress.stuck,
         label: l10n.tileStuck,
-        icon: Icons.notifications_none_rounded,
+        icon: AppIcon.bell,
         tone: StatTone.peach,
         dashed: dashed,
       ),
       StatTile(
         value: dashed ? 0 : progress.reflections,
         label: l10n.tileReflections,
-        icon: Icons.star_outline_rounded,
+        icon: AppIcon.star,
         tone: StatTone.lilac,
         dashed: dashed,
       ),
@@ -265,11 +266,7 @@ class _WithData extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
-                    child: Icon(
-                      Icons.arrow_downward_rounded,
-                      size: 18,
-                      color: c.primaryInk,
-                    ),
+                    child: DuoIcon(AppIcon.down, size: 18, color: c.primaryInk),
                   ),
                   const SizedBox(width: AppSpace.s2),
                   Expanded(
@@ -286,7 +283,7 @@ class _WithData extends StatelessWidget {
               const SizedBox(height: 10),
               PillButton(
                 label: l10n.chartShowList,
-                icon: Icons.format_list_bulleted_rounded,
+                icon: AppIcon.list,
                 tone: PillTone.soft,
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
@@ -363,7 +360,7 @@ class _NewStudent extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.show_chart_rounded, color: c.ink),
+                  DuoIcon(AppIcon.chart, color: c.ink),
                   const SizedBox(width: 10),
                   Flexible(
                     child: Text(
@@ -465,19 +462,19 @@ class _Problem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final (IconData icon, String? title, String text) = switch (problem) {
+    final (AppIcon icon, String? title, String text) = switch (problem) {
       ProgressProblem.unavailable => (
-        Icons.schedule_rounded,
+        AppIcon.clock,
         null,
         l10n.progressUnavailable,
       ),
       ProgressProblem.offline => (
-        Icons.wifi_off_rounded,
+        AppIcon.wifiOff,
         l10n.chatOfflineTitle,
         l10n.chatOfflineText,
       ),
       ProgressProblem.failed => (
-        Icons.error_outline_rounded,
+        AppIcon.alert,
         l10n.chatErrorTitle,
         l10n.chatErrorText,
       ),

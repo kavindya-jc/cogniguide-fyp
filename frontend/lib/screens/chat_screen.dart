@@ -18,6 +18,7 @@ import '../widgets/round_icon_button.dart';
 import '../widgets/tap_surface.dart';
 import '../utils/maths_text.dart';
 import '../widgets/typing_dots.dart';
+import '../widgets/duo_icon.dart';
 
 /// Screen 4: the chat with the coach, through `POST /chat`.
 ///
@@ -351,7 +352,7 @@ class _Header extends StatelessWidget {
               Row(
                 children: [
                   RoundIconButton(
-                    icon: Icons.arrow_back_rounded,
+                    icon: AppIcon.back,
                     semanticLabel: l10n.chatBack,
                     tone: RoundIconTone.light,
                     onPressed: () => Navigator.of(context).maybePop(),
@@ -456,10 +457,7 @@ class _Header extends StatelessWidget {
                               turns: expanded ? 0.5 : 0,
                               duration: AppMotion.of(context, AppMotion.medium),
                               curve: AppMotion.ease,
-                              child: Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color: c.ink,
-                              ),
+                              child: DuoIcon(AppIcon.chevronDown, color: c.ink),
                             ),
                           ),
                         ],
@@ -486,19 +484,19 @@ class _ProblemNotice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final (IconData icon, String title, String text) = switch (problem) {
+    final (AppIcon icon, String title, String text) = switch (problem) {
       ChatProblem.busy => (
-        Icons.schedule_rounded,
+        AppIcon.clock,
         l10n.chatBusyTitle,
         l10n.chatBusyText,
       ),
       ChatProblem.failed => (
-        Icons.error_outline_rounded,
+        AppIcon.alert,
         l10n.chatErrorTitle,
         l10n.chatErrorText,
       ),
       ChatProblem.offline => (
-        Icons.wifi_off_rounded,
+        AppIcon.wifiOff,
         l10n.chatOfflineTitle,
         l10n.chatOfflineText,
       ),
@@ -539,13 +537,14 @@ class _InputBar extends StatelessWidget {
     final c = AppColors.of(context);
     final l10n = AppLocalizations.of(context);
 
-    // Light frosted glass over the end of the conversation, but plain
+    // See-through liquid glass over the end of the conversation, but plain
     // solid white while the student is typing. The emulator test showed
     // the blur is about 6x heavier then, and with the keyboard open nobody
     // can see through the bar anyway.
     return ListenableBuilder(
       listenable: focusNode,
       builder: (context, child) => GlassSurface(
+        tone: GlassTone.clear,
         blur: !focusNode.hasFocus,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         child: child!,
@@ -615,9 +614,9 @@ class _InputBar extends StatelessWidget {
                     ),
                     const SizedBox(width: AppSpace.s2),
                     RoundIconButton(
-                      icon: Icons.arrow_forward_rounded,
+                      icon: AppIcon.send,
                       semanticLabel: l10n.chatSend,
-                      tone: RoundIconTone.dark,
+                      tone: RoundIconTone.primary,
                       size: AppSizes.send,
                       onPressed: canSend ? onSend : null,
                     ),
@@ -637,11 +636,7 @@ class _InputBar extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.error_outline_rounded,
-                          size: 18,
-                          color: c.butterInk,
-                        ),
+                        DuoIcon(AppIcon.alert, size: 18, color: c.butterInk),
                         const SizedBox(width: AppSpace.s2),
                         Expanded(
                           child: Text(

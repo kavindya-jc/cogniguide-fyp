@@ -37,7 +37,10 @@ abstract final class AppRadius {
   /// Top panel (bottom corners), bottom sheet (top corners).
   static const double xl = 40;
 
-  /// Buttons, chips, bottom nav, send button.
+  /// Chunky 3D buttons.
+  static const double button = 18;
+
+  /// Chips, bottom nav, send button.
   static const double pill = 999;
 }
 
@@ -45,6 +48,9 @@ abstract final class AppRadius {
 abstract final class AppSizes {
   /// Main buttons and inputs.
   static const double button = 52;
+
+  /// The darker band under a chunky 3D button (it sinks into it on press).
+  static const double buttonEdge = 5;
 
   /// Smallest tap target (chips, grade filter, maths keys).
   static const double tap = 44;

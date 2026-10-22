@@ -12,6 +12,7 @@ import '../widgets/pip.dart';
 import 'create_account_screen.dart';
 import 'language_screen.dart';
 import 'login_screen.dart';
+import '../widgets/duo_icon.dart';
 
 /// Screen 0: the first screen. Pip, what the app does, and the way in.
 class WelcomeScreen extends StatelessWidget {
@@ -69,7 +70,7 @@ class WelcomeScreen extends StatelessWidget {
                               button: true,
                               child: PillButton(
                                 label: settings.language.nativeName,
-                                icon: Icons.language_rounded,
+                                icon: AppIcon.globe,
                                 tone: PillTone.light,
                                 onPressed: () => open(const LanguageScreen()),
                               ),
