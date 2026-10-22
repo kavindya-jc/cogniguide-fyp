@@ -73,8 +73,9 @@ void main() {
     await tester.tap(find.text('Solve: 3x − 5 = 2x + 7'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(GlassSurface), findsOneWidget);
-    expect(find.byType(BackdropFilter), findsOneWidget);
+    // Two glass surfaces: the header and the input bar (never more).
+    expect(find.byType(GlassSurface), findsNWidgets(2));
+    expect(find.byType(BackdropFilter), findsNWidgets(2));
     // The coach's message is still fully readable above the bar.
     expect(find.text('Hello!'), findsOneWidget);
   });
@@ -87,7 +88,7 @@ void lighterGlassTests() {
     await startApp(tester, saved: {'student_code': 'P001'});
     await tester.tap(find.text('Solve: 3x − 5 = 2x + 7'));
     await tester.pumpAndSettle();
-    expect(find.byType(BackdropFilter), findsOneWidget);
+    expect(find.byType(BackdropFilter), findsNWidgets(2));
 
     // The student taps into the message box: no blur while typing.
     await tester.tap(find.byType(TextField));
@@ -97,7 +98,7 @@ void lighterGlassTests() {
     // Done typing (box not active any more): the glass comes back.
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
-    expect(find.byType(BackdropFilter), findsOneWidget);
+    expect(find.byType(BackdropFilter), findsNWidgets(2));
   });
 
   testWidgets('log-out sheet: solid while sliding, glass once stopped', (

@@ -58,7 +58,7 @@ void main() {
 
     await tester.tap(find.text('Solve: 3x − 5 = 2x + 7'));
     await tester.pumpAndSettle();
-    expect(find.text('PROBLEM 1 · ALGEBRA · GRADE 9'), findsOneWidget);
+    expect(find.text('Problem 1 · Algebra · Grade 9'), findsOneWidget);
     expect(find.text('Solve: 3x − 5 = 2x + 7'), findsOneWidget);
   });
 
@@ -75,7 +75,7 @@ void main() {
     await tester.enterText(find.byType(TextField), 'Find 20% of 350.');
     await tapVisible(tester, start);
     await tester.pumpAndSettle();
-    expect(find.text('YOUR OWN PROBLEM'), findsOneWidget);
+    expect(find.text('Your own problem'), findsOneWidget);
     expect(find.text('Find 20% of 350.'), findsOneWidget);
   });
 

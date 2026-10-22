@@ -67,29 +67,43 @@ class MathsKeyRow extends StatelessWidget {
                 button: true,
                 label: key.spokenName(l10n),
                 excludeSemantics: true,
-                child: TapSurface(
-                  onTap: () => onKey(key.insert),
-                  pressScale: 0.92,
-                  color: c.surfaceSunken,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                // White keys on a grey band (the chunky look).
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: c.line,
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      minWidth: AppSizes.tap,
-                      minHeight: AppSizes.tap,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpace.s3,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 3),
+                    child: TapSurface(
+                      onTap: () => onKey(key.insert),
+                      pressScale: 0.92,
+                      color: c.surfaceRaised,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      child: Center(
-                        widthFactor: 1,
-                        child: Text(
-                          key.label,
-                          style: AppText.label.copyWith(
-                            color: c.ink,
-                            fontSize: 17,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          minWidth: AppSizes.tap,
+                          minHeight: AppSizes.tap,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpace.s3,
+                          ),
+                          child: Center(
+                            widthFactor: 1,
+                            child: Text(
+                              key.label,
+                              style: AppText.label.copyWith(
+                                color: c.ink,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                fontVariations: const [
+                                  FontVariation('wght', 700),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),

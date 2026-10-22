@@ -9,6 +9,7 @@ import '../widgets/form_page.dart';
 import '../widgets/labelled_field.dart';
 import '../widgets/notice_card.dart';
 import '../widgets/pill_button.dart';
+import '../widgets/pip.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
 import '../widgets/duo_icon.dart';
@@ -90,6 +91,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     return FormPage(
       title: l10n.createTitle,
       subtitle: _hasFix ? l10n.createSubtitleFix : l10n.createSubtitle,
+      pip: PipMood.determined,
       content: [
         AutofillGroup(
           child: Opacity(

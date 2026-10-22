@@ -9,6 +9,7 @@ import '../theme/app_text.dart';
 import '../widgets/form_page.dart';
 import '../widgets/notice_card.dart';
 import '../widgets/pill_button.dart';
+import '../widgets/pip.dart';
 import '../widgets/tap_surface.dart';
 import '../widgets/duo_icon.dart';
 
@@ -35,6 +36,7 @@ class LanguageScreen extends StatelessWidget {
       builder: (context, _) => FormPage(
         title: l10n.languageTitle,
         subtitle: l10n.languageSubtitle,
+        pip: PipMood.wink,
         content: [
           Semantics(
             label: l10n.languageTitle,
@@ -44,7 +46,7 @@ class LanguageScreen extends StatelessWidget {
               children: [
                 for (final lang in AppLanguage.values) ...[
                   if (lang != AppLanguage.values.first)
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 14),
                   _LanguageOption(
                     nativeName: lang.nativeName,
                     englishName: englishName(lang),
@@ -57,8 +59,8 @@ class LanguageScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppSpace.s5),
           NoticeCard(
-            icon: AppIcon.globe,
-            tone: NoticeTone.primary,
+            icon: AppIcon.alert,
+            tone: NoticeTone.sky,
             text: l10n.languageNote,
           ),
         ],
@@ -74,7 +76,8 @@ class LanguageScreen extends StatelessWidget {
   }
 }
 
-/// One language row. The chosen one has a tick (so not colour alone).
+/// One language card, chunky like a button. The chosen one has a violet
+/// ring and a tick (so not colour alone); the others an empty circle.
 class _LanguageOption extends StatelessWidget {
   const _LanguageOption({
     required this.nativeName,
@@ -98,53 +101,73 @@ class _LanguageOption extends StatelessWidget {
       button: true,
       label: '$nativeName, $englishName',
       excludeSemantics: true,
-      child: TapSurface(
-        onTap: onTap,
-        color: selected ? c.primarySoft : c.surfaceRaised,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          side: BorderSide(
-            color: selected ? c.primary : c.line,
-            width: selected ? 2 : 1.5,
-          ),
+      // The darker band under the card (the chunky look).
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: selected ? c.primaryEdge : c.line,
+          borderRadius: BorderRadius.circular(22),
         ),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 64),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpace.s5,
-              vertical: AppSpace.s3,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: selected ? 5 : 4),
+          child: TapSurface(
+            onTap: onTap,
+            color: c.surfaceRaised,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(22),
+              side: BorderSide(
+                color: selected ? c.primary : c.line,
+                width: selected ? 3 : 2,
+              ),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(nativeName, style: AppText.title),
-                      const SizedBox(height: 2),
-                      Text(
-                        englishName,
-                        style: AppText.caption.copyWith(
-                          color: c.inkMuted,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 76),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpace.s5,
+                  vertical: AppSpace.s3,
                 ),
-                if (selected)
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: c.primary,
-                      shape: BoxShape.circle,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            englishName,
+                            style: AppText.title.copyWith(
+                              fontSize: 19,
+                              fontWeight: FontWeight.w800,
+                              fontVariations: const [
+                                FontVariation('wght', 800),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            nativeName,
+                            style: AppText.label.copyWith(color: c.inkMuted),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: DuoIcon(AppIcon.check, size: 18, color: c.onPrimary),
-                  ),
-              ],
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: selected ? c.primary : null,
+                        shape: BoxShape.circle,
+                        border: selected
+                            ? null
+                            : Border.all(color: c.fieldLine, width: 2),
+                      ),
+                      child: selected
+                          ? DuoIcon(AppIcon.check, size: 18, color: c.onPrimary)
+                          : null,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

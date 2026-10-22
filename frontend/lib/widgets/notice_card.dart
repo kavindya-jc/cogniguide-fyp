@@ -10,8 +10,14 @@ enum NoticeTone {
   /// Busy, something went wrong, offline, write-it-down.
   butter,
 
-  /// Privacy and language notes.
+  /// General notes.
   primary,
+
+  /// The language note.
+  sky,
+
+  /// Privacy notes.
+  mint,
 }
 
 /// A rounded note with an icon in a circle and words beside it.
@@ -39,10 +45,16 @@ class NoticeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final (Color bg, Color well, Color onWell) = switch (tone) {
-      NoticeTone.butter => (c.butterSoft, c.butter, c.onAccent),
-      NoticeTone.primary => (c.primarySoft, c.primary, c.onPrimary),
+    // A soft pastel card; the icon sits in a white circle and the words
+    // are in the matching dark colour.
+    final (Color bg, Color ink) = switch (tone) {
+      NoticeTone.butter => (c.butterSoft, c.butterInk),
+      NoticeTone.primary => (c.primarySoft, c.primaryInk),
+      NoticeTone.sky => (c.skySoft, c.skyInk),
+      NoticeTone.mint => (c.mintSoft, c.mintInk),
     };
+    final well = c.surfaceRaised;
+    final onWell = ink;
 
     return Semantics(
       container: true,
@@ -68,10 +80,24 @@ class NoticeCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (title != null) ...[
-                    Text(title!, style: AppText.title.copyWith(color: c.ink)),
+                    Text(
+                      title!,
+                      style: AppText.title.copyWith(
+                        color: c.ink,
+                        fontWeight: FontWeight.w800,
+                        fontVariations: const [FontVariation('wght', 800)],
+                      ),
+                    ),
                     const SizedBox(height: AppSpace.s1),
                   ],
-                  Text(text, style: AppText.body.copyWith(color: c.ink)),
+                  Text(
+                    text,
+                    style: AppText.body.copyWith(
+                      color: title == null ? ink : c.ink,
+                      fontWeight: FontWeight.w600,
+                      fontVariations: const [FontVariation('wght', 600)],
+                    ),
+                  ),
                   if (action != null) ...[
                     const SizedBox(height: AppSpace.s3),
                     action!,
