@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../l10n/app_localizations.dart';
 import '../services/app_services.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
+import '../widgets/duo_icon.dart';
 import '../widgets/entrance.dart';
+import '../widgets/glass_surface.dart';
 import '../widgets/pill_button.dart';
 import '../widgets/pip.dart';
+import '../widgets/soft_blobs.dart';
+import '../widgets/tap_surface.dart';
 import 'create_account_screen.dart';
 import 'language_screen.dart';
 import 'login_screen.dart';
-import '../widgets/duo_icon.dart';
 
-/// Screen 0: the first screen. Pip, what the app does, and the way in.
+/// Screen 0: the first screen. Pip says hello in a glass speech bubble,
+/// the promise, and a white panel with the 3 steps and the way in.
+///
+/// PERFORMANCE: the speech bubble is the only glass here (small). Pip
+/// breathes for 12 seconds, then the screen is completely still.
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
@@ -29,173 +35,250 @@ class WelcomeScreen extends StatelessWidget {
     ).push(MaterialPageRoute<void>(builder: (_) => screen));
 
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, box) => SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: box.maxHeight),
-            child: IntrinsicHeight(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Logo, name and language button.
-                  SafeArea(
-                    bottom: false,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpace.screen,
-                        AppSpace.s5,
-                        AppSpace.screen,
-                        0,
-                      ),
-                      child: Row(
-                        children: [
-                          ExcludeSemantics(
-                            child: SvgPicture.asset(
-                              'assets/pip/logo.svg',
-                              width: AppSizes.tap,
-                              height: AppSizes.tap,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(l10n.appTitle, style: AppText.h2),
-                          ),
-                          ListenableBuilder(
-                            listenable: settings,
-                            builder: (context, _) => Semantics(
-                              label: l10n.welcomeLanguageButton(
-                                settings.language.nativeName,
-                              ),
-                              excludeSemantics: true,
-                              button: true,
-                              child: PillButton(
-                                label: settings.language.nativeName,
-                                icon: AppIcon.globe,
-                                tone: PillTone.light,
-                                onPressed: () => open(const LanguageScreen()),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Pip and the promise.
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpace.screen,
-                        AppSpace.s4,
-                        AppSpace.screen,
-                        AppSpace.screen,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // The welcome moment: Pip drops in first, then
-                          // the words rise, then the violet panel slides up.
-                          Entrance(
-                            style: EntranceStyle.drop,
-                            child: Semantics(
-                              label: l10n.pipWaving,
-                              excludeSemantics: true,
-                              child: const Pip(size: 170, breathe: true),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpace.s2),
-                          Entrance(
-                            delay: const Duration(milliseconds: 150),
-                            child: Semantics(
-                              header: true,
-                              child: Text(
-                                l10n.welcomeTitle,
-                                textAlign: TextAlign.center,
-                                style: AppText.h1,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpace.s2),
-                          Entrance(
-                            delay: const Duration(milliseconds: 200),
-                            child: Text(
-                              l10n.welcomeSubtitle,
-                              textAlign: TextAlign.center,
-                              style: AppText.body.copyWith(color: c.inkMuted),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Teal panel: the 3 steps and the buttons.
-                  Entrance(
-                    style: EntranceStyle.slideUp,
-                    delay: const Duration(milliseconds: 250),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: c.primary,
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(AppRadius.xl),
-                        ),
-                      ),
-                      child: SafeArea(
-                        top: false,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: SoftBlobs()),
+          LayoutBuilder(
+            builder: (context, box) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: box.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // The name and the language chip.
+                      SafeArea(
+                        bottom: false,
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(
                             AppSpace.screen,
-                            28,
+                            AppSpace.s4,
                             AppSpace.screen,
-                            AppSpace.s8,
+                            0,
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                          child: Row(
                             children: [
-                              for (final (i, step) in [
-                                l10n.welcomeStep1,
-                                l10n.welcomeStep2,
-                                l10n.welcomeStep3,
-                              ].indexed) ...[
-                                if (i > 0) const SizedBox(height: 14),
-                                Entrance(
-                                  // One after another, 50 ms apart.
-                                  delay: Duration(milliseconds: 400 + 50 * i),
-                                  child: _Step(number: i + 1, text: step),
+                              Expanded(
+                                child: Text(
+                                  l10n.appTitle,
+                                  style: AppText.h2.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    fontVariations: const [
+                                      FontVariation('wght', 800),
+                                      FontVariation('opsz', 22),
+                                    ],
+                                  ),
                                 ),
-                              ],
-                              const SizedBox(height: AppSpace.s5),
-                              Entrance(
-                                delay: const Duration(milliseconds: 550),
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    PillButton(
-                                      label: l10n.welcomeCreateAccount,
-                                      tone: PillTone.light,
-                                      expand: true,
-                                      onPressed: () =>
-                                          open(const CreateAccountScreen()),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    PillButton(
-                                      label: l10n.welcomeLogIn,
-                                      tone: PillTone.outlineOnPrimary,
-                                      expand: true,
-                                      onPressed: () =>
-                                          open(const LoginScreen()),
-                                    ),
-                                  ],
+                              ),
+                              ListenableBuilder(
+                                listenable: settings,
+                                builder: (context, _) => _LanguageChip(
+                                  name: settings.language.nativeName,
+                                  semanticLabel: l10n.welcomeLanguageButton(
+                                    settings.language.nativeName,
+                                  ),
+                                  onTap: () => open(const LanguageScreen()),
                                 ),
                               ),
                             ],
                           ),
                         ),
                       ),
-                    ),
+
+                      // Pip's hello, Pip and the promise.
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpace.screen,
+                            AppSpace.s3,
+                            AppSpace.screen,
+                            AppSpace.s4,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // The welcome moment: the bubble and Pip drop
+                              // in, the words rise, then the panel slides up.
+                              Entrance(
+                                style: EntranceStyle.drop,
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: _SpeechBubble(
+                                    text: l10n.welcomeSubtitle,
+                                  ),
+                                ),
+                              ),
+                              Entrance(
+                                style: EntranceStyle.drop,
+                                delay: const Duration(milliseconds: 80),
+                                child: Semantics(
+                                  label: l10n.pipWaving,
+                                  excludeSemantics: true,
+                                  child: const Pip(size: 150, breathe: true),
+                                ),
+                              ),
+                              Entrance(
+                                delay: const Duration(milliseconds: 150),
+                                child: Semantics(
+                                  header: true,
+                                  child: Text(
+                                    l10n.welcomeTitle,
+                                    textAlign: TextAlign.center,
+                                    style: AppText.h1.copyWith(
+                                      fontSize: 36,
+                                      height: 40 / 36,
+                                      fontVariations: const [
+                                        FontVariation('wght', 800),
+                                        FontVariation('opsz', 36),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // The white panel: the 3 steps and the buttons.
+                      Entrance(
+                        style: EntranceStyle.slideUp,
+                        delay: const Duration(milliseconds: 250),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: c.surfaceRaised,
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(36),
+                            ),
+                          ),
+                          child: SafeArea(
+                            top: false,
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 480,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    AppSpace.screen,
+                                    AppSpace.s6,
+                                    AppSpace.screen,
+                                    AppSpace.s6,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      for (final (i, (step, bg, ink)) in [
+                                        (
+                                          l10n.welcomeStep1,
+                                          c.butterSoft,
+                                          c.butterInk,
+                                        ),
+                                        (
+                                          l10n.welcomeStep2,
+                                          c.peachSoft,
+                                          c.peachInk,
+                                        ),
+                                        (
+                                          l10n.welcomeStep3,
+                                          c.mintSoft,
+                                          c.mintInk,
+                                        ),
+                                      ].indexed) ...[
+                                        if (i > 0) const SizedBox(height: 10),
+                                        Entrance(
+                                          // One after another, 50 ms apart.
+                                          delay: Duration(
+                                            milliseconds: 400 + 50 * i,
+                                          ),
+                                          child: _Step(
+                                            number: i + 1,
+                                            text: step,
+                                            background: bg,
+                                            ink: ink,
+                                          ),
+                                        ),
+                                      ],
+                                      const SizedBox(height: 18),
+                                      Entrance(
+                                        delay: const Duration(
+                                          milliseconds: 550,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            PillButton(
+                                              label: l10n.welcomeCreateAccount,
+                                              expand: true,
+                                              onPressed: () => open(
+                                                const CreateAccountScreen(),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            PillButton(
+                                              label: l10n.welcomeLogIn,
+                                              tone: PillTone.soft,
+                                              expand: true,
+                                              onPressed: () =>
+                                                  open(const LoginScreen()),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Pip's words in a small see-through glass bubble, its tail towards Pip.
+class _SpeechBubble extends StatelessWidget {
+  const _SpeechBubble({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    // A share of the width (not a fixed maximum), so the screen can measure
+    // the bubble's height correctly before laying it out.
+    return FractionallySizedBox(
+      widthFactor: 0.78,
+      child: Padding(
+        padding: const EdgeInsets.only(right: AppSpace.s2),
+        child: GlassSurface(
+          tone: GlassTone.clear,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(6),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Text(
+              text,
+              style: AppText.body.copyWith(
+                color: c.ink,
+                height: 22 / 16,
+                fontWeight: FontWeight.w700,
+                fontVariations: const [FontVariation('wght', 700)],
               ),
             ),
           ),
@@ -205,12 +288,68 @@ class WelcomeScreen extends StatelessWidget {
   }
 }
 
-/// One numbered step on the violet panel.
+/// The language chip at the top right: globe and the language's name.
+class _LanguageChip extends StatelessWidget {
+  const _LanguageChip({
+    required this.name,
+    required this.semanticLabel,
+    required this.onTap,
+  });
+
+  final String name;
+  final String semanticLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      excludeSemantics: true,
+      child: TapSurface(
+        onTap: onTap,
+        color: c.surfaceRaised,
+        shape: StadiumBorder(side: BorderSide(color: c.line, width: 1.5)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: AppSizes.tap),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpace.s4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DuoIcon(AppIcon.globe, size: 20, color: c.ink),
+                const SizedBox(width: AppSpace.s2),
+                Text(
+                  name,
+                  style: AppText.label.copyWith(
+                    color: c.ink,
+                    fontWeight: FontWeight.w700,
+                    fontVariations: const [FontVariation('wght', 700)],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One numbered step: a pastel number tile and the words.
 class _Step extends StatelessWidget {
-  const _Step({required this.number, required this.text});
+  const _Step({
+    required this.number,
+    required this.text,
+    required this.background,
+    required this.ink,
+  });
 
   final int number;
   final String text;
+  final Color background;
+  final Color ink;
 
   @override
   Widget build(BuildContext context) {
@@ -223,15 +362,29 @@ class _Step extends StatelessWidget {
             height: 36,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: c.surfaceRaised,
-              shape: BoxShape.circle,
+              color: background,
+              borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
-            child: Text('$number', style: AppText.title.copyWith(color: c.ink)),
+            child: Text(
+              '$number',
+              style: AppText.title.copyWith(
+                color: ink,
+                fontWeight: FontWeight.w800,
+                fontVariations: const [FontVariation('wght', 800)],
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 14),
         Expanded(
-          child: Text(text, style: AppText.title.copyWith(color: c.onPrimary)),
+          child: Text(
+            text,
+            style: AppText.title.copyWith(
+              color: c.ink,
+              fontWeight: FontWeight.w700,
+              fontVariations: const [FontVariation('wght', 700)],
+            ),
+          ),
         ),
       ],
     );

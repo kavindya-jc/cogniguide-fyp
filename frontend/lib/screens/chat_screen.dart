@@ -20,6 +20,7 @@ import '../utils/maths_text.dart';
 import '../widgets/typing_dots.dart';
 import '../widgets/duo_icon.dart';
 import '../widgets/measure_height.dart';
+import '../widgets/soft_blobs.dart';
 
 /// Screen 4: the chat with the coach, through `POST /chat`.
 ///
@@ -55,8 +56,10 @@ class _ChatScreenState extends State<ChatScreen> {
   final _inputFocus = FocusNode();
   final _scroll = ScrollController();
 
-  /// Height of the floating input bar (measured after layout).
+  /// Heights of the floating glass header and input bar (measured after
+  /// layout), so the conversation can scroll underneath both.
   double _barHeight = 150;
+  double _headerHeight = 200;
 
   String? _code;
   String? _sessionId;
@@ -194,96 +197,105 @@ class _ChatScreenState extends State<ChatScreen> {
         : PipMood.idle;
 
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      // The conversation scrolls underneath the floating glass header and
+      // the floating input bar. Only these two are glass (the blur limit).
+      body: Stack(
         children: [
-          _Header(
-            eyebrow: widget.eyebrow,
-            problem: widget.problem,
-            mood: mood,
-            expanded: _expanded,
-            onToggle: () => setState(() => _expanded = !_expanded),
-          ),
-          Expanded(
-            // The input bar floats over the bottom of the conversation, so
-            // messages scroll softly underneath its glass.
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Semantics(
-                    label: l10n.chatConversation,
-                    container: true,
-                    child: ListView(
-                      controller: _scroll,
-                      // Room at the bottom so the last message can scroll
-                      // up above the floating bar.
-                      padding: EdgeInsets.fromLTRB(
-                        AppSpace.s4,
-                        AppSpace.s4,
-                        AppSpace.s4,
-                        AppSpace.s4 + _barHeight,
+          const Positioned.fill(child: SoftBlobs()),
+          Positioned.fill(
+            child: Semantics(
+              label: l10n.chatConversation,
+              container: true,
+              child: ListView(
+                controller: _scroll,
+                // Room above and below so the first and last messages can
+                // scroll clear of the floating header and bar.
+                padding: EdgeInsets.fromLTRB(
+                  AppSpace.s4,
+                  _headerHeight + AppSpace.s4,
+                  AppSpace.s4,
+                  AppSpace.s4 + _barHeight,
+                ),
+                children: [
+                  for (final m in _messages) ...[
+                    // Each new bubble pops in once (the key stops it
+                    // replaying when the list rebuilds).
+                    Appear(
+                      key: ObjectKey(m),
+                      style: m.role == ChatRole.teacher
+                          ? AppearStyle.popLeft
+                          : AppearStyle.popRight,
+                      child: ChatBubble(
+                        // Coach maths like $x$ is shown as plain x (the
+                        // original text is what goes back to the server).
+                        text: m.role == ChatRole.teacher
+                            ? readableMaths(m.text)
+                            : m.text,
+                        kind: m.role == ChatRole.teacher
+                            ? BubbleKind.coach
+                            : m.unsent
+                            ? BubbleKind.unsent
+                            : BubbleKind.student,
                       ),
-                      children: [
-                        for (final m in _messages) ...[
-                          // Each new bubble pops in once (the key stops it
-                          // replaying when the list rebuilds).
-                          Appear(
-                            key: ObjectKey(m),
-                            style: m.role == ChatRole.teacher
-                                ? AppearStyle.popLeft
-                                : AppearStyle.popRight,
-                            child: ChatBubble(
-                              // Coach maths like $x$ is shown as plain x (the
-                              // original text is what goes back to the server).
-                              text: m.role == ChatRole.teacher
-                                  ? readableMaths(m.text)
-                                  : m.text,
-                              kind: m.role == ChatRole.teacher
-                                  ? BubbleKind.coach
-                                  : m.unsent
-                                  ? BubbleKind.unsent
-                                  : BubbleKind.student,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                        ],
-                        if (_waiting)
-                          const Appear(
-                            style: AppearStyle.popLeft,
-                            child: TypingDots(),
-                          ),
-                        if (_problem != null)
-                          Appear(
-                            key: ValueKey(_problem),
-                            style: AppearStyle.drop,
-                            child: _ProblemNotice(
-                              problem: _problem!,
-                              onRetry: _ask,
-                            ),
-                          ),
-                      ],
                     ),
-                  ),
-                ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: MeasureHeight(
-                    onHeight: (h) {
-                      if (h != _barHeight) setState(() => _barHeight = h);
-                    },
-                    child: _InputBar(
-                      controller: _input,
-                      focusNode: _inputFocus,
-                      canSend: !_waiting && _problem == null,
-                      fixMessage: _inputFix,
-                      onKey: _insertKey,
-                      onSend: _send,
+                    const SizedBox(height: 14),
+                  ],
+                  if (_waiting)
+                    const Appear(
+                      style: AppearStyle.popLeft,
+                      child: TypingDots(),
                     ),
-                  ),
+                  if (_problem != null)
+                    Appear(
+                      key: ValueKey(_problem),
+                      style: AppearStyle.drop,
+                      child: _ProblemNotice(problem: _problem!, onRetry: _ask),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: MeasureHeight(
+              onHeight: (h) {
+                if ((h - _headerHeight).abs() > 0.5) {
+                  setState(() => _headerHeight = h);
+                }
+              },
+              // While the student types, the header pauses its blur too
+              // (it still looks like glass), so typing stays light.
+              child: ListenableBuilder(
+                listenable: _inputFocus,
+                builder: (context, _) => _Header(
+                  eyebrow: widget.eyebrow,
+                  problem: widget.problem,
+                  mood: mood,
+                  expanded: _expanded,
+                  blur: !_inputFocus.hasFocus,
+                  onToggle: () => setState(() => _expanded = !_expanded),
                 ),
-              ],
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: MeasureHeight(
+              onHeight: (h) {
+                if (h != _barHeight) setState(() => _barHeight = h);
+              },
+              child: _InputBar(
+                controller: _input,
+                focusNode: _inputFocus,
+                canSend: !_waiting && _problem == null,
+                fixMessage: _inputFix,
+                onKey: _insertKey,
+                onSend: _send,
+              ),
             ),
           ),
         ],
@@ -292,13 +304,19 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
-/// The violet header: Back, Pip, the coach's name and the pinned problem.
+/// The floating glass header: Back, Pip, the coach's name and the pinned
+/// problem on a soft lilac card (tap it to see the whole problem).
+///
+/// Pip shows the coach's mood (thinking while the coach writes). Pip stays
+/// still here: anything moving inside the glass would redraw the blur on
+/// every frame.
 class _Header extends StatelessWidget {
   const _Header({
     required this.eyebrow,
     required this.problem,
     required this.mood,
     required this.expanded,
+    required this.blur,
     required this.onToggle,
   });
 
@@ -306,6 +324,9 @@ class _Header extends StatelessWidget {
   final String problem;
   final PipMood mood;
   final bool expanded;
+
+  /// False while the student types (see GlassSurface.blur).
+  final bool blur;
   final VoidCallback onToggle;
 
   @override
@@ -313,136 +334,164 @@ class _Header extends StatelessWidget {
     final c = AppColors.of(context);
     final l10n = AppLocalizations.of(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: c.primary,
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  RoundIconButton(
-                    icon: AppIcon.back,
-                    semanticLabel: l10n.chatBack,
-                    tone: RoundIconTone.light,
-                    onPressed: () => Navigator.of(context).maybePop(),
-                  ),
-                  const SizedBox(width: 10),
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: c.primarySoft,
-                      shape: BoxShape.circle,
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, AppSpace.s2, 12, 0),
+        child: GlassSurface(
+          tone: GlassTone.clear,
+          blur: blur,
+          borderRadius: BorderRadius.circular(28),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    RoundIconButton(
+                      icon: AppIcon.back,
+                      semanticLabel: l10n.chatBack,
+                      tone: RoundIconTone.light,
+                      onPressed: () => Navigator.of(context).maybePop(),
                     ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Pip(mood: mood, size: 52),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Semantics(
-                          header: true,
-                          child: Text(
-                            l10n.chatCoachTitle,
-                            style: AppText.title.copyWith(
-                              color: c.onPrimary,
-                              fontSize: 19,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          l10n.chatCoachSubtitle,
-                          style: AppText.caption.copyWith(
-                            color: c.onPrimary,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpace.s3),
-              // The pinned problem. Tap to show the whole text.
-              Semantics(
-                button: true,
-                expanded: expanded,
-                hint: l10n.chatToggleProblem,
-                child: TapSurface(
-                  onTap: onToggle,
-                  color: c.surfaceRaised,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                  ),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 56),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
+                    const SizedBox(width: 10),
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: mood == PipMood.thinking
+                            ? c.skySoft
+                            : c.lilacSoft,
+                        shape: BoxShape.circle,
                       ),
-                      child: Row(
+                      clipBehavior: Clip.antiAlias,
+                      alignment: Alignment.center,
+                      child: Pip(mood: mood, size: 58),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  eyebrow.toUpperCase(),
-                                  style: AppText.eyebrow.copyWith(
-                                    color: c.primaryInk,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                // Grows open smoothly to show the whole
-                                // problem (one small size animation).
-                                AnimatedSize(
-                                  duration: AppMotion.of(
-                                    context,
-                                    AppMotion.medium,
-                                  ),
-                                  curve: AppMotion.ease,
-                                  alignment: Alignment.topLeft,
-                                  child: Text(
-                                    problem,
-                                    maxLines: expanded ? null : 1,
-                                    overflow: expanded
-                                        ? TextOverflow.visible
-                                        : TextOverflow.ellipsis,
-                                    style: AppText.title.copyWith(color: c.ink),
-                                  ),
-                                ),
-                              ],
+                          Semantics(
+                            header: true,
+                            child: Text(
+                              l10n.chatCoachTitle,
+                              style: AppText.h2.copyWith(
+                                color: c.ink,
+                                fontSize: 19,
+                                height: 24 / 19,
+                                fontVariations: const [
+                                  FontVariation('wght', 800),
+                                  FontVariation('opsz', 19),
+                                ],
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 6),
-                            // The arrow turns to point up when open.
-                            child: AnimatedRotation(
-                              turns: expanded ? 0.5 : 0,
-                              duration: AppMotion.of(context, AppMotion.medium),
-                              curve: AppMotion.ease,
-                              child: DuoIcon(AppIcon.chevronDown, color: c.ink),
+                          Text(
+                            l10n.chatCoachSubtitle,
+                            style: AppText.caption.copyWith(
+                              color: c.inkMuted,
+                              fontSize: 14,
+                              height: 18 / 14,
+                              fontWeight: FontWeight.w600,
+                              fontVariations: const [
+                                FontVariation('wght', 600),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // The pinned problem. Tap to show the whole text.
+                Semantics(
+                  button: true,
+                  expanded: expanded,
+                  hint: l10n.chatToggleProblem,
+                  child: TapSurface(
+                    onTap: onToggle,
+                    color: c.lilacSoft,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 56),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 10, 12, 10),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    eyebrow,
+                                    style: AppText.caption.copyWith(
+                                      color: c.lilacInk,
+                                      fontWeight: FontWeight.w700,
+                                      fontVariations: const [
+                                        FontVariation('wght', 700),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  // Grows open smoothly to show the whole
+                                  // problem (one small size animation).
+                                  AnimatedSize(
+                                    duration: AppMotion.of(
+                                      context,
+                                      AppMotion.medium,
+                                    ),
+                                    curve: AppMotion.ease,
+                                    alignment: Alignment.topLeft,
+                                    child: Text(
+                                      problem,
+                                      maxLines: expanded ? null : 1,
+                                      overflow: expanded
+                                          ? TextOverflow.visible
+                                          : TextOverflow.ellipsis,
+                                      style: AppText.title.copyWith(
+                                        color: c.ink,
+                                        fontWeight: FontWeight.w700,
+                                        fontVariations: const [
+                                          FontVariation('wght', 700),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              // The arrow turns to point up when open.
+                              child: AnimatedRotation(
+                                turns: expanded ? 0.5 : 0,
+                                duration: AppMotion.of(
+                                  context,
+                                  AppMotion.medium,
+                                ),
+                                curve: AppMotion.ease,
+                                child: DuoIcon(
+                                  AppIcon.chevronDown,
+                                  color: c.lilacInk,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -490,7 +539,8 @@ class _ProblemNotice extends StatelessWidget {
   }
 }
 
-/// The white bar at the bottom: maths keys, the message box and Send.
+/// The bottom of the chat: a row of chunky maths keys, then a floating
+/// glass pill with the message box and the violet Send button.
 class _InputBar extends StatelessWidget {
   const _InputBar({
     required this.controller,
@@ -513,119 +563,111 @@ class _InputBar extends StatelessWidget {
     final c = AppColors.of(context);
     final l10n = AppLocalizations.of(context);
 
-    // See-through liquid glass over the end of the conversation, but plain
-    // solid white while the student is typing. The emulator test showed
-    // the blur is about 6x heavier then, and with the keyboard open nobody
-    // can see through the bar anyway.
-    return ListenableBuilder(
-      listenable: focusNode,
-      builder: (context, child) => GlassSurface(
-        tone: GlassTone.clear,
-        blur: !focusNode.hasFocus,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        child: child!,
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 10, bottom: AppSpace.s4),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              MathsKeyRow(onKey: onKey),
-              const SizedBox(height: 6),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpace.s3),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Semantics(
-                        label: l10n.chatMessageLabel,
-                        child: TextField(
-                          controller: controller,
-                          focusNode: focusNode,
-                          minLines: 1,
-                          maxLines: 3,
-                          textInputAction: TextInputAction.send,
-                          onSubmitted: (_) => onSend(),
-                          style: AppText.chat.copyWith(
-                            color: c.ink,
-                            height: 24 / 17,
-                          ),
-                          cursorColor: c.ink,
-                          decoration: InputDecoration(
-                            hintText: l10n.chatMessageHint,
-                            filled: true,
-                            fillColor: c.surface,
-                            constraints: const BoxConstraints(
-                              minHeight: AppSizes.tap,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(24),
-                              borderSide: BorderSide(
-                                color: c.fieldLine,
-                                width: 1.5,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(24),
-                              borderSide: BorderSide(
-                                color: c.fieldLine,
-                                width: 1.5,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(24),
-                              borderSide: BorderSide(color: c.ink, width: 2),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpace.s2),
-                    RoundIconButton(
-                      icon: AppIcon.send,
-                      semanticLabel: l10n.chatSend,
-                      tone: RoundIconTone.primary,
-                      size: AppSizes.send,
-                      onPressed: canSend ? onSend : null,
-                    ),
-                  ],
+    final fieldBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(24),
+      borderSide: BorderSide(color: c.fieldLine, width: 1.5),
+    );
+
+    final pill = Padding(
+      padding: const EdgeInsets.all(AppSpace.s2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: Semantics(
+              label: l10n.chatMessageLabel,
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                minLines: 1,
+                maxLines: 3,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => onSend(),
+                style: AppText.chat.copyWith(color: c.ink, height: 24 / 17),
+                cursorColor: c.ink,
+                decoration: InputDecoration(
+                  hintText: l10n.chatMessageHint,
+                  filled: true,
+                  fillColor: c.surfaceRaised,
+                  constraints: const BoxConstraints(minHeight: AppSizes.send),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 14,
+                  ),
+                  border: fieldBorder,
+                  enabledBorder: fieldBorder,
+                  focusedBorder: fieldBorder.copyWith(
+                    borderSide: BorderSide(color: c.ink, width: 2),
+                  ),
                 ),
               ),
-              if (fixMessage != null)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpace.s4,
-                    6,
-                    AppSpace.s4,
-                    0,
-                  ),
-                  child: Semantics(
-                    liveRegion: true,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        DuoIcon(AppIcon.alert, size: 18, color: c.butterInk),
-                        const SizedBox(width: AppSpace.s2),
-                        Expanded(
-                          child: Text(
-                            fixMessage!,
-                            style: AppText.help.copyWith(color: c.butterInk),
-                          ),
+            ),
+          ),
+          const SizedBox(width: AppSpace.s2),
+          RoundIconButton(
+            icon: AppIcon.send,
+            semanticLabel: l10n.chatSend,
+            tone: RoundIconTone.primary,
+            size: AppSizes.send,
+            onPressed: canSend ? onSend : null,
+          ),
+        ],
+      ),
+    );
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, AppSpace.s3),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            MathsKeyRow(onKey: onKey),
+            const SizedBox(height: AppSpace.s2),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              // See-through liquid glass over the end of the conversation,
+              // but plain solid while the student is typing: the emulator
+              // test showed the blur is about 6x heavier then, and with the
+              // keyboard open nobody can see through the bar anyway.
+              child: ListenableBuilder(
+                listenable: focusNode,
+                builder: (context, child) => GlassSurface(
+                  tone: GlassTone.clear,
+                  blur: !focusNode.hasFocus,
+                  borderRadius: BorderRadius.circular(32),
+                  child: child!,
+                ),
+                child: pill,
+              ),
+            ),
+            if (fixMessage != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpace.s5,
+                  6,
+                  AppSpace.s5,
+                  0,
+                ),
+                child: Semantics(
+                  liveRegion: true,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DuoIcon(AppIcon.alert, size: 18, color: c.butterInk),
+                      const SizedBox(width: AppSpace.s2),
+                      Expanded(
+                        child: Text(
+                          fixMessage!,
+                          style: AppText.help.copyWith(color: c.butterInk),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );

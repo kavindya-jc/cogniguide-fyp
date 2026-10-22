@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
+import 'chat_bubble.dart';
+import 'pip.dart';
 
 /// Three violet dots in a coach bubble while the coach is writing.
 ///
@@ -56,35 +58,40 @@ class _TypingDotsState extends State<TypingDots>
       liveRegion: true,
       label: AppLocalizations.of(context).chatCoachThinking,
       excludeSemantics: true,
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-          decoration: BoxDecoration(
-            color: c.surfaceRaised,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(AppRadius.bubble),
-              topRight: Radius.circular(AppRadius.bubble),
-              bottomRight: Radius.circular(AppRadius.bubble),
-              bottomLeft: Radius.circular(AppRadius.bubbleTail),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const CoachAvatar(mood: PipMood.thinking),
+          const SizedBox(width: AppSpace.s2),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            decoration: BoxDecoration(
+              color: c.surfaceRaised,
+              boxShadow: [BoxShadow(color: c.line, offset: const Offset(0, 3))],
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(AppRadius.bubble),
+                topRight: Radius.circular(AppRadius.bubble),
+                bottomRight: Radius.circular(AppRadius.bubble),
+                bottomLeft: Radius.circular(AppRadius.bubbleTail),
+              ),
             ),
-          ),
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, _) => Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (var i = 0; i < 3; i++) ...[
-                  if (i > 0) const SizedBox(width: 6),
-                  _dot(
-                    c,
-                    still ? 0.5 : _lift((_controller.value - i * 0.125) % 1),
-                  ),
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) => Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var i = 0; i < 3; i++) ...[
+                    if (i > 0) const SizedBox(width: 6),
+                    _dot(
+                      c,
+                      still ? 0.5 : _lift((_controller.value - i * 0.125) % 1),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

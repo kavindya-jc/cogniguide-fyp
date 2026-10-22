@@ -9,6 +9,7 @@ import '../widgets/form_page.dart';
 import '../widgets/labelled_field.dart';
 import '../widgets/notice_card.dart';
 import '../widgets/pill_button.dart';
+import '../widgets/pip.dart';
 import 'create_account_screen.dart';
 import 'home_screen.dart';
 import '../widgets/duo_icon.dart';
@@ -89,6 +90,8 @@ class _LoginScreenState extends State<LoginScreen> {
     return FormPage(
       title: l10n.loginTitle,
       subtitle: l10n.loginSubtitle,
+      pip: PipMood.happy,
+      hero: true,
       content: [
         if (mismatch) ...[
           NoticeCard(icon: AppIcon.alert, text: _formFix!),
@@ -131,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: AppSpace.s5),
         NoticeCard(
           icon: AppIcon.lock,
-          tone: NoticeTone.primary,
+          tone: NoticeTone.mint,
           text: l10n.loginPrivacy,
         ),
       ],
