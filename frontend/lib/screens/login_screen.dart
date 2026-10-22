@@ -130,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: AppSpace.s5),
         NoticeCard(
           icon: Icons.lock_outline_rounded,
-          tone: NoticeTone.teal,
+          tone: NoticeTone.primary,
           text: l10n.loginPrivacy,
         ),
       ],

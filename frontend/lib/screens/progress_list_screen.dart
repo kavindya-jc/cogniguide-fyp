@@ -133,9 +133,9 @@ class _HelpChip extends StatelessWidget {
     final c = AppColors.of(context);
     final l10n = AppLocalizations.of(context);
     final (Color bg, Color fg) = switch (help) {
-      HelpNeeded.aLot => (c.orangeSoft, c.orangeInk),
-      HelpNeeded.some => (c.mustardSoft, c.mustardInk),
-      HelpNeeded.aLittle => (c.tealSoft, c.tealInk),
+      HelpNeeded.aLot => (c.peachSoft, c.peachInk),
+      HelpNeeded.some => (c.butterSoft, c.butterInk),
+      HelpNeeded.aLittle => (c.primarySoft, c.primaryInk),
     };
 
     return Container(

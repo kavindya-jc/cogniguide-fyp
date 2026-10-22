@@ -6,8 +6,8 @@ import '../theme/app_text.dart';
 
 /// A text field with a visible label above it.
 ///
-/// - Selected: 2px ink border and a soft teal ring.
-/// - Needs a fix ([fixMessage] is set): mustard border and fill, plus a
+/// - Selected: 2px ink border and a soft violet ring.
+/// - Needs a fix ([fixMessage] is set): butter border and fill, plus a
 ///   message with an icon that says how to fix it. Never red.
 class LabelledField extends StatefulWidget {
   const LabelledField({
@@ -75,7 +75,7 @@ class _LabelledFieldState extends State<LabelledField> {
     final focused = _focus.hasFocus;
 
     final border = needsFix
-        ? Border.all(color: c.mustardInk, width: 2)
+        ? Border.all(color: c.butterInk, width: 2)
         : focused
         ? Border.all(color: c.ink, width: 2)
         : Border.all(color: c.fieldLine, width: 1.5);
@@ -102,11 +102,11 @@ class _LabelledFieldState extends State<LabelledField> {
             constraints: const BoxConstraints(minHeight: AppSizes.button),
             alignment: Alignment.centerLeft,
             decoration: BoxDecoration(
-              color: needsFix ? c.mustardSoft : c.surfaceRaised,
+              color: needsFix ? c.butterSoft : c.surfaceRaised,
               borderRadius: BorderRadius.circular(AppRadius.md),
               border: border,
               boxShadow: focused && !needsFix
-                  ? [BoxShadow(color: c.tealSoft, spreadRadius: 4)]
+                  ? [BoxShadow(color: c.primarySoft, spreadRadius: 4)]
                   : null,
             ),
             child: Semantics(
@@ -151,7 +151,7 @@ class _LabelledFieldState extends State<LabelledField> {
                     child: Icon(
                       Icons.error_outline_rounded,
                       size: 18,
-                      color: c.mustardInk,
+                      color: c.butterInk,
                     ),
                   ),
                   const SizedBox(width: AppSpace.s2),
@@ -159,7 +159,7 @@ class _LabelledFieldState extends State<LabelledField> {
                     child: Text(
                       widget.fixMessage!,
                       style: AppText.help.copyWith(
-                        color: c.mustardInk,
+                        color: c.butterInk,
                         fontWeight: FontWeight.w500,
                         fontVariations: const [FontVariation.weight(500)],
                       ),

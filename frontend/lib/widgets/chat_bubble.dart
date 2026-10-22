@@ -10,10 +10,10 @@ enum BubbleKind {
   /// The coach's reply: white, on the left.
   coach,
 
-  /// The student's message: teal, on the right.
+  /// The student's message: violet, on the right.
   student,
 
-  /// A student message that could not be sent: soft teal, "Not sent".
+  /// A student message that could not be sent: soft violet, "Not sent".
   unsent,
 }
 
@@ -35,8 +35,8 @@ class ChatBubble extends StatelessWidget {
 
     final (Color bg, Color fg) = switch (kind) {
       BubbleKind.coach => (c.surfaceRaised, c.ink),
-      BubbleKind.student => (c.teal, c.onTeal),
-      BubbleKind.unsent => (c.tealSoft, c.ink),
+      BubbleKind.student => (c.primary, c.onPrimary),
+      BubbleKind.unsent => (c.primarySoft, c.ink),
     };
 
     const big = Radius.circular(AppRadius.bubble);
@@ -56,7 +56,7 @@ class ChatBubble extends StatelessWidget {
               bottomRight: tail,
             ),
       side: kind == BubbleKind.unsent
-          ? BorderSide(color: c.teal, width: 1.5)
+          ? BorderSide(color: c.primary, width: 1.5)
           : BorderSide.none,
     );
 
@@ -92,13 +92,13 @@ class ChatBubble extends StatelessWidget {
                         Icon(
                           Icons.cloud_off_rounded,
                           size: 16,
-                          color: c.tealInk,
+                          color: c.primaryInk,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           l10n.chatNotSent,
                           style: AppText.help.copyWith(
-                            color: c.tealInk,
+                            color: c.primaryInk,
                             fontWeight: FontWeight.w600,
                             fontVariations: const [FontVariation.weight(600)],
                           ),

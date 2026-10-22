@@ -145,21 +145,21 @@ class _Tiles extends StatelessWidget {
         value: dashed ? 0 : progress.selfCorrections,
         label: l10n.tileSelfCorrections,
         icon: Icons.check_rounded,
-        tone: StatTone.mustard,
+        tone: StatTone.butter,
         dashed: dashed,
       ),
       StatTile(
         value: dashed ? 0 : progress.stuck,
         label: l10n.tileStuck,
         icon: Icons.notifications_none_rounded,
-        tone: StatTone.orange,
+        tone: StatTone.peach,
         dashed: dashed,
       ),
       StatTile(
         value: dashed ? 0 : progress.reflections,
         label: l10n.tileReflections,
         icon: Icons.star_outline_rounded,
-        tone: StatTone.lavender,
+        tone: StatTone.lilac,
         dashed: dashed,
       ),
     ];
@@ -208,7 +208,7 @@ class _WithData extends StatelessWidget {
         Container(
           padding: const EdgeInsets.fromLTRB(12, 16, 20, 16),
           decoration: BoxDecoration(
-            color: c.tealSoft,
+            color: c.primarySoft,
             borderRadius: BorderRadius.circular(AppRadius.lg),
           ),
           child: Row(
@@ -228,7 +228,7 @@ class _WithData extends StatelessWidget {
                       Text(
                         l10n.progressBasedOnRecent,
                         style: AppText.caption.copyWith(
-                          color: c.tealInk,
+                          color: c.primaryInk,
                           fontSize: 14,
                         ),
                       ),
@@ -268,7 +268,7 @@ class _WithData extends StatelessWidget {
                     child: Icon(
                       Icons.arrow_downward_rounded,
                       size: 18,
-                      color: c.tealInk,
+                      color: c.primaryInk,
                     ),
                   ),
                   const SizedBox(width: AppSpace.s2),
@@ -333,7 +333,7 @@ class _NewStudent extends StatelessWidget {
         Container(
           padding: const EdgeInsets.fromLTRB(10, 14, 18, 14),
           decoration: BoxDecoration(
-            color: c.tealSoft,
+            color: c.primarySoft,
             borderRadius: BorderRadius.circular(AppRadius.lg),
           ),
           child: Row(

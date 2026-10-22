@@ -12,7 +12,7 @@ void reduceMotion(WidgetTester tester) {
   addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
 }
 
-/// The lavender blob's left edge inside the bottom nav.
+/// The lilac blob's left edge inside the bottom nav.
 double blobLeft(WidgetTester tester) {
   final blob = find.descendant(
     of: find.byType(AppBottomNav),

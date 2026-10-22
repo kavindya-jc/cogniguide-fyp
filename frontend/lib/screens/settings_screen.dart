@@ -58,7 +58,7 @@ class SettingsScreen extends StatelessWidget {
                     vertical: 18,
                   ),
                   decoration: BoxDecoration(
-                    color: c.tealSoft,
+                    color: c.primarySoft,
                     borderRadius: BorderRadius.circular(AppRadius.lg),
                   ),
                   child: Row(
@@ -67,13 +67,13 @@ class SettingsScreen extends StatelessWidget {
                         width: AppSizes.tap,
                         height: AppSizes.tap,
                         decoration: BoxDecoration(
-                          color: c.teal,
+                          color: c.primary,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.key_rounded,
                           size: 22,
-                          color: c.onTeal,
+                          color: c.onPrimary,
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -268,8 +268,8 @@ class _SwitchRow extends StatelessWidget {
                 Switch(
                   value: value,
                   onChanged: onChanged,
-                  activeThumbColor: c.onTeal,
-                  activeTrackColor: c.teal,
+                  activeThumbColor: c.onPrimary,
+                  activeTrackColor: c.primary,
                   inactiveThumbColor: c.inkMuted,
                   inactiveTrackColor: c.surfaceSunken,
                   trackOutlineColor: WidgetStatePropertyAll(c.fieldLine),

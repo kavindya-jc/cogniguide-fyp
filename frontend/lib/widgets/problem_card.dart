@@ -7,7 +7,7 @@ import 'tap_surface.dart';
 
 /// A problem in the "Pick a problem" list.
 ///
-/// Colours take turns by [index]: night, lavender, orange, night, ...
+/// Colours take turns by [index]: night, lilac, peach, night, ...
 /// [eyebrow] is the small line, for example "Problem 1 · Algebra · Grade 9";
 /// it is shown in capitals.
 class ProblemCard extends StatelessWidget {
@@ -29,8 +29,8 @@ class ProblemCard extends StatelessWidget {
     final c = AppColors.of(context);
     final (Color bg, Color fg, Color eyebrowColor) = switch (index % 3) {
       0 => (c.night, c.onNight, c.nightAccent),
-      1 => (c.lavender, c.onAccent, c.onAccent),
-      _ => (c.orange, c.onAccent, c.onAccent),
+      1 => (c.lilac, c.onAccent, c.onAccent),
+      _ => (c.peach, c.onAccent, c.onAccent),
     };
 
     return Semantics(

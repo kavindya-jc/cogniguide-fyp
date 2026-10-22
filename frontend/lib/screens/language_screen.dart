@@ -57,7 +57,7 @@ class LanguageScreen extends StatelessWidget {
           const SizedBox(height: AppSpace.s5),
           NoticeCard(
             icon: Icons.translate_rounded,
-            tone: NoticeTone.teal,
+            tone: NoticeTone.primary,
             text: l10n.languageNote,
           ),
         ],
@@ -99,11 +99,11 @@ class _LanguageOption extends StatelessWidget {
       excludeSemantics: true,
       child: TapSurface(
         onTap: onTap,
-        color: selected ? c.tealSoft : c.surfaceRaised,
+        color: selected ? c.primarySoft : c.surfaceRaised,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
           side: BorderSide(
-            color: selected ? c.teal : c.line,
+            color: selected ? c.primary : c.line,
             width: selected ? 2 : 1.5,
           ),
         ),
@@ -138,10 +138,14 @@ class _LanguageOption extends StatelessWidget {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: c.teal,
+                      color: c.primary,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.check_rounded, size: 18, color: c.onTeal),
+                    child: Icon(
+                      Icons.check_rounded,
+                      size: 18,
+                      color: c.onPrimary,
+                    ),
                   ),
               ],
             ),

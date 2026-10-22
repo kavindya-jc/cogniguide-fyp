@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Text styles from the design spec (font: Plus Jakarta Sans).
+/// Text styles from the design spec.
+///
+/// Two fonts: Bricolage Grotesque for big headings and numbers ([h1], [h2],
+/// [stat]), and Plus Jakarta Sans for everything else.
 ///
 /// Styles carry no colour: the theme gives text the `ink` colour, and a
 /// widget picks another theme colour with `.copyWith(color: ...)` if needed.
@@ -10,14 +13,17 @@ import 'package:flutter/material.dart';
 abstract final class AppText {
   static const String fontFamily = 'PlusJakartaSans';
 
-  /// Screen titles. 32 / 36, bold.
-  static final TextStyle h1 = _style(32, 36, 700, letterSpacing: -0.64);
+  /// The heading font. Only [h1], [h2] and [stat] use it.
+  static const String displayFamily = 'BricolageGrotesque';
+
+  /// Screen titles. 32 / 36, extra bold.
+  static final TextStyle h1 = _display(32, 36, 800, letterSpacing: -0.64);
 
   /// Card titles, sheet title. 22 / 28, bold.
-  static final TextStyle h2 = _style(22, 28, 700, letterSpacing: -0.22);
+  static final TextStyle h2 = _display(22, 28, 700, letterSpacing: -0.22);
 
-  /// Numbers in stat tiles. 36 / 40, bold.
-  static final TextStyle stat = _style(36, 40, 700, letterSpacing: -0.72);
+  /// Numbers in stat tiles. 36 / 40, extra bold.
+  static final TextStyle stat = _display(36, 40, 800, letterSpacing: -0.72);
 
   /// Greetings, problem text, list rows. 17 / 22, semibold.
   static final TextStyle title = _style(17, 22, 600);
@@ -68,6 +74,28 @@ abstract final class AppText {
       // In maths 3x means 3 times the unknown x, so keep letters as typed.
       fontFeatures: const [FontFeature.disable('calt')],
       letterSpacing: letterSpacing,
+    );
+  }
+
+  /// A heading in Bricolage Grotesque. Its `opsz` (optical size) axis is set
+  /// to the font size, so the letters are drawn for that size.
+  static TextStyle _display(
+    double size,
+    double lineHeight,
+    int weight, {
+    double letterSpacing = 0,
+  }) {
+    return _style(
+      size,
+      lineHeight,
+      weight,
+      letterSpacing: letterSpacing,
+    ).copyWith(
+      fontFamily: displayFamily,
+      fontVariations: [
+        FontVariation.weight(weight.toDouble()),
+        FontVariation('opsz', size),
+      ],
     );
   }
 }

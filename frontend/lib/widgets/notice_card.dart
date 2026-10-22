@@ -7,10 +7,10 @@ import '../theme/app_text.dart';
 /// The look of a [NoticeCard].
 enum NoticeTone {
   /// Busy, something went wrong, offline, write-it-down.
-  mustard,
+  butter,
 
   /// Privacy and language notes.
-  teal,
+  primary,
 }
 
 /// A rounded note with an icon in a circle and words beside it.
@@ -20,7 +20,7 @@ class NoticeCard extends StatelessWidget {
     super.key,
     required this.icon,
     required this.text,
-    this.tone = NoticeTone.mustard,
+    this.tone = NoticeTone.butter,
     this.title,
     this.action,
   });
@@ -39,13 +39,13 @@ class NoticeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final (Color bg, Color well, Color onWell) = switch (tone) {
-      NoticeTone.mustard => (c.mustardSoft, c.mustard, c.onAccent),
-      NoticeTone.teal => (c.tealSoft, c.teal, c.onTeal),
+      NoticeTone.butter => (c.butterSoft, c.butter, c.onAccent),
+      NoticeTone.primary => (c.primarySoft, c.primary, c.onPrimary),
     };
 
     return Semantics(
       container: true,
-      liveRegion: tone == NoticeTone.mustard,
+      liveRegion: tone == NoticeTone.butter,
       child: Container(
         padding: const EdgeInsets.all(AppSpace.s4),
         decoration: BoxDecoration(

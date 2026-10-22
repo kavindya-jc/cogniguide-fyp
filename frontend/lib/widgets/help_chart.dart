@@ -12,7 +12,7 @@ import '../theme/app_text.dart';
 ///
 /// One point per session, oldest on the left. "A lot" is at the top and
 /// "A little" at the bottom, so lower is better. The newest point is
-/// mustard. Screen readers hear the same numbers as one sentence.
+/// butter. Screen readers hear the same numbers as one sentence.
 ///
 /// When it first appears, the line draws itself from left to right
 /// (1.4 s), then the points pop in one by one, the newest last.
@@ -181,7 +181,7 @@ class _ChartPainter extends CustomPainter {
 
     // The line, drawn from the left up to [lineShown] of its length.
     final line = Paint()
-      ..color = colors.teal
+      ..color = colors.primary
       ..strokeWidth = 4
       ..style = PaintingStyle.stroke
       ..strokeJoin = StrokeJoin.round
@@ -195,7 +195,7 @@ class _ChartPainter extends CustomPainter {
       }
     }
 
-    // The points: white with a teal ring; the newest is mustard.
+    // The points: white with a violet ring; the newest is butter.
     for (var i = 0; i < n; i++) {
       final p = points[i];
 
@@ -210,7 +210,7 @@ class _ChartPainter extends CustomPainter {
       final grow = Curves.easeOutBack.transform(pop);
 
       if (i == n - 1) {
-        canvas.drawCircle(p, 9 * grow, Paint()..color = colors.mustard);
+        canvas.drawCircle(p, 9 * grow, Paint()..color = colors.butter);
         canvas.drawCircle(
           p,
           9 * grow,
@@ -225,7 +225,7 @@ class _ChartPainter extends CustomPainter {
           p,
           6 * grow,
           Paint()
-            ..color = colors.teal
+            ..color = colors.primary
             ..style = PaintingStyle.stroke
             ..strokeWidth = 3.5,
         );

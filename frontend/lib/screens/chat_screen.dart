@@ -315,7 +315,7 @@ class _MeasureHeightState extends State<_MeasureHeight> {
   }
 }
 
-/// The teal header: Back, Pip, the coach's name and the pinned problem.
+/// The violet header: Back, Pip, the coach's name and the pinned problem.
 class _Header extends StatelessWidget {
   const _Header({
     required this.eyebrow,
@@ -338,7 +338,7 @@ class _Header extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: c.teal,
+        color: c.primary,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
       ),
       child: SafeArea(
@@ -361,7 +361,7 @@ class _Header extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: c.tealSoft,
+                      color: c.primarySoft,
                       shape: BoxShape.circle,
                     ),
                     clipBehavior: Clip.antiAlias,
@@ -377,7 +377,7 @@ class _Header extends StatelessWidget {
                           child: Text(
                             l10n.chatCoachTitle,
                             style: AppText.title.copyWith(
-                              color: c.onTeal,
+                              color: c.onPrimary,
                               fontSize: 19,
                             ),
                           ),
@@ -385,7 +385,7 @@ class _Header extends StatelessWidget {
                         Text(
                           l10n.chatCoachSubtitle,
                           style: AppText.caption.copyWith(
-                            color: c.onTeal,
+                            color: c.onPrimary,
                             fontSize: 14,
                           ),
                         ),
@@ -423,7 +423,7 @@ class _Header extends StatelessWidget {
                                 Text(
                                   eyebrow.toUpperCase(),
                                   style: AppText.eyebrow.copyWith(
-                                    color: c.tealInk,
+                                    color: c.primaryInk,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -476,7 +476,7 @@ class _Header extends StatelessWidget {
   }
 }
 
-/// The mustard notice for busy / something went wrong / no internet.
+/// The butter notice for busy / something went wrong / no internet.
 class _ProblemNotice extends StatelessWidget {
   const _ProblemNotice({required this.problem, required this.onRetry});
 
@@ -640,13 +640,13 @@ class _InputBar extends StatelessWidget {
                         Icon(
                           Icons.error_outline_rounded,
                           size: 18,
-                          color: c.mustardInk,
+                          color: c.butterInk,
                         ),
                         const SizedBox(width: AppSpace.s2),
                         Expanded(
                           child: Text(
                             fixMessage!,
-                            style: AppText.help.copyWith(color: c.mustardInk),
+                            style: AppText.help.copyWith(color: c.butterInk),
                           ),
                         ),
                       ],

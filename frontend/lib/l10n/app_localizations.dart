@@ -778,6 +778,30 @@ abstract class AppLocalizations {
   /// **'Your coach, resting'**
   String get pipSleepy;
 
+  /// No description provided for @pipCheering.
+  ///
+  /// In en, this message translates to:
+  /// **'Your coach, cheering you on'**
+  String get pipCheering;
+
+  /// No description provided for @pipSurprised.
+  ///
+  /// In en, this message translates to:
+  /// **'Your coach, surprised'**
+  String get pipSurprised;
+
+  /// No description provided for @pipDetermined.
+  ///
+  /// In en, this message translates to:
+  /// **'Your coach, ready to think'**
+  String get pipDetermined;
+
+  /// No description provided for @pipWink.
+  ///
+  /// In en, this message translates to:
+  /// **'Your coach, winking'**
+  String get pipWink;
+
   /// Screen reader name for the row of area chips.
   ///
   /// In en, this message translates to:
