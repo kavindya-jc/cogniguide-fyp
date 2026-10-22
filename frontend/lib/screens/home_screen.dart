@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/app_services.dart';
 import '../theme/app_sizes.dart';
 import '../widgets/bottom_nav.dart';
+import '../widgets/soft_blobs.dart';
 import 'pick_problem_tab.dart';
 import 'progress_tab.dart';
 
@@ -32,6 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Stack(
         children: [
+          // The background with soft colour glows, for the glass to show.
+          const Positioned.fill(child: SoftBlobs()),
           // Keeps each tab's state (chosen area, scroll) when switching.
           IndexedStack(
             index: _tab.index,

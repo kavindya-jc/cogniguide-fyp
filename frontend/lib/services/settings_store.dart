@@ -41,13 +41,39 @@ class SettingsStore extends ChangeNotifier {
   }
 
   static const _glassKey = 'glass_effects';
+  static const _glassAutoOffKey = 'glass_auto_off';
+  static const _glassKeptOnKey = 'glass_kept_on';
 
-  /// The frosted glass look (blur). On by default. Students with a slow
-  /// phone can turn it off in Settings to keep the app smooth.
-  bool get glassEffects => _prefs.getBool(_glassKey) ?? true;
+  /// Whether the glass look (blur) is shown. On by default. It is off when
+  /// the student turned it off, or when the app turned it off by itself
+  /// because the phone was too slow ([glassTurnedOffForSpeed]).
+  bool get glassEffects =>
+      (_prefs.getBool(_glassKey) ?? true) && !glassTurnedOffForSpeed;
 
+  /// True when the app turned glass off by itself (see GlassSpeedGuard).
+  /// Settings explains this to the student.
+  bool get glassTurnedOffForSpeed => _prefs.getBool(_glassAutoOffKey) ?? false;
+
+  /// The app watches speed only while glass is on, and never again once
+  /// the student has turned glass back on after an automatic switch-off.
+  bool get shouldWatchGlassSpeed =>
+      glassEffects && !(_prefs.getBool(_glassKeptOnKey) ?? false);
+
+  /// The student's choice in Settings. Turning glass back on after the app
+  /// switched it off means "keep it on": the app stops checking.
   Future<void> setGlassEffects(bool on) async {
     await _prefs.setBool(_glassKey, on);
+    if (on && glassTurnedOffForSpeed) {
+      await _prefs.setBool(_glassAutoOffKey, false);
+      await _prefs.setBool(_glassKeptOnKey, true);
+    }
+    notifyListeners();
+  }
+
+  /// Called by the speed guard when the phone is too slow for glass.
+  Future<void> turnGlassOffForSpeed() async {
+    if (!shouldWatchGlassSpeed) return;
+    await _prefs.setBool(_glassAutoOffKey, true);
     notifyListeners();
   }
 }

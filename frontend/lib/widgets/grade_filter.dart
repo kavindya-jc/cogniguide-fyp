@@ -11,7 +11,7 @@ import 'tap_surface.dart';
 
 /// "Grade  All 8 9 10 11". Each button is at least 44 × 44.
 ///
-/// The chosen one has a violet-soft pill with a violet ring. When another
+/// The chosen one has a soft butter pill with a butter ring. When another
 /// grade is chosen, the pill slides over to it (the same liquid feel as
 /// the bottom nav). [selected] is null for "All".
 ///
@@ -93,9 +93,9 @@ class _GradeFilterState extends State<GradeFilter> {
               child: RepaintBoundary(
                 child: DecoratedBox(
                   decoration: ShapeDecoration(
-                    color: c.primarySoft,
+                    color: c.butterSoft,
                     shape: StadiumBorder(
-                      side: BorderSide(color: c.primary, width: 2),
+                      side: BorderSide(color: c.butter, width: 2),
                     ),
                   ),
                 ),
@@ -175,7 +175,9 @@ class _GradeButton extends StatelessWidget {
               child: AnimatedDefaultTextStyle(
                 duration: AppMotion.of(context, AppMotion.quick),
                 style: AppText.label.copyWith(
-                  color: selected ? c.primaryInk : c.inkMuted,
+                  color: selected ? c.butterInk : c.inkMuted,
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                  fontVariations: [FontVariation('wght', selected ? 800 : 600)],
                 ),
                 child: Text(text),
               ),

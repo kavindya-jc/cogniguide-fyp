@@ -13,6 +13,10 @@ enum AppearStyle {
 
   /// A notice: drops in gently from just above. No shaking.
   drop,
+
+  /// A card coming onto the screen as the list scrolls: rises a little
+  /// and grows to full size.
+  rise,
 }
 
 /// Plays a short arrival animation once, the first time [child] is shown.
@@ -29,12 +33,13 @@ class Appear extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final drop = style == AppearStyle.drop;
+    final rise = style == AppearStyle.rise;
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: AppMotion.of(context, AppMotion.pop),
       // A small spring for bubbles; a calm ease for notices.
-      curve: drop ? AppMotion.ease : Curves.easeOutBack,
+      curve: drop || rise ? AppMotion.ease : Curves.easeOutBack,
       child: child,
       builder: (context, t, child) {
         if (t >= 1) return child!;
@@ -42,14 +47,23 @@ class Appear extends StatelessWidget {
         return Opacity(
           opacity: shown,
           child: Transform.translate(
-            offset: Offset(0, drop ? -6 * (1 - t) : 8 * (1 - t)),
+            offset: Offset(
+              0,
+              drop
+                  ? -6 * (1 - t)
+                  : rise
+                  ? 24 * (1 - t)
+                  : 8 * (1 - t),
+            ),
             child: drop
                 ? child
                 : Transform.scale(
-                    scale: 0.94 + 0.06 * t,
-                    alignment: style == AppearStyle.popLeft
-                        ? Alignment.bottomLeft
-                        : Alignment.bottomRight,
+                    scale: rise ? 0.96 + 0.04 * t : 0.94 + 0.06 * t,
+                    alignment: switch (style) {
+                      AppearStyle.popLeft => Alignment.bottomLeft,
+                      AppearStyle.popRight => Alignment.bottomRight,
+                      _ => Alignment.center,
+                    },
                     child: child,
                   ),
           ),

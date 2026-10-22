@@ -478,6 +478,12 @@ abstract class AppLocalizations {
   /// **'Turn off on a slow phone to keep the app smooth and save battery.'**
   String get settingsGlassHelp;
 
+  /// No description provided for @settingsGlassAutoOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turned off by itself because it was slowing this phone down. You can turn it back on.'**
+  String get settingsGlassAutoOff;
+
   /// No description provided for @logoutTitle.
   ///
   /// In en, this message translates to:
