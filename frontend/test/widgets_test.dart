@@ -120,7 +120,7 @@ void main() {
     expect(picked, 10);
   });
 
-  testWidgets('ProblemCard shows the eyebrow in capitals', (tester) async {
+  testWidgets('ProblemCard shows the eyebrow and the problem', (tester) async {
     var taps = 0;
     await tester.pumpWidget(
       wrap(
@@ -136,7 +136,7 @@ void main() {
       ),
     );
 
-    expect(find.text('PROBLEM 1 · ALGEBRA · GRADE 9'), findsOneWidget);
+    expect(find.text('Problem 1 · Algebra · Grade 9'), findsOneWidget);
     await tester.tap(find.byType(ProblemCard));
     expect(taps, 1);
   });
@@ -146,10 +146,7 @@ void main() {
       wrap(
         const SizedBox(
           width: 340,
-          child: NoticeCard(
-            icon: AppIcon.clock,
-            text: 'Coach is busy',
-          ),
+          child: NoticeCard(icon: AppIcon.clock, text: 'Coach is busy'),
         ),
       ),
     );

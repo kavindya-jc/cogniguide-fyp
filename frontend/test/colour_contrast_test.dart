@@ -36,6 +36,7 @@ void main() {
         (c.peachInk, c.peachSoft, 'peach card text'),
         (c.skyInk, c.skySoft, 'sky card text'),
         (c.mintInk, c.mintSoft, 'mint card text'),
+        (c.onNavActive, c.navActive, 'chosen tab in the nav'),
         (c.onAccent, c.lilac, 'text on strong lilac'),
         (c.onAccent, c.butter, 'text on strong butter'),
         (c.onAccent, c.peach, 'text on strong peach'),

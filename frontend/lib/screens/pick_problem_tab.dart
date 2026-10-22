@@ -7,10 +7,15 @@ import '../services/app_services.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
+import '../theme/app_motion.dart';
+import '../widgets/appear.dart';
 import '../widgets/area_chip.dart';
 import '../widgets/dashed_box.dart';
+import '../widgets/duo_icon.dart';
 import '../widgets/entrance.dart';
+import '../widgets/glass_surface.dart';
 import '../widgets/grade_filter.dart';
+import '../widgets/measure_height.dart';
 import '../widgets/notice_card.dart';
 import '../widgets/pill_button.dart';
 import '../widgets/pip.dart';
@@ -19,7 +24,6 @@ import '../widgets/round_icon_button.dart';
 import 'chat_screen.dart';
 import 'logout_sheet.dart';
 import 'settings_screen.dart';
-import '../widgets/duo_icon.dart';
 
 /// The longest problem the server accepts (docs/api_contract.md).
 const int maxProblemLength = 2000;
@@ -43,6 +47,12 @@ class _PickProblemTabState extends State<PickProblemTab> {
   final _own = TextEditingController();
   String? _ownFix;
 
+  /// The list scrolls under the floating glass header.
+  final _scroll = ScrollController();
+
+  /// How tall the glass header is, so the list starts below it.
+  double _headerHeight = 220;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -52,6 +62,7 @@ class _PickProblemTabState extends State<PickProblemTab> {
   @override
   void dispose() {
     _own.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -99,11 +110,10 @@ class _PickProblemTabState extends State<PickProblemTab> {
         final loading = snap.connectionState != ConnectionState.done;
         final items = snap.data ?? const <Problem>[];
 
-        return ListView(
-          padding: const EdgeInsets.only(bottom: 104),
+        final list = ListView(
+          controller: _scroll,
+          padding: EdgeInsets.only(top: _headerHeight + 14, bottom: 120),
           children: [
-            _Header(code: widget.code, showPip: !loading && items.isNotEmpty),
-            const SizedBox(height: 14),
             AreaChipRow(
               selected: _area,
               onChanged: (a) => _filter(area: a),
@@ -141,12 +151,18 @@ class _PickProblemTabState extends State<PickProblemTab> {
                             p.area.label(l10n),
                             p.grade,
                           );
-                          return ProblemCard(
-                            index: i,
-                            eyebrow: eyebrow,
-                            text: p.text,
-                            onTap: () =>
-                                _openChat(eyebrow: eyebrow, problem: p.text),
+                          // Each card rises in the first time it scrolls
+                          // onto the screen.
+                          return Appear(
+                            key: ValueKey('${p.area}-${p.grade}-${p.text}'),
+                            style: AppearStyle.rise,
+                            child: ProblemCard(
+                              index: i,
+                              eyebrow: eyebrow,
+                              text: p.text,
+                              onTap: () =>
+                                  _openChat(eyebrow: eyebrow, problem: p.text),
+                            ),
                           );
                         },
                       ),
@@ -167,96 +183,156 @@ class _PickProblemTabState extends State<PickProblemTab> {
             ),
           ],
         );
+
+        return Stack(
+          children: [
+            list,
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: MeasureHeight(
+                onHeight: (h) {
+                  if ((h - _headerHeight).abs() > 0.5) {
+                    setState(() => _headerHeight = h);
+                  }
+                },
+                child: _Header(
+                  code: widget.code,
+                  scroll: _scroll,
+                  showPip: !loading && items.isNotEmpty,
+                ),
+              ),
+            ),
+          ],
+        );
       },
     );
   }
 }
 
-/// The violet panel: Pip, "Hi, P001", Log out, Settings and the title.
+/// The floating glass header: "Hi, P001", Log out, Settings, the title
+/// and Pip. The list scrolls underneath it.
+///
+/// As the student scrolls down, the title shrinks a little and Pip floats
+/// up and tilts, so the screen feels alive.
+/// PERFORMANCE: only a scale, a move and a turn (no layout, no blur
+/// change). The glass is one of at most two blurred things on screen
+/// (the other is the bottom nav). With "reduce motion" on, nothing moves.
 class _Header extends StatelessWidget {
-  const _Header({required this.code, required this.showPip});
+  const _Header({
+    required this.code,
+    required this.scroll,
+    required this.showPip,
+  });
 
   final String code;
+  final ScrollController scroll;
 
   /// One Pip per screen: hidden while the thinking Pip shows below.
   final bool showPip;
+
+  /// How far the student scrolls before the effect is complete.
+  static const double _range = 160;
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final l10n = AppLocalizations.of(context);
+    final still = AppMotion.reduced(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: c.primary,
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(AppRadius.xl),
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpace.s5,
-            AppSpace.s3,
-            AppSpace.s5,
-            AppSpace.s6,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  if (showPip) ...[
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: c.primarySoft,
-                        shape: BoxShape.circle,
+    // 0 at the top of the list, 1 after scrolling [_range] pixels.
+    double progress() => still || !scroll.hasClients
+        ? 0
+        : (scroll.offset / _range).clamp(0.0, 1.0);
+
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, AppSpace.s2, 14, 0),
+        child: GlassSurface(
+          tone: GlassTone.clear,
+          borderRadius: BorderRadius.circular(28),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 10, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.homeGreeting(code),
+                        style: AppText.title.copyWith(
+                          color: c.ink,
+                          fontWeight: FontWeight.w700,
+                          fontVariations: const [FontVariation('wght', 700)],
+                        ),
                       ),
-                      clipBehavior: Clip.antiAlias,
-                      child: const Pip(size: 56),
                     ),
-                    const SizedBox(width: AppSpace.s2),
+                    PillButton(
+                      label: l10n.logOut,
+                      tone: PillTone.ghost,
+                      onPressed: () => showLogoutSheet(context),
+                    ),
+                    const SizedBox(width: AppSpace.s1),
+                    RoundIconButton(
+                      icon: AppIcon.settings,
+                      semanticLabel: l10n.homeSettings,
+                      tone: RoundIconTone.light,
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => SettingsScreen(code: code),
+                        ),
+                      ),
+                    ),
                   ],
-                  Expanded(
-                    child: Text(
-                      l10n.homeGreeting(code),
-                      style: AppText.title.copyWith(color: c.onPrimary),
-                    ),
-                  ),
-                  PillButton(
-                    label: l10n.logOut,
-                    tone: PillTone.ghostOnPrimary,
-                    onPressed: () => showLogoutSheet(context),
-                  ),
-                  const SizedBox(width: AppSpace.s1),
-                  RoundIconButton(
-                    icon: AppIcon.settings,
-                    semanticLabel: l10n.homeSettings,
-                    tone: RoundIconTone.light,
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => SettingsScreen(code: code),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AnimatedBuilder(
+                        animation: scroll,
+                        builder: (context, child) => Transform.scale(
+                          scale: 1 - 0.14 * progress(),
+                          alignment: Alignment.centerLeft,
+                          child: child,
+                        ),
+                        child: Semantics(
+                          header: true,
+                          child: Text(
+                            l10n.homeTitle,
+                            style: AppText.h1.copyWith(
+                              color: c.ink,
+                              fontSize: 28,
+                              height: 32 / 28,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Semantics(
-                header: true,
-                child: Text(
-                  l10n.homeTitle,
-                  style: AppText.h1.copyWith(
-                    color: c.onPrimary,
-                    fontSize: 30,
-                    height: 34 / 30,
-                  ),
+                    if (showPip)
+                      AnimatedBuilder(
+                        animation: scroll,
+                        builder: (context, child) {
+                          final t = progress();
+                          return Transform.translate(
+                            offset: Offset(0, -14 * t),
+                            child: Transform.rotate(
+                              angle: -0.1 * t,
+                              child: child,
+                            ),
+                          );
+                        },
+                        // Pip stays still here: anything moving inside the
+                        // glass makes the blur redraw every frame. The
+                        // scroll gives Pip its movement instead.
+                        child: const Pip(mood: PipMood.determined, size: 84),
+                      ),
+                  ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -409,7 +485,7 @@ class _OwnProblemBox extends StatelessWidget {
               RoundIconButton(
                 icon: AppIcon.forward,
                 semanticLabel: l10n.homeOwnStart,
-                tone: RoundIconTone.dark,
+                tone: RoundIconTone.primary,
                 onPressed: onStart,
               ),
             ],

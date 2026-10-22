@@ -162,9 +162,18 @@ void main() {
 }
 
 /// Scrolls a button into view (the page may be taller than the phone),
-/// then taps it.
+/// then taps it. It is scrolled to the middle, clear of floating glass
+/// headers and the bottom nav.
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
-  await tester.ensureVisible(finder);
+  if (finder.evaluate().isEmpty) {
+    // Not built yet: lists only build what is near the screen.
+    await tester.scrollUntilVisible(
+      finder,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+  }
+  await Scrollable.ensureVisible(tester.element(finder), alignment: 0.5);
   await tester.pumpAndSettle();
   await tester.tap(finder);
 }

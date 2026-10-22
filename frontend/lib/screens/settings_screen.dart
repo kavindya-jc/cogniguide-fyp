@@ -123,6 +123,9 @@ class SettingsScreen extends StatelessWidget {
                           help: l10n.settingsGlassHelp,
                           value: settings.glassEffects,
                           onChanged: settings.setGlassEffects,
+                          note: settings.glassTurnedOffForSpeed
+                              ? l10n.settingsGlassAutoOff
+                              : null,
                         ),
                       ),
                       Padding(
@@ -217,6 +220,7 @@ class _SwitchRow extends StatelessWidget {
     required this.help,
     required this.value,
     required this.onChanged,
+    this.note,
   });
 
   final AppIcon icon;
@@ -224,6 +228,9 @@ class _SwitchRow extends StatelessWidget {
   final String help;
   final bool value;
   final ValueChanged<bool> onChanged;
+
+  /// An extra line, for example why the app turned this off by itself.
+  final String? note;
 
   @override
   Widget build(BuildContext context) {
@@ -262,6 +269,31 @@ class _SwitchRow extends StatelessWidget {
                         help,
                         style: AppText.help.copyWith(color: c.inkMuted),
                       ),
+                      if (note != null) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 1),
+                              child: DuoIcon(
+                                AppIcon.alert,
+                                size: 18,
+                                color: c.butterInk,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                note!,
+                                style: AppText.help.copyWith(
+                                  color: c.butterInk,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),

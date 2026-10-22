@@ -90,6 +90,7 @@
   "settingsLanguage": "Language",
   "settingsGlass": "Glass effects",
   "settingsGlassHelp": "Turn off on a slow phone to keep the app smooth and save battery.",
+  "settingsGlassAutoOff": "Turned off by itself because it was slowing this phone down. You can turn it back on.",
 
   "logoutTitle": "Log out?",
   "logoutText": "You'll need your code and password to log back in. Your progress stays saved.",

@@ -7,6 +7,7 @@ import 'screens/welcome_screen.dart';
 import 'services/app_services.dart';
 import 'services/auth_service.dart';
 import 'services/chat_api.dart';
+import 'services/glass_speed_guard.dart';
 import 'services/problem_repository.dart';
 import 'services/progress_api.dart';
 import 'services/settings_store.dart';
@@ -16,11 +17,15 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   final auth = StandInAuthService(prefs);
+  final settings = SettingsStore(prefs);
+
+  // Turns glass off by itself if this phone is too slow for it.
+  GlassSpeedGuard(settings).start();
 
   runApp(
     CogniGuideApp(
       auth: auth,
-      settings: SettingsStore(prefs),
+      settings: settings,
       problems: LocalProblemRepository(),
       chat: ChatApi(),
       progress: ProgressApi(),
@@ -65,6 +70,8 @@ class CogniGuideApp extends StatelessWidget {
         darkTheme: AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        // Lets all glass on a screen share one backdrop (faster blur).
+        builder: (context, child) => BackdropGroup(child: child!),
         home: loggedIn ? const HomeScreen() : const WelcomeScreen(),
       ),
     );

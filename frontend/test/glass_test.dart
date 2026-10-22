@@ -16,7 +16,9 @@ void main() {
 
   testWidgets('glass is on by default: the bottom nav blurs', (tester) async {
     await startApp(tester, saved: {'student_code': 'P001'});
-    expect(find.byType(GlassSurface), findsOneWidget);
+    // Two glass surfaces: the header and the bottom nav (never more).
+    expect(find.byType(GlassSurface), findsNWidgets(2));
+    expect(find.byType(BackdropFilter), findsNWidgets(2));
     expect(navBlur(), findsOneWidget);
   });
 
@@ -25,8 +27,8 @@ void main() {
       tester,
       saved: {'student_code': 'P001', 'glass_effects': false},
     );
-    expect(find.byType(GlassSurface), findsOneWidget);
-    expect(navBlur(), findsNothing);
+    expect(find.byType(GlassSurface), findsNWidgets(2));
+    expect(find.byType(BackdropFilter), findsNothing);
   });
 
   testWidgets('reduce motion turns the blur off too', (tester) async {
@@ -102,15 +104,17 @@ void lighterGlassTests() {
     tester,
   ) async {
     await startApp(tester, saved: {'student_code': 'P001'});
-    // The bottom nav is glass already: 1 blur before the sheet opens.
-    expect(find.byType(BackdropFilter), findsOneWidget);
+    // The header and the bottom nav are glass: 2 blurs.
+    expect(find.byType(BackdropFilter), findsNWidgets(2));
 
     await tester.tap(find.text('Log out'));
     await tester.pump(); // the tap
     await tester.pump(const Duration(milliseconds: 150)); // mid-slide
-    expect(find.byType(BackdropFilter), findsOneWidget); // only the nav
+    // Covered by the sheet, header and nav pause their blur; the sliding
+    // sheet is solid.
+    expect(find.byType(BackdropFilter), findsNothing);
 
     await tester.pumpAndSettle(); // the sheet has stopped
-    expect(find.byType(BackdropFilter), findsNWidgets(2)); // nav + sheet
+    expect(find.byType(BackdropFilter), findsOneWidget); // only the sheet
   });
 }

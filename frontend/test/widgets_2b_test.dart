@@ -25,13 +25,7 @@ Widget wrap(Widget child, {bool reduceMotion = false}) => MaterialApp(
 void main() {
   testWidgets('StatTile is read as one item: number and label', (tester) async {
     await tester.pumpWidget(
-      wrap(
-        const StatTile(
-          value: 6,
-          label: 'Sessions',
-          icon: AppIcon.book,
-        ),
-      ),
+      wrap(const StatTile(value: 6, label: 'Sessions', icon: AppIcon.book)),
     );
 
     expect(find.text('6'), findsOneWidget);

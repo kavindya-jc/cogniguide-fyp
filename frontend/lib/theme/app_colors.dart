@@ -55,6 +55,11 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.glassClearMid,
     required this.glassClearBottom,
     required this.glassHighlight,
+    required this.navActive,
+    required this.onNavActive,
+    required this.blobViolet,
+    required this.blobPeach,
+    required this.blobSky,
   });
 
   /// Every screen background.
@@ -151,6 +156,15 @@ class AppColors extends ThemeExtension<AppColors> {
   /// The light catching the top of the glass.
   final Color glassHighlight;
 
+  /// The chosen tab's pill in the bottom nav, and its words.
+  final Color navActive;
+  final Color onNavActive;
+
+  /// The soft colour glows behind screens (see SoftBlobs).
+  final Color blobViolet;
+  final Color blobPeach;
+  final Color blobSky;
+
   static const light = AppColors(
     surface: Color(0xFFF5F4F8),
     surfaceRaised: Color(0xFFFFFFFF),
@@ -192,6 +206,11 @@ class AppColors extends ThemeExtension<AppColors> {
     glassClearMid: Color(0x24FFFFFF), // white at 14%
     glassClearBottom: Color(0x42FFFFFF), // white at 26%
     glassHighlight: Color(0xFFFFFFFF),
+    navActive: Color(0xFF26233A),
+    onNavActive: Color(0xFFFFFFFF),
+    blobViolet: Color(0x8CA99BFF),
+    blobPeach: Color(0x80FFC896),
+    blobSky: Color(0x738CC8FF),
   );
 
   /// Deep violet-black (not pure black) so it is gentle on the eyes at night.
@@ -236,6 +255,11 @@ class AppColors extends ThemeExtension<AppColors> {
     glassClearMid: Color(0x08FFFFFF), // white at 3%
     glassClearBottom: Color(0x14FFFFFF), // white at 8%
     glassHighlight: Color(0x4DFFFFFF),
+    navActive: Color(0xFFA99EFF),
+    onNavActive: Color(0xFF16141F),
+    blobViolet: Color(0x737C6AF0),
+    blobPeach: Color(0x38F09A3A),
+    blobSky: Color(0x4D5A9BE8),
   );
 
   /// The colours of the current theme.

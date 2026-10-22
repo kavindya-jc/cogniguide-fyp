@@ -32,7 +32,7 @@ void main() {
     expect(find.text('What would you like to work on?'), findsOneWidget);
     // Algebra is chosen first: 3 sample problems.
     expect(find.byType(ProblemCard), findsNWidgets(3));
-    expect(find.text('PROBLEM 1 · ALGEBRA · GRADE 9'), findsOneWidget);
+    expect(find.text('Problem 1 · Algebra · Grade 9'), findsOneWidget);
 
     // Grade 10 only.
     await tester.tap(find.bySemanticsLabel('Grade 10'));

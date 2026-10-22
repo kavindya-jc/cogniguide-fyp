@@ -230,6 +230,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Turn off on a slow phone to keep the app smooth and save battery.';
 
   @override
+  String get settingsGlassAutoOff =>
+      'Turned off by itself because it was slowing this phone down. You can turn it back on.';
+
+  @override
   String get logoutTitle => 'Log out?';
 
   @override

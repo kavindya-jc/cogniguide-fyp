@@ -16,9 +16,10 @@ import 'duo_icon.dart';
 /// The two main tabs.
 enum AppTab { practice, progress }
 
-/// The floating glass pill at the bottom: Practice and My progress.
+/// The floating see-through glass pill at the bottom: Practice and
+/// My progress.
 ///
-/// The lilac "active" blob is the app's signature motion: it glides to
+/// The "active" pill is the app's signature motion: it glides to
 /// the tapped tab and stretches like a drop of liquid on the way. The
 /// student can also swipe along the nav; the blob follows the finger and
 /// the tab changes on release. Each tab has an icon and a word.
@@ -107,7 +108,7 @@ class _AppBottomNavState extends State<AppBottomNav>
       container: true,
       label: l10n.navMain,
       child: GlassSurface(
-        tone: GlassTone.dark,
+        tone: GlassTone.clear,
         borderRadius: BorderRadius.circular(AppRadius.pill),
         child: GestureDetector(
           onHorizontalDragUpdate: _dragUpdate,
@@ -142,7 +143,7 @@ class _AppBottomNavState extends State<AppBottomNav>
                               scaleY: squash,
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
-                                  color: c.lilac,
+                                  color: c.navActive,
                                   borderRadius: BorderRadius.circular(
                                     AppRadius.pill,
                                   ),
@@ -201,7 +202,7 @@ class _Tab extends StatelessWidget {
   final String label;
   final bool active;
 
-  /// How much the lilac blob is under this tab (0 to 1). The text
+  /// How much the active pill is under this tab (0 to 1). The text
   /// colour follows it, so it always reads well on what is behind it.
   final double cover;
   final VoidCallback onTap;
@@ -209,7 +210,7 @@ class _Tab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final fg = Color.lerp(c.onNight, c.onAccent, cover)!;
+    final fg = Color.lerp(c.ink, c.onNavActive, cover)!;
 
     return Semantics(
       button: true,
@@ -231,7 +232,12 @@ class _Tab extends StatelessWidget {
                 child: Text(
                   label,
                   overflow: TextOverflow.ellipsis,
-                  style: AppText.tab.copyWith(color: fg),
+                  style: AppText.tab.copyWith(
+                    color: fg,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    fontVariations: const [FontVariation('wght', 700)],
+                  ),
                 ),
               ),
             ],

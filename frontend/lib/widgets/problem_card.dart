@@ -8,9 +8,9 @@ import 'duo_icon.dart';
 
 /// A problem in the "Pick a problem" list.
 ///
-/// Colours take turns by [index]: night, lilac, peach, night, ...
-/// [eyebrow] is the small line, for example "Problem 1 · Algebra · Grade 9";
-/// it is shown in capitals.
+/// Soft pastel colours take turns by [index]: lilac, butter, peach, sky,
+/// mint, then again. [eyebrow] is the small line above the problem, for
+/// example "Problem 1 · Algebra · Grade 9".
 class ProblemCard extends StatelessWidget {
   const ProblemCard({
     super.key,
@@ -28,11 +28,14 @@ class ProblemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final (Color bg, Color fg, Color eyebrowColor) = switch (index % 3) {
-      0 => (c.night, c.onNight, c.nightAccent),
-      1 => (c.lilac, c.onAccent, c.onAccent),
-      _ => (c.peach, c.onAccent, c.onAccent),
+    final (Color bg, Color eyebrowColor) = switch (index % 5) {
+      0 => (c.lilacSoft, c.lilacInk),
+      1 => (c.butterSoft, c.butterInk),
+      2 => (c.peachSoft, c.peachInk),
+      3 => (c.skySoft, c.skyInk),
+      _ => (c.mintSoft, c.mintInk),
     };
+    final fg = c.ink;
 
     return Semantics(
       button: true,
@@ -42,9 +45,7 @@ class ProblemCard extends StatelessWidget {
         onTap: onTap,
         pressScale: 0.98,
         color: bg,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpace.s5,
@@ -59,16 +60,24 @@ class ProblemCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      eyebrow.toUpperCase(),
-                      style: AppText.eyebrow.copyWith(color: eyebrowColor),
+                      eyebrow,
+                      style: AppText.caption.copyWith(
+                        color: eyebrowColor,
+                        fontSize: 14,
+                        height: 18 / 14,
+                        fontWeight: FontWeight.w700,
+                        fontVariations: const [FontVariation('wght', 700)],
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       text,
                       style: AppText.title.copyWith(
                         color: fg,
-                        fontSize: 18,
-                        height: 25 / 18,
+                        fontSize: 19,
+                        height: 25 / 19,
+                        fontWeight: FontWeight.w700,
+                        fontVariations: const [FontVariation('wght', 700)],
                       ),
                     ),
                   ],
@@ -76,8 +85,8 @@ class ProblemCard extends StatelessWidget {
               ),
               const SizedBox(width: AppSpace.s3),
               Container(
-                width: AppSizes.tap,
-                height: AppSizes.tap,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
                   color: c.surfaceRaised,
                   shape: BoxShape.circle,

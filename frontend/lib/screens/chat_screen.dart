@@ -19,6 +19,7 @@ import '../widgets/tap_surface.dart';
 import '../utils/maths_text.dart';
 import '../widgets/typing_dots.dart';
 import '../widgets/duo_icon.dart';
+import '../widgets/measure_height.dart';
 
 /// Screen 4: the chat with the coach, through `POST /chat`.
 ///
@@ -268,7 +269,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  child: _MeasureHeight(
+                  child: MeasureHeight(
                     onHeight: (h) {
                       if (h != _barHeight) setState(() => _barHeight = h);
                     },
@@ -288,31 +289,6 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
     );
-  }
-}
-
-/// Tells its parent how tall [child] is after each layout, so the
-/// conversation can leave room for the floating input bar.
-class _MeasureHeight extends StatefulWidget {
-  const _MeasureHeight({required this.child, required this.onHeight});
-
-  final Widget child;
-  final ValueChanged<double> onHeight;
-
-  @override
-  State<_MeasureHeight> createState() => _MeasureHeightState();
-}
-
-class _MeasureHeightState extends State<_MeasureHeight> {
-  final _key = GlobalKey();
-
-  @override
-  Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final box = _key.currentContext?.findRenderObject() as RenderBox?;
-      if (box != null && box.hasSize) widget.onHeight(box.size.height);
-    });
-    return KeyedSubtree(key: _key, child: widget.child);
   }
 }
 
