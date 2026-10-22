@@ -6,10 +6,11 @@ import '../theme/app_text.dart';
 import 'dashed_box.dart';
 import 'duo_icon.dart';
 
-/// The colour of a [StatTile]'s icon circle.
-enum StatTone { primary, butter, peach, lilac }
+/// The pastel colour of a [StatTile].
+enum StatTone { sky, mint, peach, lilac }
 
-/// One of the 4 numbers on My progress, for example "6 · Sessions".
+/// One of the 4 numbers on My progress, for example "6 · Sessions":
+/// a soft pastel tile with an icon, a big number and a label.
 ///
 /// [dashed] is the empty look for a new student (no icon, dashed border).
 /// It shows a count, never a score or a grade.
@@ -19,7 +20,7 @@ class StatTile extends StatelessWidget {
     required this.value,
     required this.label,
     this.icon,
-    this.tone = StatTone.primary,
+    this.tone = StatTone.sky,
     this.dashed = false,
   });
 
@@ -32,41 +33,30 @@ class StatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final (Color bg, Color well, Color onWell) = switch (tone) {
-      StatTone.primary => (c.surfaceSunken, c.primary, c.onPrimary),
-      StatTone.butter => (c.surfaceSunken, c.butter, c.onAccent),
-      StatTone.peach => (c.peachSoft, c.peach, c.onAccent),
-      StatTone.lilac => (c.lilacSoft, c.lilac, c.onAccent),
+    final (Color bg, Color ink) = switch (tone) {
+      StatTone.sky => (c.skySoft, c.skyInk),
+      StatTone.mint => (c.mintSoft, c.mintInk),
+      StatTone.peach => (c.peachSoft, c.peachInk),
+      StatTone.lilac => (c.lilacSoft, c.lilacInk),
     };
 
-    // Centred, so tiles of the same height line up in a grid.
     final content = Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpace.s3,
-        vertical: AppSpace.s4,
-      ),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!dashed && icon != null) ...[
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(color: well, shape: BoxShape.circle),
-              child: DuoIcon(icon!, size: 20, color: onWell),
-            ),
-            const SizedBox(height: AppSpace.s2),
+            DuoIcon(icon!, size: 26, color: ink),
+            const SizedBox(height: AppSpace.s1),
           ],
           Text('$value', style: AppText.stat.copyWith(color: c.ink)),
-          const SizedBox(height: AppSpace.s1),
+          const SizedBox(height: 2),
           Text(
             label,
-            textAlign: TextAlign.center,
             style: AppText.label.copyWith(
-              color: c.inkMuted,
-              fontWeight: FontWeight.w500,
-              fontVariations: const [FontVariation.weight(500)],
+              color: dashed ? c.inkMuted : ink,
+              height: 20 / 16,
             ),
           ),
         ],
@@ -77,7 +67,7 @@ class StatTile extends StatelessWidget {
         ? DashedBox(
             color: c.inkMuted,
             radius: AppRadius.md,
-            child: Center(child: content),
+            child: Align(alignment: Alignment.topLeft, child: content),
           )
         : Container(
             width: double.infinity,
@@ -85,7 +75,7 @@ class StatTile extends StatelessWidget {
               color: bg,
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
-            child: Center(child: content),
+            child: Align(alignment: Alignment.topLeft, child: content),
           );
 
     // Read as one item: "6, Sessions".
