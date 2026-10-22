@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Text styles from the design spec (font: Outfit).
+/// Text styles from the design spec (font: Plus Jakarta Sans).
 ///
 /// Styles carry no colour: the theme gives text the `ink` colour, and a
 /// widget picks another theme colour with `.copyWith(color: ...)` if needed.
@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 /// Reading text is at least 16px. Only [caption] and [eyebrow] are smaller,
 /// as the spec allows, for dates, chart labels and small kicker lines.
 abstract final class AppText {
-  static const String fontFamily = 'Outfit';
+  static const String fontFamily = 'PlusJakartaSans';
 
   /// Screen titles. 32 / 36, bold.
   static final TextStyle h1 = _style(32, 36, 700, letterSpacing: -0.64);
@@ -50,7 +50,7 @@ abstract final class AppText {
   /// Write the words in capitals with `.toUpperCase()`.
   static final TextStyle eyebrow = _style(12, 14, 600, letterSpacing: 0.72);
 
-  /// Outfit is one variable font file, so the weight is set in two ways:
+  /// Plus Jakarta Sans is one variable font file, so the weight is set in two ways:
   /// [FontWeight] for Flutter, and the `wght` axis so the font draws it.
   static TextStyle _style(
     double size,
@@ -64,6 +64,9 @@ abstract final class AppText {
       height: lineHeight / size,
       fontWeight: FontWeight.values[(weight ~/ 100) - 1],
       fontVariations: [FontVariation.weight(weight.toDouble())],
+      // Plus Jakarta Sans would turn "3x" into "3×" (its "calt" feature).
+      // In maths 3x means 3 times the unknown x, so keep letters as typed.
+      fontFeatures: const [FontFeature.disable('calt')],
       letterSpacing: letterSpacing,
     );
   }

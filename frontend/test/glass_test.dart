@@ -12,6 +12,8 @@ Finder navBlur() => find.descendant(
 );
 
 void main() {
+  lighterGlassTests();
+
   testWidgets('glass is on by default: the bottom nav blurs', (tester) async {
     await startApp(tester, saved: {'student_code': 'P001'});
     expect(find.byType(GlassSurface), findsOneWidget);
@@ -73,5 +75,42 @@ void main() {
     expect(find.byType(BackdropFilter), findsOneWidget);
     // The coach's message is still fully readable above the bar.
     expect(find.text('Hello!'), findsOneWidget);
+  });
+}
+
+void lighterGlassTests() {
+  testWidgets('chat bar: glass while reading, solid while typing', (
+    tester,
+  ) async {
+    await startApp(tester, saved: {'student_code': 'P001'});
+    await tester.tap(find.text('Solve: 3x − 5 = 2x + 7'));
+    await tester.pumpAndSettle();
+    expect(find.byType(BackdropFilter), findsOneWidget);
+
+    // The student taps into the message box: no blur while typing.
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+    expect(find.byType(BackdropFilter), findsNothing);
+
+    // Done typing (box not active any more): the glass comes back.
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    expect(find.byType(BackdropFilter), findsOneWidget);
+  });
+
+  testWidgets('log-out sheet: solid while sliding, glass once stopped', (
+    tester,
+  ) async {
+    await startApp(tester, saved: {'student_code': 'P001'});
+    // The bottom nav is glass already: 1 blur before the sheet opens.
+    expect(find.byType(BackdropFilter), findsOneWidget);
+
+    await tester.tap(find.text('Log out'));
+    await tester.pump(); // the tap
+    await tester.pump(const Duration(milliseconds: 150)); // mid-slide
+    expect(find.byType(BackdropFilter), findsOneWidget); // only the nav
+
+    await tester.pumpAndSettle(); // the sheet has stopped
+    expect(find.byType(BackdropFilter), findsNWidgets(2)); // nav + sheet
   });
 }

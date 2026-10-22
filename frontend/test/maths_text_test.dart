@@ -1,7 +1,12 @@
+import 'dart:ui' show FontFeature;
+
+import 'package:cogniguide/theme/app_text.dart';
 import 'package:cogniguide/utils/maths_text.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  fontMathsTests();
+
   test('the real coach replies from the backend test read cleanly', () {
     expect(
       readableMaths(
@@ -39,5 +44,21 @@ void main() {
     expect(readableMaths(r'It costs $5 and $10.'), r'It costs $5 and $10.');
     expect(readableMaths('A bag costs Rs. 2400.'), 'A bag costs Rs. 2400.');
     expect(readableMaths('What do you notice?'), 'What do you notice?');
+  });
+}
+
+void fontMathsTests() {
+  test('the font never turns 3x into 3× (calt is off in every style)', () {
+    for (final style in [
+      AppText.h1,
+      AppText.title,
+      AppText.body,
+      AppText.chat,
+      AppText.label,
+      AppText.input,
+      AppText.caption,
+    ]) {
+      expect(style.fontFeatures, contains(const FontFeature.disable('calt')));
+    }
   });
 }

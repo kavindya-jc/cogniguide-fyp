@@ -539,9 +539,17 @@ class _InputBar extends StatelessWidget {
     final c = AppColors.of(context);
     final l10n = AppLocalizations.of(context);
 
-    // Light frosted glass over the end of the conversation.
-    return GlassSurface(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+    // Light frosted glass over the end of the conversation, but plain
+    // solid white while the student is typing. The emulator test showed
+    // the blur is about 6x heavier then, and with the keyboard open nobody
+    // can see through the bar anyway.
+    return ListenableBuilder(
+      listenable: focusNode,
+      builder: (context, child) => GlassSurface(
+        blur: !focusNode.hasFocus,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        child: child!,
+      ),
       child: SafeArea(
         top: false,
         child: Padding(
