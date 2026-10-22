@@ -11,6 +11,7 @@ import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
 import 'glass_surface.dart';
 import 'tap_surface.dart';
+import 'duo_icon.dart';
 
 /// The two main tabs.
 enum AppTab { practice, progress }
@@ -154,7 +155,7 @@ class _AppBottomNavState extends State<AppBottomNav>
                           children: [
                             Expanded(
                               child: _Tab(
-                                icon: Icons.menu_book_rounded,
+                                icon: AppIcon.book,
                                 label: l10n.navPractice,
                                 active: widget.current == AppTab.practice,
                                 // 1 when the blob is fully under this tab.
@@ -165,7 +166,7 @@ class _AppBottomNavState extends State<AppBottomNav>
                             const SizedBox(width: _gap),
                             Expanded(
                               child: _Tab(
-                                icon: Icons.show_chart_rounded,
+                                icon: AppIcon.chart,
                                 label: l10n.navProgress,
                                 active: widget.current == AppTab.progress,
                                 cover: t.clamp(0.0, 1.0),
@@ -196,7 +197,7 @@ class _Tab extends StatelessWidget {
     required this.onTap,
   });
 
-  final IconData icon;
+  final AppIcon icon;
   final String label;
   final bool active;
 
@@ -224,7 +225,7 @@ class _Tab extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 22, color: fg),
+              DuoIcon(icon, size: 22, color: fg),
               const SizedBox(width: AppSpace.s2),
               Flexible(
                 child: Text(

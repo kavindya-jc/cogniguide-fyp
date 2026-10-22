@@ -4,6 +4,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
 import 'tap_surface.dart';
+import 'duo_icon.dart';
 
 /// A problem in the "Pick a problem" list.
 ///
@@ -81,11 +82,7 @@ class ProblemCard extends StatelessWidget {
                   color: c.surfaceRaised,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 20,
-                  color: c.ink,
-                ),
+                child: DuoIcon(AppIcon.forward, size: 20, color: c.ink),
               ),
             ],
           ),

@@ -9,6 +9,7 @@ import 'package:cogniguide/widgets/pill_button.dart';
 import 'package:cogniguide/widgets/pip.dart';
 import 'package:cogniguide/widgets/problem_card.dart';
 import 'package:cogniguide/widgets/round_icon_button.dart';
+import 'package:cogniguide/widgets/duo_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -53,7 +54,7 @@ void main() {
     await tester.pumpWidget(
       wrap(
         RoundIconButton(
-          icon: Icons.arrow_back_rounded,
+          icon: AppIcon.back,
           semanticLabel: 'Back',
           onPressed: () {},
         ),
@@ -76,7 +77,7 @@ void main() {
 
     expect(find.text('Password'), findsOneWidget);
     expect(find.text('Add 2 more.'), findsOneWidget);
-    expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
+    expect(findIcon(AppIcon.alert), findsOneWidget);
   });
 
   testWidgets('AreaChipRow shows 6 areas and a tick on the chosen one', (
@@ -90,7 +91,7 @@ void main() {
     );
 
     expect(find.byType(AreaChip), findsNWidgets(6));
-    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+    expect(findIcon(AppIcon.check), findsOneWidget);
     expect(
       tester.getSize(find.byType(AreaChip).first).height,
       greaterThanOrEqualTo(44),
@@ -146,14 +147,14 @@ void main() {
         const SizedBox(
           width: 340,
           child: NoticeCard(
-            icon: Icons.schedule_rounded,
+            icon: AppIcon.clock,
             text: 'Coach is busy',
           ),
         ),
       ),
     );
 
-    expect(find.byIcon(Icons.schedule_rounded), findsOneWidget);
+    expect(findIcon(AppIcon.clock), findsOneWidget);
     expect(find.text('Coach is busy'), findsOneWidget);
   });
 
@@ -162,3 +163,7 @@ void main() {
     expect(find.bySemanticsLabel('Your coach, resting'), findsOneWidget);
   });
 }
+
+/// Finds one of the app's own icons.
+Finder findIcon(AppIcon icon) =>
+    find.byWidgetPredicate((w) => w is DuoIcon && w.icon == icon);

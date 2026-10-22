@@ -5,6 +5,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
 import 'round_icon_button.dart';
+import 'duo_icon.dart';
 
 /// The layout shared by Language, Create account and Log in:
 /// a Back button, a title and subtitle, the page content, and the buttons
@@ -59,7 +60,7 @@ class FormPage extends StatelessWidget {
                         Align(
                           alignment: Alignment.centerLeft,
                           child: RoundIconButton(
-                            icon: Icons.arrow_back_rounded,
+                            icon: AppIcon.back,
                             semanticLabel: l10n.back,
                             onPressed:
                                 onBack ??

@@ -11,6 +11,7 @@ import '../widgets/notice_card.dart';
 import '../widgets/pill_button.dart';
 import 'create_account_screen.dart';
 import 'home_screen.dart';
+import '../widgets/duo_icon.dart';
 
 /// Screen 2: log in with the anonymous code and password.
 class LoginScreen extends StatefulWidget {
@@ -90,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
       subtitle: l10n.loginSubtitle,
       content: [
         if (mismatch) ...[
-          NoticeCard(icon: Icons.error_outline_rounded, text: _formFix!),
+          NoticeCard(icon: AppIcon.alert, text: _formFix!),
           const SizedBox(height: AppSpace.s4),
         ],
         AutofillGroup(
@@ -129,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         const SizedBox(height: AppSpace.s5),
         NoticeCard(
-          icon: Icons.lock_outline_rounded,
+          icon: AppIcon.lock,
           tone: NoticeTone.primary,
           text: l10n.loginPrivacy,
         ),

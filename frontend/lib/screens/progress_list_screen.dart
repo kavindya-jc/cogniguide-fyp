@@ -8,6 +8,7 @@ import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
 import '../widgets/help_chart.dart';
 import '../widgets/round_icon_button.dart';
+import '../widgets/duo_icon.dart';
 
 /// Screen 6b: the chart's numbers as a table, for students (and screen
 /// readers) who prefer words to a picture.
@@ -41,7 +42,7 @@ class ProgressListScreen extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: RoundIconButton(
-                    icon: Icons.arrow_back_rounded,
+                    icon: AppIcon.back,
                     semanticLabel: l10n.listBack,
                     onPressed: () => Navigator.of(context).maybePop(),
                   ),

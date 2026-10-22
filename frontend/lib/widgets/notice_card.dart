@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
+import 'duo_icon.dart';
 
 /// The look of a [NoticeCard].
 enum NoticeTone {
@@ -25,7 +26,7 @@ class NoticeCard extends StatelessWidget {
     this.action,
   });
 
-  final IconData icon;
+  final AppIcon icon;
   final String text;
   final NoticeTone tone;
 
@@ -59,7 +60,7 @@ class NoticeCard extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(color: well, shape: BoxShape.circle),
-              child: Icon(icon, size: 20, color: onWell),
+              child: DuoIcon(icon, size: 20, color: onWell),
             ),
             const SizedBox(width: AppSpace.s3),
             Expanded(

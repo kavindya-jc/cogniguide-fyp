@@ -11,6 +11,7 @@ import '../widgets/notice_card.dart';
 import '../widgets/pill_button.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
+import '../widgets/duo_icon.dart';
 
 /// Screen 1: create an account with an anonymous code and a password.
 /// No name, email or photo.
@@ -137,10 +138,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         ),
         const SizedBox(height: AppSpace.s5),
         if (_otherFix != null) ...[
-          NoticeCard(icon: Icons.error_outline_rounded, text: _otherFix!),
+          NoticeCard(icon: AppIcon.alert, text: _otherFix!),
           const SizedBox(height: AppSpace.s3),
         ],
-        NoticeCard(icon: Icons.edit_note_rounded, text: l10n.createWriteItDown),
+        NoticeCard(icon: AppIcon.pencil, text: l10n.createWriteItDown),
       ],
       buttons: [
         PillButton(

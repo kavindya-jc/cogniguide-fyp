@@ -8,6 +8,7 @@ import '../theme/app_motion.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
 import 'tap_surface.dart';
+import 'duo_icon.dart';
 
 /// One maths area filter chip. 44px tall, white.
 /// When chosen it turns night and shows a tick (so not colour alone).
@@ -49,7 +50,7 @@ class AreaChip extends StatelessWidget {
                   child: selected
                       ? Padding(
                           padding: const EdgeInsets.only(right: AppSpace.s1),
-                          child: Icon(Icons.check_rounded, size: 18, color: fg),
+                          child: DuoIcon(AppIcon.check, size: 18, color: fg),
                         )
                       : const SizedBox.shrink(),
                 ),

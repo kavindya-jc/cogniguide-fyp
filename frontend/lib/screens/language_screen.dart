@@ -10,6 +10,7 @@ import '../widgets/form_page.dart';
 import '../widgets/notice_card.dart';
 import '../widgets/pill_button.dart';
 import '../widgets/tap_surface.dart';
+import '../widgets/duo_icon.dart';
 
 /// Screen 0b: choose a language. Opened from Welcome or from Settings.
 ///
@@ -56,7 +57,7 @@ class LanguageScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppSpace.s5),
           NoticeCard(
-            icon: Icons.translate_rounded,
+            icon: AppIcon.globe,
             tone: NoticeTone.primary,
             text: l10n.languageNote,
           ),
@@ -141,11 +142,7 @@ class _LanguageOption extends StatelessWidget {
                       color: c.primary,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      Icons.check_rounded,
-                      size: 18,
-                      color: c.onPrimary,
-                    ),
+                    child: DuoIcon(AppIcon.check, size: 18, color: c.onPrimary),
                   ),
               ],
             ),

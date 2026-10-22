@@ -6,8 +6,19 @@ import '../services/app_services.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 
-/// Light glass (chat bar, sheets) or dark glass (the night bottom nav).
-enum GlassTone { light, dark }
+/// The kinds of glass.
+enum GlassTone {
+  /// Frosted and mostly solid, so text right on it is easy to read
+  /// (sheets).
+  light,
+
+  /// Frosted night (the bottom nav, for now).
+  dark,
+
+  /// See-through "liquid" glass, for bars whose words and fields sit on
+  /// their own backgrounds (header, nav, chat bar).
+  clear,
+}
 
 /// Frosted "liquid glass" for things that float above the page.
 ///
@@ -43,7 +54,7 @@ class GlassSurface extends StatelessWidget {
   final bool blur;
 
   /// How soft the blur is. Fixed on purpose (animating it is expensive).
-  static const double blurSigma = 16;
+  static const double blurSigma = 14;
 
   /// True when the app may draw the blur.
   static bool blurAllowed(BuildContext context) {
@@ -63,19 +74,54 @@ class GlassSurface extends StatelessWidget {
       listenable: settings ?? const _NeverChanges(),
       builder: (context, _) {
         final glass = blur && blurAllowed(context);
-        final solid = tone == GlassTone.light ? c.surfaceRaised : c.night;
-        final frosted = tone == GlassTone.light ? c.glassLight : c.glassDark;
+        final solid = tone == GlassTone.dark ? c.night : c.surfaceRaised;
 
         final surface = DecoratedBox(
           decoration: BoxDecoration(
-            color: glass ? frosted : solid,
-            borderRadius: borderRadius,
-            // The thin bright top edge that makes glass read as glass.
-            border: glass
-                ? Border(top: BorderSide(color: c.glassEdge, width: 1))
+            color: !glass
+                ? solid
+                : switch (tone) {
+                    GlassTone.light => c.glassLight,
+                    GlassTone.dark => c.glassDark,
+                    GlassTone.clear => null,
+                  },
+            // Liquid glass: brighter at the top, clearest in the middle.
+            gradient: glass && tone == GlassTone.clear
+                ? LinearGradient(
+                    begin: const Alignment(-0.3, -1),
+                    end: const Alignment(0.3, 1),
+                    colors: [
+                      c.glassClearTop,
+                      c.glassClearMid,
+                      c.glassClearBottom,
+                    ],
+                    stops: const [0, 0.55, 1],
+                  )
                 : null,
+            borderRadius: borderRadius,
+            // The thin bright edge that makes glass read as glass.
+            border: glass ? Border.all(color: c.glassEdge) : null,
           ),
-          child: child,
+          // Light catching the top edge.
+          position: DecorationPosition.background,
+          child: glass
+              ? DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: borderRadius,
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: const Alignment(0, -0.6),
+                      colors: [
+                        c.glassHighlight.withValues(
+                          alpha: c.glassHighlight.a * 0.35,
+                        ),
+                        c.glassHighlight.withValues(alpha: 0),
+                      ],
+                    ),
+                  ),
+                  child: child,
+                )
+              : child,
         );
 
         return DecoratedBox(

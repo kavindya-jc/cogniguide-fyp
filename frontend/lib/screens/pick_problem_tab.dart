@@ -19,6 +19,7 @@ import '../widgets/round_icon_button.dart';
 import 'chat_screen.dart';
 import 'logout_sheet.dart';
 import 'settings_screen.dart';
+import '../widgets/duo_icon.dart';
 
 /// The longest problem the server accepts (docs/api_contract.md).
 const int maxProblemLength = 2000;
@@ -121,7 +122,7 @@ class _PickProblemTabState extends State<PickProblemTab> {
               child: switch ((loading, snap.hasError, items.isEmpty)) {
                 (true, _, _) => const _Loading(),
                 (_, true, _) => NoticeCard(
-                  icon: Icons.error_outline_rounded,
+                  icon: AppIcon.alert,
                   text: l10n.homeLoadFailed,
                   action: PillButton(
                     label: l10n.tryAgain,
@@ -232,7 +233,7 @@ class _Header extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpace.s1),
                   RoundIconButton(
-                    icon: Icons.settings_outlined,
+                    icon: AppIcon.settings,
                     semanticLabel: l10n.homeSettings,
                     tone: RoundIconTone.light,
                     onPressed: () => Navigator.of(context).push(
@@ -406,7 +407,7 @@ class _OwnProblemBox extends StatelessWidget {
               ),
               const SizedBox(width: AppSpace.s2),
               RoundIconButton(
-                icon: Icons.arrow_forward_rounded,
+                icon: AppIcon.forward,
                 semanticLabel: l10n.homeOwnStart,
                 tone: RoundIconTone.dark,
                 onPressed: onStart,
@@ -421,7 +422,7 @@ class _OwnProblemBox extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.error_outline_rounded, size: 18, color: c.butterInk),
+                DuoIcon(AppIcon.alert, size: 18, color: c.butterInk),
                 const SizedBox(width: AppSpace.s2),
                 Expanded(
                   child: Text(

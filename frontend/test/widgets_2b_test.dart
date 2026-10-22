@@ -5,6 +5,7 @@ import 'package:cogniguide/widgets/chat_bubble.dart';
 import 'package:cogniguide/widgets/maths_keys.dart';
 import 'package:cogniguide/widgets/stat_tile.dart';
 import 'package:cogniguide/widgets/typing_dots.dart';
+import 'package:cogniguide/widgets/duo_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -28,7 +29,7 @@ void main() {
         const StatTile(
           value: 6,
           label: 'Sessions',
-          icon: Icons.menu_book_rounded,
+          icon: AppIcon.book,
         ),
       ),
     );
@@ -43,13 +44,13 @@ void main() {
         const StatTile(
           value: 0,
           label: 'Sessions',
-          icon: Icons.menu_book_rounded,
+          icon: AppIcon.book,
           dashed: true,
         ),
       ),
     );
 
-    expect(find.byIcon(Icons.menu_book_rounded), findsNothing);
+    expect(findIcon(AppIcon.book), findsNothing);
     expect(find.text('0'), findsOneWidget);
   });
 
@@ -92,7 +93,7 @@ void main() {
     );
 
     expect(find.text('Not sent'), findsOneWidget);
-    expect(find.byIcon(Icons.cloud_off_rounded), findsOneWidget);
+    expect(findIcon(AppIcon.cloudOff), findsOneWidget);
   });
 
   testWidgets('Typing dots move, and stand still with reduce motion', (
@@ -133,3 +134,7 @@ void main() {
     handle.dispose();
   });
 }
+
+/// Finds one of the app's own icons.
+Finder findIcon(AppIcon icon) =>
+    find.byWidgetPredicate((w) => w is DuoIcon && w.icon == icon);
