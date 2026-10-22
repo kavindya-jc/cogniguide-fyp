@@ -460,11 +460,41 @@ abstract class AppLocalizations {
   /// **'Your code: {code}'**
   String settingsYourCode(String code);
 
+  /// No description provided for @settingsYourCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your code'**
+  String get settingsYourCodeLabel;
+
   /// No description provided for @settingsLanguage.
   ///
   /// In en, this message translates to:
   /// **'Language'**
   String get settingsLanguage;
+
+  /// No description provided for @settingsTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Look'**
+  String get settingsTheme;
+
+  /// No description provided for @settingsThemeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Same as phone'**
+  String get settingsThemeSystem;
+
+  /// No description provided for @settingsThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get settingsThemeLight;
+
+  /// No description provided for @settingsThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get settingsThemeDark;
 
   /// No description provided for @settingsGlass.
   ///

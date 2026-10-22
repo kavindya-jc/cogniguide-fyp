@@ -7,6 +7,7 @@ import 'screens/welcome_screen.dart';
 import 'services/app_services.dart';
 import 'services/auth_service.dart';
 import 'services/chat_api.dart';
+import 'services/demo_mode.dart';
 import 'services/glass_speed_guard.dart';
 import 'services/problem_repository.dart';
 import 'services/progress_api.dart';
@@ -27,8 +28,10 @@ Future<void> main() async {
       auth: auth,
       settings: settings,
       problems: LocalProblemRepository(),
-      chat: ChatApi(),
-      progress: ProgressApi(),
+      // The online preview for the team uses example replies (see
+      // DemoMode); phones always talk to the real server.
+      chat: DemoMode.on ? DemoChatApi() : ChatApi(),
+      progress: DemoMode.on ? DemoProgressApi() : ProgressApi(),
       // A student who is still logged in goes straight to Pick a problem.
       loggedIn: await auth.currentCode() != null,
     ),
@@ -62,17 +65,21 @@ class CogniGuideApp extends StatelessWidget {
       problems: problems,
       chat: chat,
       progress: progress,
-      child: MaterialApp(
-        onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light,
-        // Follows the phone: dark when the phone is in dark mode.
-        darkTheme: AppTheme.dark,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        // Lets all glass on a screen share one backdrop (faster blur).
-        builder: (context, child) => BackdropGroup(child: child!),
-        home: loggedIn ? const HomeScreen() : const WelcomeScreen(),
+      // Rebuilds when the student picks Light, Dark or Same as phone.
+      child: ListenableBuilder(
+        listenable: settings,
+        builder: (context, _) => MaterialApp(
+          onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: settings.themeMode,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          // Lets all glass on a screen share one backdrop (faster blur).
+          builder: (context, child) => BackdropGroup(child: child!),
+          home: loggedIn ? const HomeScreen() : const WelcomeScreen(),
+        ),
       ),
     );
   }

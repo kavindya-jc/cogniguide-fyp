@@ -83,18 +83,18 @@ class _LogoutSheet extends StatelessWidget {
                 width: 44,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: c.line,
+                  color: c.fieldLine.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
               const SizedBox(height: AppSpace.s3),
-              const Pip(mood: PipMood.sleepy, size: 110),
+              const Pip(mood: PipMood.sleepy, size: 120),
               const SizedBox(height: AppSpace.s2),
               Semantics(
                 header: true,
                 child: Text(
                   l10n.logoutTitle,
-                  style: AppText.h2.copyWith(fontSize: 26, height: 30 / 26),
+                  style: AppText.h2.copyWith(fontSize: 28, height: 32 / 28),
                 ),
               ),
               const SizedBox(height: AppSpace.s2),
@@ -104,7 +104,13 @@ class _LogoutSheet extends StatelessWidget {
                 style: AppText.body.copyWith(color: c.inkMuted, fontSize: 17),
               ),
               const SizedBox(height: AppSpace.s5),
-              PillButton(label: l10n.logOut, expand: true, onPressed: logOut),
+              // Night, not violet: a calm "are you sure" action.
+              PillButton(
+                label: l10n.logOut,
+                tone: PillTone.night,
+                expand: true,
+                onPressed: logOut,
+              ),
               const SizedBox(height: 10),
               PillButton(
                 label: l10n.logoutStay,

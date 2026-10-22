@@ -220,7 +220,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get settingsYourCodeLabel => 'Your code';
+
+  @override
   String get settingsLanguage => 'Language';
+
+  @override
+  String get settingsTheme => 'Look';
+
+  @override
+  String get settingsThemeSystem => 'Same as phone';
+
+  @override
+  String get settingsThemeLight => 'Light';
+
+  @override
+  String get settingsThemeDark => 'Dark';
 
   @override
   String get settingsGlass => 'Glass effects';
