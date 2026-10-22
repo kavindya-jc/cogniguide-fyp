@@ -4,4 +4,8 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- TEST BUILDS ONLY: lets the app talk to the local CogniGuide server
+         over plain http (http://10.0.2.2:5000 on the emulator). The release
+         app does not get this; it must use https. -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>

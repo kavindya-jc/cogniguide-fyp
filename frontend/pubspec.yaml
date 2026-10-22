@@ -104,9 +104,10 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 
-  # Outfit (variable font, SIL Open Font Licence, see assets/fonts/OFL.txt).
+  # Plus Jakarta Sans (variable font, SIL Open Font Licence, see
+  # assets/fonts/OFL.txt). Replaced Outfit on 2026-10-21 for a more modern look.
   # Bundled so the app works offline and never fetches fonts from Google.
   fonts:
-    - family: Outfit
+    - family: PlusJakartaSans
       fonts:
-        - asset: assets/fonts/Outfit-Variable.ttf
+        - asset: assets/fonts/PlusJakartaSans-Variable.ttf

@@ -54,9 +54,18 @@ class _LogoutSheet extends StatelessWidget {
       );
     }
 
-    return GlassSurface(
-      borderRadius: const BorderRadius.vertical(
-        top: Radius.circular(AppRadius.xl),
+    // Plain solid white while the sheet slides up or down, glass only once
+    // it has stopped. Re-blurring half the screen on every frame of the
+    // slide was just over the smooth limit in the emulator test.
+    final slide = ModalRoute.of(context)?.animation;
+    return ListenableBuilder(
+      listenable: slide ?? const AlwaysStoppedAnimation(1.0),
+      builder: (context, child) => GlassSurface(
+        blur: slide == null || slide.status == AnimationStatus.completed,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppRadius.xl),
+        ),
+        child: child!,
       ),
       child: SafeArea(
         top: false,

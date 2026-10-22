@@ -19,6 +19,8 @@ enum GlassTone { light, dark }
 /// - It becomes plain solid colour (no blur) when the student turns
 ///   "Glass effects" off in Settings, or when the phone's reduce-motion
 ///   or high-contrast setting is on.
+/// - A screen can also turn the blur off for a moment with [blur], at the
+///   times it would cost the most (while typing, while sliding).
 class GlassSurface extends StatelessWidget {
   const GlassSurface({
     super.key,
@@ -26,6 +28,7 @@ class GlassSurface extends StatelessWidget {
     required this.borderRadius,
     this.tone = GlassTone.light,
     this.shadow = true,
+    this.blur = true,
   });
 
   final Widget child;
@@ -34,6 +37,10 @@ class GlassSurface extends StatelessWidget {
 
   /// The soft shadow under floating things.
   final bool shadow;
+
+  /// False shows plain solid colour for now (no blur), even when glass is
+  /// on. Used while typing in the chat and while the sheet slides.
+  final bool blur;
 
   /// How soft the blur is. Fixed on purpose (animating it is expensive).
   static const double blurSigma = 16;
@@ -55,7 +62,7 @@ class GlassSurface extends StatelessWidget {
     return ListenableBuilder(
       listenable: settings ?? const _NeverChanges(),
       builder: (context, _) {
-        final glass = blurAllowed(context);
+        final glass = blur && blurAllowed(context);
         final solid = tone == GlassTone.light ? c.surfaceRaised : c.night;
         final frosted = tone == GlassTone.light ? c.glassLight : c.glassDark;
 
