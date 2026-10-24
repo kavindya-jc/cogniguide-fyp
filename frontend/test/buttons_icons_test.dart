@@ -60,7 +60,10 @@ void main() {
         ),
       );
       expect(tester.takeException(), isNull);
-      expect(find.byType(BackdropFilter), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((w) => w is BackdropFilter && w.enabled),
+        findsOneWidget,
+      );
     }
   });
 }
