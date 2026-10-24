@@ -5,11 +5,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'widget_test.dart' show startApp, tapVisible;
 
-/// The blur inside the bottom nav, if there is one.
-Finder navBlur() => find.descendant(
-  of: find.byType(AppBottomNav),
-  matching: find.byType(BackdropFilter),
-);
+/// Blurs that are switched on (a switched-off blur stays in place but
+/// draws nothing).
+Finder blurs() =>
+    find.byWidgetPredicate((w) => w is BackdropFilter && w.enabled);
+
+/// The blur inside the bottom nav, if it is switched on.
+Finder navBlur() =>
+    find.descendant(of: find.byType(AppBottomNav), matching: blurs());
 
 void main() {
   lighterGlassTests();
@@ -18,7 +21,7 @@ void main() {
     await startApp(tester, saved: {'student_code': 'P001'});
     // Two glass surfaces: the header and the bottom nav (never more).
     expect(find.byType(GlassSurface), findsNWidgets(2));
-    expect(find.byType(BackdropFilter), findsNWidgets(2));
+    expect(blurs(), findsNWidgets(2));
     expect(navBlur(), findsOneWidget);
   });
 
@@ -28,7 +31,7 @@ void main() {
       saved: {'student_code': 'P001', 'glass_effects': false},
     );
     expect(find.byType(GlassSurface), findsNWidgets(2));
-    expect(find.byType(BackdropFilter), findsNothing);
+    expect(blurs(), findsNothing);
   });
 
   testWidgets('reduce motion turns the blur off too', (tester) async {
@@ -75,7 +78,7 @@ void main() {
 
     // Two glass surfaces: the header and the input bar (never more).
     expect(find.byType(GlassSurface), findsNWidgets(2));
-    expect(find.byType(BackdropFilter), findsNWidgets(2));
+    expect(blurs(), findsNWidgets(2));
     // The coach's message is still fully readable above the bar.
     expect(find.text('Hello!'), findsOneWidget);
   });
@@ -88,17 +91,17 @@ void lighterGlassTests() {
     await startApp(tester, saved: {'student_code': 'P001'});
     await tester.tap(find.text('Solve: 3x − 5 = 2x + 7'));
     await tester.pumpAndSettle();
-    expect(find.byType(BackdropFilter), findsNWidgets(2));
+    expect(blurs(), findsNWidgets(2));
 
     // The student taps into the message box: no blur while typing.
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
-    expect(find.byType(BackdropFilter), findsNothing);
+    expect(blurs(), findsNothing);
 
     // Done typing (box not active any more): the glass comes back.
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
-    expect(find.byType(BackdropFilter), findsNWidgets(2));
+    expect(blurs(), findsNWidgets(2));
   });
 
   testWidgets('log-out sheet: solid while sliding, glass once stopped', (
@@ -106,16 +109,16 @@ void lighterGlassTests() {
   ) async {
     await startApp(tester, saved: {'student_code': 'P001'});
     // The header and the bottom nav are glass: 2 blurs.
-    expect(find.byType(BackdropFilter), findsNWidgets(2));
+    expect(blurs(), findsNWidgets(2));
 
     await tester.tap(find.text('Log out'));
     await tester.pump(); // the tap
     await tester.pump(const Duration(milliseconds: 150)); // mid-slide
     // Covered by the sheet, header and nav pause their blur; the sliding
     // sheet is solid.
-    expect(find.byType(BackdropFilter), findsNothing);
+    expect(blurs(), findsNothing);
 
     await tester.pumpAndSettle(); // the sheet has stopped
-    expect(find.byType(BackdropFilter), findsOneWidget); // only the sheet
+    expect(blurs(), findsOneWidget); // only the sheet
   });
 }

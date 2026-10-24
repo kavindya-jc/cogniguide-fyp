@@ -117,11 +117,14 @@ class GlassSurface extends StatelessWidget {
           ),
           // Light catching the top edge.
           position: DecorationPosition.background,
-          child: looksGlass
-              ? DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: borderRadius,
-                    gradient: LinearGradient(
+          // Always the same widgets, glass or not (only their settings
+          // change). Swapping widgets in and out would rebuild [child]
+          // from scratch, and a text box inside would lose the keyboard.
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: borderRadius,
+              gradient: looksGlass
+                  ? LinearGradient(
                       begin: Alignment.topCenter,
                       end: const Alignment(0, -0.6),
                       colors: [
@@ -130,11 +133,11 @@ class GlassSurface extends StatelessWidget {
                         ),
                         c.glassHighlight.withValues(alpha: 0),
                       ],
-                    ),
-                  ),
-                  child: child,
-                )
-              : child,
+                    )
+                  : null,
+            ),
+            child: child,
+          ),
         );
 
         return DecoratedBox(
@@ -145,20 +148,22 @@ class GlassSurface extends StatelessWidget {
           child: RepaintBoundary(
             child: ClipRRect(
               borderRadius: borderRadius,
-              child: glass
-                  // Grouped: all glass on screen shares one copy of what is
-                  // behind it (see BackdropGroup in main.dart), so two glass
-                  // areas cost much less than two separate blurs.
-                  ? _CountBlur(
-                      child: BackdropFilter.grouped(
-                        filter: ImageFilter.blur(
-                          sigmaX: blurSigma,
-                          sigmaY: blurSigma,
-                        ),
-                        child: surface,
-                      ),
-                    )
-                  : surface,
+              // Grouped: all glass on screen shares one copy of what is
+              // behind it (see BackdropGroup in main.dart), so two glass
+              // areas cost much less than two separate blurs. When the blur
+              // is off it is switched off ([enabled]), not removed, so the
+              // widgets inside stay the same (see above).
+              child: _CountBlur(
+                active: glass,
+                child: BackdropFilter.grouped(
+                  enabled: glass,
+                  filter: ImageFilter.blur(
+                    sigmaX: blurSigma,
+                    sigmaY: blurSigma,
+                  ),
+                  child: surface,
+                ),
+              ),
             ),
           ),
         );
@@ -169,8 +174,10 @@ class GlassSurface extends StatelessWidget {
 
 /// Keeps [GlassSurface.liveBlurs] up to date while its blur is shown.
 class _CountBlur extends StatefulWidget {
-  const _CountBlur({required this.child});
+  const _CountBlur({required this.active, required this.child});
 
+  /// True while the blur is actually drawn.
+  final bool active;
   final Widget child;
 
   @override
@@ -181,12 +188,20 @@ class _CountBlurState extends State<_CountBlur> {
   @override
   void initState() {
     super.initState();
-    GlassSurface.liveBlurs++;
+    if (widget.active) GlassSurface.liveBlurs++;
+  }
+
+  @override
+  void didUpdateWidget(_CountBlur old) {
+    super.didUpdateWidget(old);
+    if (widget.active != old.active) {
+      GlassSurface.liveBlurs += widget.active ? 1 : -1;
+    }
   }
 
   @override
   void dispose() {
-    GlassSurface.liveBlurs--;
+    if (widget.active) GlassSurface.liveBlurs--;
     super.dispose();
   }
 
