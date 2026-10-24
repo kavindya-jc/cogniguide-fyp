@@ -63,6 +63,11 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.bySemanticsLabel('Settings'));
       await tester.pumpAndSettle();
+      // Pick your buddy (from Settings), then back.
+      await tester.tap(find.bySemanticsLabel('Change your buddy'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Back'));
+      await tester.pumpAndSettle();
       await tester.tap(find.bySemanticsLabel('Back to problems'));
       await tester.pumpAndSettle();
 

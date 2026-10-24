@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter/foundation.dart';
+
+import '../models/buddy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// The languages the app offers.
@@ -38,6 +40,33 @@ class SettingsStore extends ChangeNotifier {
 
   Future<void> setLanguage(AppLanguage language) async {
     await _prefs.setString(_languageKey, language.code);
+    notifyListeners();
+  }
+
+  static const _buddyKey = 'buddy';
+
+  /// The buddy picture the student picked, or null if not yet.
+  /// Saved only on this phone; never sent to the server.
+  Buddy? get buddy {
+    final saved = _prefs.getString(_buddyKey);
+    for (final b in Buddy.values) {
+      if (b.name == saved) return b;
+    }
+    return null;
+  }
+
+  /// The buddy to show: the chosen one, or Mochi until one is picked.
+  Buddy get buddyOrFallback => buddy ?? Buddy.fallback;
+
+  Future<void> setBuddy(Buddy buddy) async {
+    await _prefs.setString(_buddyKey, buddy.name);
+    notifyListeners();
+  }
+
+  /// On log out: school phones are shared, so the next student must not
+  /// see someone else's buddy.
+  Future<void> clearBuddy() async {
+    await _prefs.remove(_buddyKey);
     notifyListeners();
   }
 

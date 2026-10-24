@@ -10,7 +10,7 @@ import '../widgets/labelled_field.dart';
 import '../widgets/notice_card.dart';
 import '../widgets/pill_button.dart';
 import '../widgets/pip.dart';
-import 'home_screen.dart';
+import 'buddy_screen.dart';
 import 'login_screen.dart';
 import '../widgets/duo_icon.dart';
 
@@ -73,8 +73,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
     switch (result) {
       case AuthResult.ok:
+        // Last step: pick a buddy picture, then into the app.
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
+          MaterialPageRoute<void>(
+            builder: (_) => const BuddyScreen(afterSignUp: true),
+          ),
           (_) => false,
         );
       case AuthResult.codeTaken:

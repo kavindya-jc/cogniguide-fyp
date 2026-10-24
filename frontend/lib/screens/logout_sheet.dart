@@ -46,7 +46,9 @@ class _LogoutSheet extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     Future<void> logOut() async {
-      await AppServices.of(context).auth.logOut();
+      final services = AppServices.of(context);
+      await services.auth.logOut();
+      await services.settings.clearBuddy();
       if (!context.mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute<void>(builder: (_) => const WelcomeScreen()),

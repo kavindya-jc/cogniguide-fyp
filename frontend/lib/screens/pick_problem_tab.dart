@@ -9,6 +9,7 @@ import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
 import '../theme/app_motion.dart';
 import '../widgets/appear.dart';
+import '../widgets/buddy_avatar.dart';
 import '../widgets/area_chip.dart';
 import '../widgets/dashed_box.dart';
 import '../widgets/duo_icon.dart';
@@ -260,6 +261,18 @@ class _Header extends StatelessWidget {
               children: [
                 Row(
                   children: [
+                    // The student's buddy beside the greeting.
+                    if (AppServices.maybeOf(context) case final services?)
+                      ListenableBuilder(
+                        listenable: services.settings,
+                        builder: (context, _) => Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: BuddyAvatar(
+                            buddy: services.settings.buddyOrFallback,
+                            size: 44,
+                          ),
+                        ),
+                      ),
                     Expanded(
                       child: Text(
                         l10n.homeGreeting(code),

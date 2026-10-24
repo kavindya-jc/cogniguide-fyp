@@ -514,6 +514,60 @@ abstract class AppLocalizations {
   /// **'Turned off by itself because it was slowing this phone down. You can turn it back on.'**
   String get settingsGlassAutoOff;
 
+  /// No description provided for @buddyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick your buddy'**
+  String get buddyTitle;
+
+  /// No description provided for @buddySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your buddy shows next to your messages. It\'s just for fun, and you can change it in Settings.'**
+  String get buddySubtitle;
+
+  /// No description provided for @buddyLastStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Last step'**
+  String get buddyLastStep;
+
+  /// No description provided for @buddyGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Buddies'**
+  String get buddyGroup;
+
+  /// No description provided for @buddyGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s go!'**
+  String get buddyGo;
+
+  /// No description provided for @buddySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get buddySave;
+
+  /// No description provided for @buddyChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get buddyChange;
+
+  /// No description provided for @buddyChangeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Change your buddy'**
+  String get buddyChangeLabel;
+
+  /// No description provided for @buddyYours.
+  ///
+  /// In en, this message translates to:
+  /// **'Your buddy: {name}'**
+  String buddyYours(String name);
+
   /// No description provided for @logoutTitle.
   ///
   /// In en, this message translates to:

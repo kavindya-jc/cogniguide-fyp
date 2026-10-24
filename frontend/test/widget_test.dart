@@ -108,6 +108,14 @@ void main() {
     await tapVisible(tester, find.text('Create account'));
     await tester.pumpAndSettle();
 
+    // Last step: pick a buddy, then into the app.
+    expect(find.text('Pick your buddy'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Rocket'));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, find.text("Let's go!"));
+    await tester.pumpAndSettle();
+    expect(prefs.getString('buddy'), 'rocket');
+
     expect(find.text('Hi, P001'), findsOneWidget);
     // Only the code is saved on the phone, never the password.
     expect(prefs.getString('student_code'), 'P001');
@@ -122,6 +130,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Think it through, your way.'), findsOneWidget);
     expect(prefs.getString('student_code'), isNull);
+    // Shared school phones: the next student never sees this buddy.
+    expect(prefs.getString('buddy'), isNull);
   });
 
   testWidgets('Log in: empty fields get fix messages', (tester) async {
