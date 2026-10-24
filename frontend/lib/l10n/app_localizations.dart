@@ -568,6 +568,48 @@ abstract class AppLocalizations {
   /// **'Your buddy: {name}'**
   String buddyYours(String name);
 
+  /// No description provided for @chatWorkedItOut.
+  ///
+  /// In en, this message translates to:
+  /// **'I worked it out!'**
+  String get chatWorkedItOut;
+
+  /// No description provided for @momentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You worked it out yourself!'**
+  String get momentTitle;
+
+  /// No description provided for @momentText.
+  ///
+  /// In en, this message translates to:
+  /// **'You asked good questions and kept going. That\'s how real mathematicians think.'**
+  String get momentText;
+
+  /// No description provided for @momentMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages you sent'**
+  String get momentMessages;
+
+  /// No description provided for @momentMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes thinking'**
+  String get momentMinutes;
+
+  /// No description provided for @momentTryAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another problem'**
+  String get momentTryAnother;
+
+  /// No description provided for @momentSeeProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'See my progress'**
+  String get momentSeeProgress;
+
   /// No description provided for @logoutTitle.
   ///
   /// In en, this message translates to:

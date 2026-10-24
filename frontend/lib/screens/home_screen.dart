@@ -10,14 +10,17 @@ import 'progress_tab.dart';
 /// The inside of the app after logging in: the two tabs
 /// (Practice and My progress) with the floating bottom nav.
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.initialTab = AppTab.practice});
+
+  /// The tab to open on (My progress after "You worked it out!").
+  final AppTab initialTab;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  AppTab _tab = AppTab.practice;
+  late AppTab _tab = widget.initialTab;
   String _code = '';
 
   @override

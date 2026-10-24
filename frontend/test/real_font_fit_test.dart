@@ -75,6 +75,14 @@ void main() {
       await tester.tap(find.text('Solve: 3x − 5 = 2x + 7'));
       await tester.pumpAndSettle();
 
+      // Send a message, then "I worked it out!" opens the celebration.
+      await tester.enterText(find.byType(TextField), 'take away 2x');
+      await tester.tap(find.bySemanticsLabel('Send'));
+      await tester.pumpAndSettle();
+      await tapVisible(tester, find.text('I worked it out!'));
+      await tester.pumpAndSettle();
+      expect(find.text('You worked it out yourself!'), findsOneWidget);
+
       // Any "overflowed" error would have failed the test above.
       expect(tester.takeException(), isNull);
     });

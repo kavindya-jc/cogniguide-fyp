@@ -21,6 +21,7 @@ import '../widgets/typing_dots.dart';
 import '../widgets/duo_icon.dart';
 import '../widgets/measure_height.dart';
 import '../widgets/soft_blobs.dart';
+import 'moment_screen.dart';
 
 /// Screen 4: the chat with the coach, through `POST /chat`.
 ///
@@ -72,6 +73,23 @@ class _ChatScreenState extends State<ChatScreen> {
 
   /// A small fix message under the box (too long, chat too long).
   String? _inputFix;
+
+  /// How long the student has been in this chat (for "Minutes thinking").
+  final _time = Stopwatch()..start();
+
+  int get _studentMessages =>
+      _messages.where((m) => m.role == ChatRole.student).length;
+
+  /// "I worked it out!": the celebration, with numbers the app knows.
+  void _workedItOut() {
+    final minutes = (_time.elapsed.inSeconds / 60).ceil().clamp(1, 999);
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            MomentScreen(messages: _studentMessages, minutes: minutes),
+      ),
+    );
+  }
 
   @override
   void didChangeDependencies() {
@@ -296,6 +314,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 fixMessage: _inputFix,
                 onKey: _insertKey,
                 onSend: _send,
+                // Only once the student has said something.
+                onWorkedItOut: _studentMessages > 0 ? _workedItOut : null,
               ),
             ),
           ),
@@ -550,10 +570,14 @@ class _InputBar extends StatelessWidget {
     required this.fixMessage,
     required this.onKey,
     required this.onSend,
+    required this.onWorkedItOut,
   });
 
   final TextEditingController controller;
   final FocusNode focusNode;
+
+  /// Opens the celebration. Null hides the button (nothing said yet).
+  final VoidCallback? onWorkedItOut;
   final bool canSend;
   final String? fixMessage;
   final ValueChanged<String> onKey;
@@ -624,6 +648,14 @@ class _InputBar extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (onWorkedItOut != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, AppSpace.s2),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: _WorkedItOutButton(onTap: onWorkedItOut!),
+                ),
+              ),
             MathsKeyRow(onKey: onKey),
             const SizedBox(height: AppSpace.s2),
             Padding(
@@ -669,6 +701,51 @@ class _InputBar extends StatelessWidget {
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// "I worked it out!": a friendly butter pill above the maths keys.
+class _WorkedItOutButton extends StatelessWidget {
+  const _WorkedItOutButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
+
+    return Semantics(
+      button: true,
+      label: l10n.chatWorkedItOut,
+      excludeSemantics: true,
+      child: TapSurface(
+        onTap: onTap,
+        color: c.butterSoft,
+        shape: StadiumBorder(side: BorderSide(color: c.butter, width: 2)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: AppSizes.tap),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpace.s4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DuoIcon(AppIcon.star, size: 20, color: c.butterInk),
+                const SizedBox(width: AppSpace.s2),
+                Text(
+                  l10n.chatWorkedItOut,
+                  style: AppText.label.copyWith(
+                    color: c.butterInk,
+                    fontWeight: FontWeight.w800,
+                    fontVariations: const [FontVariation('wght', 800)],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

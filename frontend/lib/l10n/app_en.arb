@@ -111,6 +111,13 @@
       "name": {"type": "String", "example": "Mochi"}
     }
   },
+  "chatWorkedItOut": "I worked it out!",
+  "momentTitle": "You worked it out yourself!",
+  "momentText": "You asked good questions and kept going. That's how real mathematicians think.",
+  "momentMessages": "Messages you sent",
+  "momentMinutes": "Minutes thinking",
+  "momentTryAnother": "Try another problem",
+  "momentSeeProgress": "See my progress",
   "logoutTitle": "Log out?",
   "logoutText": "You'll need your code and password to log back in. Your progress stays saved.",
   "logoutStay": "Stay",
