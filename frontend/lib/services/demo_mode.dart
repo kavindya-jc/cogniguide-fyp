@@ -30,6 +30,7 @@ class DemoChatApi extends ChatApi {
     required List<ChatTurn> history,
     String? studentId,
     String? sessionId,
+    String? token,
   }) async {
     // A short wait, so the "coach is thinking" dots show.
     await Future<void>.delayed(const Duration(milliseconds: 1400));
@@ -44,7 +45,7 @@ class DemoProgressApi extends ProgressApi {
   DemoProgressApi();
 
   @override
-  Future<ProgressResult> load(String studentId) async {
+  Future<ProgressResult> load(String studentId, {String? token}) async {
     await Future<void>.delayed(const Duration(milliseconds: 600));
     return ProgressLoaded(
       Progress.fromJson({

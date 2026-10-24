@@ -142,6 +142,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'That code and password don\'t match. Check them and try again.';
 
   @override
+  String get fixTooManyTries =>
+      'Too many tries. Please wait 15 minutes and try again.';
+
+  @override
+  String get loginExpired => 'Please log in again. Your progress is saved.';
+
+  @override
   String get fixSomethingWrong => 'Something went wrong. Please try again.';
 
   @override

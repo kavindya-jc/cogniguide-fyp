@@ -21,6 +21,7 @@ import '../widgets/typing_dots.dart';
 import '../widgets/duo_icon.dart';
 import '../widgets/measure_height.dart';
 import '../widgets/soft_blobs.dart';
+import 'login_screen.dart';
 import 'moment_screen.dart';
 
 /// Screen 4: the chat with the coach, through `POST /chat`.
@@ -129,13 +130,19 @@ class _ChatScreenState extends State<ChatScreen> {
     });
     _scrollToEnd();
 
-    final result = await AppServices.of(context).chat.send(
+    final services = AppServices.of(context);
+    final result = await services.chat.send(
       problem: widget.problem,
       history: _history,
       studentId: _code,
       sessionId: _sessionId,
+      token: await services.auth.token(),
     );
     if (!mounted) return;
+    if (result case ChatFailure(problem: ChatProblem.loginExpired)) {
+      await sendBackToLogin(context);
+      return;
+    }
 
     setState(() {
       _waiting = false;
@@ -536,7 +543,7 @@ class _ProblemNotice extends StatelessWidget {
         l10n.chatBusyTitle,
         l10n.chatBusyText,
       ),
-      ChatProblem.failed => (
+      ChatProblem.failed || ChatProblem.loginExpired => (
         AppIcon.alert,
         l10n.chatErrorTitle,
         l10n.chatErrorText,

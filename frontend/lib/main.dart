@@ -17,7 +17,10 @@ import 'theme/app_theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
-  final auth = StandInAuthService(prefs);
+  // Real sign-in through the server; the online demo has no server.
+  final AuthService auth = DemoMode.on
+      ? StandInAuthService(prefs)
+      : ServerAuthService(prefs, SecureTokenStore());
   final settings = SettingsStore(prefs);
 
   // Turns glass off by itself if this phone is too slow for it.

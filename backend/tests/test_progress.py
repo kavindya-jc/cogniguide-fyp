@@ -11,7 +11,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # the backend folder
 
-from app import api, db, progress  # noqa: E402
+import os  # noqa: E402
+
+# A made-up secret for the tests only (never the real one in .env).
+os.environ["AUTH_SECRET"] = "test-secret-for-offline-tests-only-0123456789"
+
+from app import api, auth, db, progress  # noqa: E402
 
 failures = 0
 
@@ -102,7 +107,13 @@ db.get_or_create_student = lambda code: calls.__setitem__("created", calls["crea
 
 client = api.app.test_client()
 
-r = client.get("/progress?student_id=P001")
+
+def as_(code):
+    """Stage 7c: the login token header for this student."""
+    return {"Authorization": "Bearer " + auth.make_token(code)}
+
+
+r = client.get("/progress", headers=as_("P001"))
 body = r.get_json()
 check("GET /progress -> 200", r.status_code == 200)
 check("reply has the student's code", body["student_id"] == "P001")
@@ -110,21 +121,25 @@ check("reply has 3 sessions", len(body["sessions"]) == 3)
 check("growth sentence is there", body["growth"]["trend"] == "less_help" and len(body["growth"]["message"]) > 10)
 check("Cache-Control is no-store", r.headers.get("Cache-Control") == "no-store")
 
-r2 = client.get("/progress?student_id=P002")
+r2 = client.get("/progress", headers=as_("P002"))
 check("another student gets only their own session", len(r2.get_json()["sessions"]) == 1)
 
-r3 = client.get("/progress?student_id=NEWKID")
+r3 = client.get("/progress", headers=as_("NEWKID"))
 check("unknown student -> 200 with empty lists", r3.status_code == 200 and r3.get_json()["sessions"] == [])
 check("unknown student is NOT created", calls["created"] == 0)
 
-check("missing student_id -> 400", client.get("/progress").status_code == 400)
-check("name with a space -> 400", client.get("/progress?student_id=Anna%20Lee").status_code == 400)
-check("email -> 400", client.get("/progress?student_id=a%40b.com").status_code == 400)
-check("65 characters -> 400", client.get("/progress?student_id=" + "a" * 65).status_code == 400)
+# Stage 7c: only the logged-in student, and only their own numbers.
+check("no token -> 401", client.get("/progress").status_code == 401)
+check("old-style ?student_id without a token -> 401", client.get("/progress?student_id=P001").status_code == 401)
+check("a made-up token -> 401", client.get("/progress", headers={"Authorization": "Bearer abc.def"}).status_code == 401)
+check("asking for ANOTHER student's code -> 403",
+      client.get("/progress?student_id=P002", headers=as_("P001")).status_code == 403)
+check("asking for your own code is fine",
+      client.get("/progress?student_id=P001", headers=as_("P001")).status_code == 200)
 check("error uses the standard format", "code" in client.get("/progress").get_json()["error"])
 
 db.is_configured = lambda: False
-r4 = client.get("/progress?student_id=P001")
+r4 = client.get("/progress", headers=as_("P001"))
 check("no Supabase settings -> 503 progress_unavailable", r4.status_code == 503 and r4.get_json()["error"]["code"] == "progress_unavailable")
 
 db.is_configured = lambda: True
@@ -135,13 +150,13 @@ def broken(_uuid, max_sessions=10):
 
 
 db.get_progress_rows = broken
-r5 = client.get("/progress?student_id=P001")
+r5 = client.get("/progress", headers=as_("P001"))
 check("database error -> 503, not a crash", r5.status_code == 503 and r5.get_json()["error"]["code"] == "progress_unavailable")
 check("error message does not leak details", "down" not in r5.get_data(as_text=True))
 
 page = client.get("/dashboard")
 html = page.get_data(as_text=True)
-check("GET /dashboard -> the page", page.status_code == 200 and "<title>" in html and "/progress?student_id=" in html)
+check("GET /dashboard -> the page", page.status_code == 200 and "<title>" in html and "/auth/login" in html)
 page.close()
 
 print()

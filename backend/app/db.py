@@ -240,3 +240,35 @@ def get_progress_rows(student_id, max_sessions=PROGRESS_MAX_SESSIONS):
         if len(batch) < _PAGE_SIZE:
             break
     return sessions, indicators
+
+
+# ---- Stage 7c: sign up and log in ----
+
+def find_student_login(anon_code):
+    """Stage 7c: return {"id": ..., "password_hash": ... or None} for this code, or None if unknown.
+
+    password_hash is None for students made before Stage 7c (they cannot log in).
+    """
+    res = (
+        _get_client()
+        .table("students")
+        .select("id, password_hash")
+        .eq("anon_code", anon_code)
+        .limit(1)
+        .execute()
+    )
+    return res.data[0] if res.data else None
+
+
+def create_student_with_password(anon_code, password_hash):
+    """Stage 7c: make a new student with a hashed password and return the id.
+
+    Raises an exception if the code already exists (anon_code is unique).
+    """
+    res = (
+        _get_client()
+        .table("students")
+        .insert({"anon_code": anon_code, "password_hash": password_hash})
+        .execute()
+    )
+    return res.data[0]["id"]

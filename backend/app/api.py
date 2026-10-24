@@ -1,11 +1,13 @@
 """
-CogniGuide Flask API - Phase 2, Stages 1, 3, 4, 5, 6 and 7
+CogniGuide Flask API - Phase 2, Stages 1, 3, 4, 5, 6, 7 and 7c
 
 Exposes the Socratic agent over HTTP:
     GET  /health  -> {"status": "ok"}
+    POST /auth/signup -> {"token": "...", "student_id": CODE}  (Stage 7c)
+    POST /auth/login  -> {"token": "...", "student_id": CODE}  (Stage 7c)
     POST /chat    -> {"reply": "...", "session_id": "..." or null, "hint_level": 1-3, "scaffold_level": 1-3,
                    "reflection_type": "..." or null}
-    GET  /progress?student_id=CODE -> that student's own progress numbers (Stage 7)
+    GET  /progress -> the logged-in student's own progress numbers (Stage 7, token since 7c)
     GET  /dashboard -> a simple web page that shows /progress as words, a chart and cards (Stage 7)
 
 Stage 3: if the request has a student_id, the chat is saved to Supabase
@@ -31,6 +33,11 @@ returns only numbers (never message text) and only for the anonymous code that w
 A new student gives empty lists. If the database cannot be read, /progress answers 503 and the
 chat is not affected. The dashboard page (static/dashboard.html) calls /progress from the same server.
 
+Stage 7c: sign up and log in with an anonymous code + password (auth.py). The app then sends
+"Authorization: Bearer <token>" on /chat and /progress, and the server takes the student's code
+from the token, never from the request. Without a token, /chat still answers but saves nothing,
+and /progress refuses.
+
 See docs/api_contract.md for the full request/reply format.
 
 Run from the backend/ folder:
@@ -43,7 +50,7 @@ import uuid
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from app import adaptive, db, progress, reflection, scaffolding
+from app import adaptive, auth, db, progress, reflection, scaffolding
 from app.models.socratic_agent import TutorUnavailable, socratic_response
 
 MAX_TEXT_LENGTH = 2000
@@ -194,6 +201,96 @@ def health():
     return jsonify({"status": "ok"})
 
 
+def _no_store(response):
+    """Personal replies (tokens, progress): the browser must not keep a copy."""
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+def _read_login_body():
+    """(code, password, error_response or None) from a sign up / log in request."""
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return None, None, error_response(400, "invalid_request", "Request body must be a JSON object.")
+    code = body.get("student_id")
+    if not isinstance(code, str) or not STUDENT_ID_PATTERN.match(code):
+        return None, None, error_response(
+            400, "invalid_request",
+            "'student_id' must be an anonymous code of 1-64 letters, digits, '_' or '-' (no names or emails)."
+        )
+    password = body.get("password")
+    problem = auth.password_problem(password)
+    if problem:
+        return None, None, error_response(400, "invalid_request", problem)
+    return code, password, None
+
+
+def _auth_unavailable():
+    return error_response(503, "auth_unavailable", "Sign in is not available right now. Please try again later.")
+
+
+def student_from_request():
+    """Stage 7c: (code, error_response). code is None when no token was sent.
+
+    A token that is wrong or too old gives a 401, so the app can ask the student to log in again.
+    """
+    token = auth.token_from_header(request.headers.get("Authorization"))
+    if token is None:
+        return None, None
+    if not auth.is_configured():
+        return None, _auth_unavailable()
+    code = auth.code_from_token(token)
+    if code is None:
+        return None, error_response(401, "login_required", "Please log in again.")
+    return code, None
+
+
+@app.post("/auth/signup")
+def signup():
+    """Stage 7c: make a new account. 409 if the code is taken."""
+    code, password, err = _read_login_body()
+    if err:
+        return err
+    if not auth.is_configured() or not db.is_configured():
+        return _auth_unavailable()
+    try:
+        if db.find_student_login(code) is not None:
+            return error_response(409, "code_taken", "That code is taken. Try a different one.")
+        try:
+            db.create_student_with_password(code, auth.hash_password(password))
+        except Exception:
+            # Two sign ups for the same code at the same moment: the second one loses.
+            if db.find_student_login(code) is not None:
+                return error_response(409, "code_taken", "That code is taken. Try a different one.")
+            raise
+    except Exception as err:
+        app.logger.error("Sign up failed: %s", err)  # never log the password
+        return _auth_unavailable()
+    return _no_store(jsonify({"token": auth.make_token(code), "student_id": code})), 201
+
+
+@app.post("/auth/login")
+def login():
+    """Stage 7c: log in. A wrong code and a wrong password give the SAME answer."""
+    code, password, err = _read_login_body()
+    if err:
+        return err
+    if not auth.is_configured() or not db.is_configured():
+        return _auth_unavailable()
+    if auth.is_locked(code):
+        return error_response(429, "too_many_attempts", "Too many tries. Please wait 15 minutes and try again.")
+    try:
+        row = db.find_student_login(code)
+    except Exception as err:
+        app.logger.error("Log in failed: %s", err)
+        return _auth_unavailable()
+    if not auth.password_matches(row.get("password_hash") if row else None, password):
+        auth.record_fail(code)
+        return error_response(401, "details_dont_match", "That code and password don't match.")
+    auth.clear_fails(code)
+    return _no_store(jsonify({"token": auth.make_token(code), "student_id": code}))
+
+
 @app.post("/chat")
 def chat():
     body = request.get_json(silent=True)  # None if body is missing / not JSON
@@ -204,17 +301,28 @@ def chat():
     if problem_msg:
         return error_response(400, "invalid_request", problem_msg)
 
+    # Stage 7c: who is this? Only the token can say. A code in the body must match it.
+    token_code, auth_err = student_from_request()
+    if auth_err:
+        return auth_err
+    body_code = body.get("student_id")
+    if body_code and token_code is None:
+        return error_response(401, "login_required", "Please log in to save your work.")
+    if body_code and body_code != token_code:
+        return error_response(403, "forbidden", "That is not your account.")
+    student_code = token_code  # None = an anonymous chat that is not saved
+
     history = body.get("history", [])
 
     # Stage 4: decide the hint level from the student's recent messages.
     analysis = adaptive.analyze_history(history)
 
     # Stage 5: fade the help if earlier sessions show the student needs less of it.
-    scaffold_level = load_scaffold_level(body.get("student_id"), body.get("session_id"))
+    scaffold_level = load_scaffold_level(student_code, body.get("session_id"))
     analysis = scaffolding.apply_scaffold(analysis, scaffold_level)
 
     # Stage 6: maybe ask one reflection question about the student's own way of working.
-    reflection_type = load_reflection_type(body.get("student_id"), body.get("session_id"), history, analysis)
+    reflection_type = load_reflection_type(student_code, body.get("session_id"), history, analysis)
 
     extra_instruction = adaptive.build_instruction(analysis)
     scaffold_note = scaffolding.build_scaffold_instruction(scaffold_level, analysis)
@@ -240,7 +348,6 @@ def chat():
 
     # Stage 3: save the chat. Never let a database problem break the reply.
     session_id = body.get("session_id")
-    student_code = body.get("student_id")
     if student_code:
         try:
             session_id = log_turn(
@@ -262,13 +369,19 @@ def chat():
 
 @app.get("/progress")
 def progress_view():
-    """Stage 7: this student's own progress numbers. Reads only; never creates a student."""
-    student_code = request.args.get("student_id", "")
-    if not STUDENT_ID_PATTERN.match(student_code):
-        return error_response(
-            400, "invalid_request",
-            "'student_id' is required: an anonymous code of 1-64 letters, digits, '_' or '-' (no names or emails)."
-        )
+    """Stage 7: this student's own progress numbers. Reads only; never creates a student.
+
+    Stage 7c: needs the login token; the student is the one in the token. An old-style
+    ?student_id=CODE is still allowed, but only if it is the same code.
+    """
+    student_code, auth_err = student_from_request()
+    if auth_err:
+        return auth_err
+    if student_code is None:
+        return error_response(401, "login_required", "Please log in to see your progress.")
+    asked = request.args.get("student_id")
+    if asked is not None and asked != student_code:
+        return error_response(403, "forbidden", "You can only see your own progress.")
     if not db.is_configured():
         return error_response(503, "progress_unavailable", "Progress is not available right now.")
 
@@ -283,9 +396,7 @@ def progress_view():
         app.logger.error("Reading progress failed: %s", err)
         return error_response(503, "progress_unavailable", "Progress is not available right now.")
 
-    response = jsonify(body)
-    response.headers["Cache-Control"] = "no-store"  # personal numbers: do not let the browser keep a copy
-    return response
+    return _no_store(jsonify(body))  # personal numbers: do not let the browser keep a copy
 
 
 @app.get("/dashboard")

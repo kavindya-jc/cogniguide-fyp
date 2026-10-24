@@ -95,6 +95,9 @@ enum ProgressProblem {
 
   /// "No internet".
   offline,
+
+  /// 401: the login token is wrong or too old. Log in again.
+  loginExpired,
 }
 
 sealed class ProgressResult {
@@ -113,7 +116,8 @@ class ProgressFailure extends ProgressResult {
   final ProgressProblem problem;
 }
 
-/// Talks to `GET /progress?student_id=CODE` on the CogniGuide server.
+/// Talks to `GET /progress` on the CogniGuide server. Since Stage 7c the
+/// server takes the student from the login [token], not from the code.
 class ProgressApi {
   ProgressApi({http.Client? client, String? baseUrl})
     : _client = client ?? http.Client(),
@@ -122,20 +126,23 @@ class ProgressApi {
   final http.Client _client;
   final String _baseUrl;
 
-  Future<ProgressResult> load(String studentId) async {
+  Future<ProgressResult> load(String studentId, {String? token}) async {
     final http.Response response;
     try {
       response = await _client
           .get(
-            Uri.parse(
-              '$_baseUrl/progress',
-            ).replace(queryParameters: {'student_id': studentId}),
+            Uri.parse('$_baseUrl/progress'),
+            headers: {if (token != null) 'Authorization': 'Bearer $token'},
           )
           .timeout(const Duration(seconds: 30));
     } on TimeoutException {
       return const ProgressFailure(ProgressProblem.failed);
     } on http.ClientException {
       return const ProgressFailure(ProgressProblem.offline);
+    }
+
+    if (response.statusCode == 401) {
+      return const ProgressFailure(ProgressProblem.loginExpired);
     }
 
     try {
