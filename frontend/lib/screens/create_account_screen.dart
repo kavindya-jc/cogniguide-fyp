@@ -82,7 +82,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         );
       case AuthResult.codeTaken:
         setState(() => _codeFix = l10n.fixCodeTaken);
-      case AuthResult.detailsDontMatch || AuthResult.failed:
+      case AuthResult.detailsDontMatch ||
+          AuthResult.tooManyTries ||
+          AuthResult.failed:
         setState(() => _otherFix = l10n.fixSomethingWrong);
     }
   }

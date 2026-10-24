@@ -322,6 +322,18 @@ abstract class AppLocalizations {
   /// **'That code and password don\'t match. Check them and try again.'**
   String get fixDetailsDontMatch;
 
+  /// No description provided for @fixTooManyTries.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many tries. Please wait 15 minutes and try again.'**
+  String get fixTooManyTries;
+
+  /// No description provided for @loginExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in again. Your progress is saved.'**
+  String get loginExpired;
+
   /// No description provided for @fixSomethingWrong.
   ///
   /// In en, this message translates to:

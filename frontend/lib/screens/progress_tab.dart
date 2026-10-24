@@ -13,6 +13,7 @@ import '../widgets/notice_card.dart';
 import '../widgets/pill_button.dart';
 import '../widgets/pip.dart';
 import '../widgets/stat_tile.dart';
+import 'login_screen.dart';
 import 'progress_list_screen.dart';
 import '../widgets/duo_icon.dart';
 
@@ -61,8 +62,19 @@ class _ProgressTabState extends State<ProgressTab> {
 
   void _load() {
     if (widget.code.isEmpty) return;
+    final services = AppServices.of(context);
+    final result = services.auth.token().then(
+      (token) => services.progress.load(widget.code, token: token),
+    );
     setState(() {
-      _result = AppServices.of(context).progress.load(widget.code);
+      _result = result;
+    });
+    result.then((r) {
+      if (mounted &&
+          r is ProgressFailure &&
+          r.problem == ProgressProblem.loginExpired) {
+        sendBackToLogin(context);
+      }
     });
   }
 
@@ -480,7 +492,7 @@ class _Problem extends StatelessWidget {
         l10n.chatOfflineTitle,
         l10n.chatOfflineText,
       ),
-      ProgressProblem.failed => (
+      ProgressProblem.failed || ProgressProblem.loginExpired => (
         AppIcon.alert,
         l10n.chatErrorTitle,
         l10n.chatErrorText,

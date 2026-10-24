@@ -34,6 +34,9 @@ enum ChatProblem {
 
   /// The server could not be reached at all: "No internet".
   offline,
+
+  /// 401: the login token is wrong or too old. Log in again.
+  loginExpired,
 }
 
 /// The answer from [ChatApi.send]: a reply, or a problem.
@@ -77,6 +80,7 @@ class ChatApi {
     required List<ChatTurn> history,
     required String? studentId,
     String? sessionId,
+    String? token,
   }) async {
     final body = jsonEncode({
       'problem': problem,
@@ -90,7 +94,11 @@ class ChatApi {
       response = await _client
           .post(
             Uri.parse('$_baseUrl/chat'),
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+              'Content-Type': 'application/json',
+              // Stage 7c: the server knows the student from this token.
+              if (token != null) 'Authorization': 'Bearer $token',
+            },
             body: body,
           )
           .timeout(_timeout);
@@ -119,6 +127,9 @@ class ChatApi {
     final error = json?['error'];
     final code = error is Map ? error['code'] : null;
 
+    if (response.statusCode == 401) {
+      return const ChatFailure(ChatProblem.loginExpired);
+    }
     if (response.statusCode == 503 && code == 'tutor_unavailable') {
       return const ChatFailure(ChatProblem.busy);
     }

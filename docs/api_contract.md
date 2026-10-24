@@ -1,10 +1,48 @@
-# CogniGuide API Contract (Phase 2, Stages 1, 3, 4, 5, 6 and 7)
+# CogniGuide API Contract (Phase 2, Stages 1, 3, 4, 5, 6, 7 and 7c)
 
 This is the agreement between the frontend and the Flask backend. The frontend only needs this file.
 
 - Base URL while developing: `http://127.0.0.1:5000`
 - All requests and replies are JSON (`Content-Type: application/json`).
-- The tutor itself is **stateless**: it does not remember the conversation. The frontend sends the full conversation every time. (The server also saves each chat to the database when a `student_id` is sent, see below.)
+- The tutor itself is **stateless**: it does not remember the conversation. The frontend sends the full conversation every time. (The server also saves each chat to the database for a logged-in student, see below.)
+- **Stage 7c:** students sign up and log in with their anonymous code + password (section 0). The app then sends the token on `/chat` and `/progress` as the header `Authorization: Bearer <token>`. **The server takes the student from the token**, never from a code typed in the request.
+
+## 0. Sign up and log in (Stage 7c)
+
+**Requests:** `POST /auth/signup` and `POST /auth/login`, both with:
+
+```json
+{"student_id": "P001", "password": "my-secret-1"}
+```
+
+| Field | Rules |
+|---|---|
+| `student_id` | Anonymous code, 1-64 letters, digits, `_` or `-` (names and emails are rejected) |
+| `password` | 8-128 characters |
+
+**Success reply** (signup `201`, login `200`, both `Cache-Control: no-store`):
+
+```json
+{"token": "eyJjb2RlIjoiUDAwMSJ9...", "student_id": "P001"}
+```
+
+- The token is a signed ticket that says "this is P001". It is valid for **30 days**. Keep it in the phone's secure storage and send it on every `/chat` and `/progress` call.
+- Log out = delete the token on the phone (the server keeps nothing to delete).
+- The password is never stored: only a salted hash (Werkzeug). It is never logged.
+
+**Errors:**
+
+| Status | `code` | When | App shows |
+|---|---|---|---|
+| 400 | `invalid_request` | Bad code, password too short or too long, not JSON | The field fix message |
+| 409 | `code_taken` | Sign up with a code that already exists | "That code is taken..." |
+| 401 | `details_dont_match` | Log in with a wrong password **or** an unknown code (the same answer, so nobody can find out which codes exist) | "That code and password don't match..." |
+| 429 | `too_many_attempts` | 5 wrong passwords for this code in 15 minutes | "Too many tries. Please wait 15 minutes" |
+| 503 | `auth_unavailable` | `AUTH_SECRET` or Supabase is not set up, or the database cannot be read | "Something went wrong, try again" |
+
+Students made before Stage 7c (the old test codes) have no password and cannot log in. Make new test accounts with sign up.
+
+**Server setup (once):** run `backend/sql/stage7c_auth.sql` in the Supabase SQL Editor, and add a line `AUTH_SECRET=<at least 32 random characters>` to `backend/.env`. Without `AUTH_SECRET`, sign in is switched off and protected calls answer 503 (it fails closed).
 
 ## 1. POST /chat
 
@@ -30,14 +68,16 @@ Asks the Socratic tutor for its next message.
 | `history` | list | no (default `[]`) | Max 50 items |
 | `history[].role` | string | yes | Exactly `"teacher"` or `"student"` |
 | `history[].content` | string | yes | Not empty, max 2000 characters |
-| `student_id` | string | no | Anonymous code, 1-64 characters: letters, digits, `_` or `-` only (so names and emails are rejected). **If missing, nothing is saved.** |
+| `student_id` | string | no | Stage 7c: optional. If sent, it must be the same code as in the token (else 403). The student is always taken from the token. |
 | `session_id` | string | no | The `session_id` from an earlier reply. Leave it out on the first message of a session. |
 
 Notes for the frontend:
 - First message of a session: send `"history": []` and no `session_id`. The tutor opens the conversation.
 - After the student types something, add it to `history` as a `"student"` item (as the **last** item), then call `/chat`.
 - Add each reply to `history` as a `"teacher"` item.
-- Send the same `student_id` on every call. Send the `session_id` from the previous reply on every call after the first, so the whole conversation is saved in one session.
+- Send the header `Authorization: Bearer <token>` on every call (Stage 7c). Without a token the tutor still answers, but **nothing is saved**. A code in the body without a token gives 401.
+- Send the `session_id` from the previous reply on every call after the first, so the whole conversation is saved in one session.
+- A token that is wrong or older than 30 days gives **401 `login_required`**: send the student back to Log in.
 - Only the newest student message (the last `history` item, if it is from the student) and the tutor's reply are saved on each call, so earlier messages are not saved twice.
 
 ### Success reply (200)
@@ -123,7 +163,7 @@ Known limits: the numbers (2, 3, 0.5, 3 messages) are first guesses and are not 
 
 Stage 7 lets a student see how their own thinking is growing. It is **not a grade**.
 
-**Request:** `GET /progress?student_id=CODE` (the same anonymous code used in `/chat`: 1-64 letters, digits, `_` or `-`).
+**Request:** `GET /progress` with the header `Authorization: Bearer <token>` (Stage 7c). The numbers are always the logged-in student's own. An old-style `?student_id=CODE` is still allowed only if it is the same code (else 403).
 
 **Success reply (200):**
 
@@ -146,11 +186,11 @@ Stage 7 lets a student see how their own thinking is growing. It is **not a grad
 - A student the server has never seen gets **200 with empty lists**, and nothing is created.
 - The reply has **numbers only**: no message text, no session ids, no names. It is sent with `Cache-Control: no-store`.
 
-**Errors:** 400 `invalid_request` (missing or bad `student_id`); 503 `progress_unavailable` (Supabase is not set up or cannot be read; the chat is not affected).
+**Errors:** 401 `login_required` (no token, or a wrong or old token: log in again); 403 `forbidden` (asking for another student's code); 503 `progress_unavailable` (Supabase is not set up or cannot be read; the chat is not affected).
 
-**Page:** `GET /dashboard` is a simple web page served by the same server. The student types their code and sees the growth sentence, number cards, and a line chart of the help needed per session (with a table of the same numbers).
+**Page:** `GET /dashboard` is a simple web page served by the same server. The student logs in with their code and password and sees the growth sentence, number cards, and a line chart of the help needed per session (with a table of the same numbers).
 
-Known limits: the numbers come from the word rules of Stage 4, so "growth" is a rough guide, not proof. The 0.5 rule and the 3-session window are first guesses (Phase 3). **There is no sign-in yet: anyone who knows an anonymous code can open that code's page.** This is fine for the prototype with pretend students; add a sign-in check and restrict CORS before real participants use it (Phase 3). The real Flutter screen can use the same `/progress` data.
+Known limits: the numbers come from the word rules of Stage 4, so "growth" is a rough guide, not proof. The 0.5 rule and the 3-session window are first guesses (Phase 3). Since Stage 7c a student needs their password to see their progress. Still to do before real participants (Phase 3): restrict CORS. The real Flutter screen can use the same `/progress` data.
 
 ## 3. GET /health
 
@@ -169,6 +209,8 @@ Every error uses the same shape:
 | 400 | `invalid_request` | Body is not JSON, a field is missing, wrong type, empty, too long, bad role, bad `student_id`, or `session_id` not a valid id | Fix the request (a bug in the app) |
 | 404 | `not_found` | Unknown URL | Check the URL |
 | 405 | `method_not_allowed` | Wrong method (e.g. GET on /chat) | Use POST |
+| 401 | `login_required` (Stage 7c) | No token where one is needed, or a wrong or old token | Send the student to Log in ("Please log in again") |
+| 403 | `forbidden` (Stage 7c) | A code in the request is not the logged-in student | A bug in the app |
 | 500 | `server_error` | Unexpected failure, or the Gemini API key or model name is missing on the server | Show "Something went wrong, try again" |
 | 503 | `progress_unavailable` (Stage 7, `/progress` only) | Supabase is not set up or cannot be read | Show "Progress is not available right now" |
 | 503 | `tutor_unavailable` (new in Stage 4) | Gemini was busy or failed, even after the server tried again 3 times | Show "The tutor is busy, please try again" and let the student press send again. **Nothing was saved**, so it is safe to repeat the same request |
@@ -182,5 +224,11 @@ CORS is a browser safety rule that blocks a web page from calling a server on a 
 ## 6. Quick test
 
 ```
-curl -X POST http://127.0.0.1:5000/chat -H "Content-Type: application/json" -d "{\"problem\": \"What is 2+3?\", \"history\": [], \"student_id\": \"TEST01\"}"
+curl -X POST http://127.0.0.1:5000/auth/signup -H "Content-Type: application/json" -d "{\"student_id\": \"TEST01\", \"password\": \"test-pass-1\"}"
+```
+
+Copy the `token` from the reply, then:
+
+```
+curl -X POST http://127.0.0.1:5000/chat -H "Content-Type: application/json" -H "Authorization: Bearer PASTE_TOKEN_HERE" -d "{\"problem\": \"What is 2+3?\", \"history\": []}"
 ```

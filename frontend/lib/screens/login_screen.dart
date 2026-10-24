@@ -16,7 +16,10 @@ import '../widgets/duo_icon.dart';
 
 /// Screen 2: log in with the anonymous code and password.
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({super.key, this.expired = false});
+
+  /// True when the app sent the student here because the login ran out.
+  final bool expired;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -71,6 +74,8 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       case AuthResult.detailsDontMatch:
         setState(() => _formFix = l10n.fixDetailsDontMatch);
+      case AuthResult.tooManyTries:
+        setState(() => _formFix = l10n.fixTooManyTries);
       case AuthResult.codeTaken || AuthResult.failed:
         setState(() => _formFix = l10n.fixSomethingWrong);
     }
@@ -93,6 +98,10 @@ class _LoginScreenState extends State<LoginScreen> {
       pip: PipMood.happy,
       hero: true,
       content: [
+        if (widget.expired && !mismatch) ...[
+          NoticeCard(icon: AppIcon.lock, text: l10n.loginExpired),
+          const SizedBox(height: AppSpace.s4),
+        ],
         if (mismatch) ...[
           NoticeCard(icon: AppIcon.alert, text: _formFix!),
           const SizedBox(height: AppSpace.s4),
@@ -161,4 +170,17 @@ class _LoginScreenState extends State<LoginScreen> {
       ],
     );
   }
+}
+
+/// The login ran out (the server said 401): forget it, and go to Log in
+/// with a calm note. School phones are shared, so the buddy goes too.
+Future<void> sendBackToLogin(BuildContext context) async {
+  final services = AppServices.of(context);
+  await services.auth.logOut();
+  await services.settings.clearBuddy();
+  if (!context.mounted) return;
+  Navigator.of(context).pushAndRemoveUntil(
+    MaterialPageRoute<void>(builder: (_) => const LoginScreen(expired: true)),
+    (_) => false,
+  );
 }

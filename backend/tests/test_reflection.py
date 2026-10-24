@@ -12,7 +12,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # the backend folder
 
-from app import adaptive, db, reflection  # noqa: E402
+import os  # noqa: E402
+
+# A made-up secret for the tests only (never the real one in .env).
+os.environ["AUTH_SECRET"] = "test-secret-for-offline-tests-only-0123456789"
+
+from app import adaptive, auth, db, reflection  # noqa: E402
 
 failures = 0
 
@@ -232,13 +237,15 @@ if api is not None:
     def talk(code, messages, session_id=None, problem=PROBLEM):
         """Play a whole session. Returns the list of (reflection_type, instruction) for each student message."""
         history, results = [], []
-        first = client.post("/chat", json={"problem": problem, "history": [], "student_id": code}).get_json()
+        login = {"Authorization": "Bearer " + auth.make_token(code)}  # Stage 7c
+        first = client.post("/chat", json={"problem": problem, "history": [], "student_id": code},
+                            headers=login).get_json()
         session_id = first["session_id"]
         history.append({"role": "teacher", "content": first["reply"]})
         for msg in messages:
             history.append({"role": "student", "content": msg})
             r = client.post("/chat", json={"problem": problem, "history": history,
-                                           "student_id": code, "session_id": session_id})
+                                           "student_id": code, "session_id": session_id}, headers=login)
             body = r.get_json()
             results.append((body["reflection_type"], seen["instructions"][-1], r.status_code))
             history.append({"role": "teacher", "content": body["reply"]})
@@ -292,13 +299,17 @@ if api is not None:
     check("f. no reflection while the student is stuck", res[1][0] is None and res[2][0] is None)
     check("f. reflection comes at the first fine message", res[3][0] == "asks_for_answer")
 
+    def as_(code):
+        """Stage 7c: the login token header for this student."""
+        return {"Authorization": "Bearer " + auth.make_token(code)}
+
     # g. Safety: a database problem never breaks the chat
     store = new_db()
     seed("ASKER3", [hints(3, 3) + [("asked_for_answer", 1)], hints(3, 2) + [("asked_for_answer", 1)]])
     session_id, _ = talk("ASKER3", FINE[:2])
     store.fail_on = "indicators"  # reading the history now fails
     history = chat(*FINE[:3])
-    r = client.post("/chat", json={"problem": PROBLEM, "history": history, "student_id": "ASKER3", "session_id": session_id})
+    r = client.post("/chat", json={"problem": PROBLEM, "history": history, "student_id": "ASKER3", "session_id": session_id}, headers=as_("ASKER3"))
     check("g. database read error: chat still gives 200", r.status_code == 200)
     check("g. database read error: no reflection", r.get_json()["reflection_type"] is None)
     store.fail_on = None
@@ -308,7 +319,7 @@ if api is not None:
     seed("ASKER4", [hints(3, 3) + [("asked_for_answer", 1)], hints(3, 2) + [("asked_for_answer", 1)]])
     seed("OTHERKID", [hints(1, 1)])
     other_session = store.tables["sessions"][-1]["id"]
-    r = client.post("/chat", json={"problem": PROBLEM, "history": chat(*FINE[:3]), "student_id": "ASKER4", "session_id": other_session})
+    r = client.post("/chat", json={"problem": PROBLEM, "history": chat(*FINE[:3]), "student_id": "ASKER4", "session_id": other_session}, headers=as_("ASKER4"))
     check("h. a session of another student -> no reflection", r.get_json()["reflection_type"] is None)
 
     # i. No student_id / no session_id: same as Stage 5
@@ -316,7 +327,7 @@ if api is not None:
     check("i. no student_id: reflection_type is null", r.status_code == 200 and r.get_json()["reflection_type"] is None)
     store = new_db()
     seed("ASKER5", [hints(3, 3) + [("asked_for_answer", 1)], hints(3, 2) + [("asked_for_answer", 1)]])
-    r = client.post("/chat", json={"problem": PROBLEM, "history": chat(*FINE[:3]), "student_id": "ASKER5"})
+    r = client.post("/chat", json={"problem": PROBLEM, "history": chat(*FINE[:3]), "student_id": "ASKER5"}, headers=as_("ASKER5"))
     check("i. no session_id: reflection_type is null", r.get_json()["reflection_type"] is None)
     check("i. the Stage 5 fields are still there", {"reply", "session_id", "hint_level", "scaffold_level"} <= set(r.get_json()))
 

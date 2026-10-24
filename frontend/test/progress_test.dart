@@ -46,19 +46,21 @@ int tileValue(WidgetTester tester, String label) =>
 
 void main() {
   group('ProgressApi', () {
-    test('asks for the code and reads the numbers', () async {
-      late Uri asked;
+    test('sends the login token (not the code) and reads the numbers', () async {
+      late http.Request asked;
       final api = ProgressApi(
         baseUrl: 'http://server',
         client: pretendServer((r) {
-          asked = r.url;
+          asked = r;
           return progressSays(fourSessions);
         }),
       );
 
-      final r = await api.load('P001');
+      final r = await api.load('P001', token: 'tok123');
 
-      expect(asked.toString(), 'http://server/progress?student_id=P001');
+      // Stage 7c: the server takes the student from the token.
+      expect(asked.url.toString(), 'http://server/progress');
+      expect(asked.headers['Authorization'], 'Bearer tok123');
       final p = (r as ProgressLoaded).progress;
       expect(p.sessions.length, 4);
       expect(p.sessions.map((s) => s.help), [

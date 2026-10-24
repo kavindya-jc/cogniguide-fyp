@@ -53,6 +53,8 @@
   "fixPasswordsDontMatch": "The two passwords don't match yet. Type it again slowly.",
   "fixPasswordEmpty": "Type your password.",
   "fixDetailsDontMatch": "That code and password don't match. Check them and try again.",
+  "fixTooManyTries": "Too many tries. Please wait 15 minutes and try again.",
+  "loginExpired": "Please log in again. Your progress is saved.",
   "fixSomethingWrong": "Something went wrong. Please try again.",
 
   "loginTitle": "Welcome back",
