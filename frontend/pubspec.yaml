@@ -72,6 +72,8 @@ flutter:
   assets:
     - assets/pip/
     - assets/problems/
+    # The buddy pictures students pick (playful-ui-avatars set).
+    - assets/avatars/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

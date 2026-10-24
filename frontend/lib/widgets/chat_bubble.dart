@@ -4,6 +4,8 @@ import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
+import '../models/buddy.dart';
+import 'buddy_avatar.dart';
 import 'duo_icon.dart';
 import 'pip.dart';
 
@@ -24,10 +26,18 @@ enum BubbleKind {
 /// It only takes the message [text]. The coach's hint level, scaffold level
 /// and reflection type are never shown, so there is no place for them here.
 class ChatBubble extends StatelessWidget {
-  const ChatBubble({super.key, required this.text, required this.kind});
+  const ChatBubble({
+    super.key,
+    required this.text,
+    required this.kind,
+    this.buddy,
+  });
 
   final String text;
   final BubbleKind kind;
+
+  /// The student's buddy, shown beside their own messages.
+  final Buddy? buddy;
 
   @override
   Widget build(BuildContext context) {
@@ -155,6 +165,10 @@ class ChatBubble extends StatelessWidget {
               ),
             ),
           ),
+          if (!fromCoach && buddy != null) ...[
+            const SizedBox(width: AppSpace.s2),
+            BuddyAvatar(buddy: buddy!),
+          ],
         ],
       ),
     );

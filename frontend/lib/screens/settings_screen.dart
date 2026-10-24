@@ -5,11 +5,12 @@ import '../services/app_services.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
+import '../widgets/buddy_avatar.dart';
 import '../widgets/pill_button.dart';
-import '../widgets/pip.dart';
 import '../widgets/round_icon_button.dart';
 import '../widgets/soft_blobs.dart';
 import '../widgets/tap_surface.dart';
+import 'buddy_screen.dart';
 import 'language_screen.dart';
 import 'logout_sheet.dart';
 import '../widgets/duo_icon.dart';
@@ -72,21 +73,32 @@ class SettingsScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 18),
 
-                            // Your code, with a winking Pip.
-                            Semantics(
-                              label: l10n.settingsYourCode(code),
-                              excludeSemantics: true,
-                              child: Container(
-                                padding: const EdgeInsets.fromLTRB(6, 8, 18, 8),
-                                decoration: BoxDecoration(
-                                  color: c.mintSoft,
-                                  borderRadius: BorderRadius.circular(26),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Pip(mood: PipMood.wink, size: 88),
-                                    const SizedBox(width: AppSpace.s2),
-                                    Expanded(
+                            // Your code, with your buddy and a Change button.
+                            Container(
+                              padding: const EdgeInsets.fromLTRB(
+                                14,
+                                12,
+                                12,
+                                12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: c.mintSoft,
+                                borderRadius: BorderRadius.circular(26),
+                              ),
+                              child: Row(
+                                children: [
+                                  ListenableBuilder(
+                                    listenable: settings,
+                                    builder: (context, _) => BuddyAvatar(
+                                      buddy: settings.buddyOrFallback,
+                                      size: 64,
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppSpace.s3),
+                                  Expanded(
+                                    child: Semantics(
+                                      label: l10n.settingsYourCode(code),
+                                      excludeSemantics: true,
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -99,14 +111,19 @@ class SettingsScreen extends StatelessWidget {
                                                 color: c.mintInk,
                                               ),
                                               const SizedBox(width: 6),
-                                              Text(
-                                                l10n.settingsYourCodeLabel,
-                                                style: AppText.label.copyWith(
-                                                  color: c.mintInk,
-                                                  fontWeight: FontWeight.w700,
-                                                  fontVariations: const [
-                                                    FontVariation('wght', 700),
-                                                  ],
+                                              Flexible(
+                                                child: Text(
+                                                  l10n.settingsYourCodeLabel,
+                                                  style: AppText.label.copyWith(
+                                                    color: c.mintInk,
+                                                    fontWeight: FontWeight.w700,
+                                                    fontVariations: const [
+                                                      FontVariation(
+                                                        'wght',
+                                                        700,
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
                                             ],
@@ -122,8 +139,47 @@ class SettingsScreen extends StatelessWidget {
                                         ],
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  Semantics(
+                                    label: l10n.buddyChangeLabel,
+                                    button: true,
+                                    excludeSemantics: true,
+                                    child: TapSurface(
+                                      onTap: () => Navigator.of(context).push(
+                                        MaterialPageRoute<void>(
+                                          builder: (_) => const BuddyScreen(
+                                            afterSignUp: false,
+                                          ),
+                                        ),
+                                      ),
+                                      color: c.surfaceRaised,
+                                      shape: const StadiumBorder(),
+                                      child: ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          minHeight: AppSizes.tap,
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: AppSpace.s4,
+                                          ),
+                                          child: Center(
+                                            widthFactor: 1,
+                                            child: Text(
+                                              l10n.buddyChange,
+                                              style: AppText.label.copyWith(
+                                                color: c.mintInk,
+                                                fontWeight: FontWeight.w700,
+                                                fontVariations: const [
+                                                  FontVariation('wght', 700),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             const SizedBox(height: 18),

@@ -249,6 +249,36 @@ class AppLocalizationsEn extends AppLocalizations {
       'Turned off by itself because it was slowing this phone down. You can turn it back on.';
 
   @override
+  String get buddyTitle => 'Pick your buddy';
+
+  @override
+  String get buddySubtitle =>
+      'Your buddy shows next to your messages. It\'s just for fun, and you can change it in Settings.';
+
+  @override
+  String get buddyLastStep => 'Last step';
+
+  @override
+  String get buddyGroup => 'Buddies';
+
+  @override
+  String get buddyGo => 'Let\'s go!';
+
+  @override
+  String get buddySave => 'Save';
+
+  @override
+  String get buddyChange => 'Change';
+
+  @override
+  String get buddyChangeLabel => 'Change your buddy';
+
+  @override
+  String buddyYours(String name) {
+    return 'Your buddy: $name';
+  }
+
+  @override
   String get logoutTitle => 'Log out?';
 
   @override

@@ -236,6 +236,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             : m.unsent
                             ? BubbleKind.unsent
                             : BubbleKind.student,
+                        buddy: AppServices.of(context).settings.buddyOrFallback,
                       ),
                     ),
                     const SizedBox(height: 14),
