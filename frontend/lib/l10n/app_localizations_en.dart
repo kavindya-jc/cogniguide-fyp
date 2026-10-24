@@ -279,6 +279,28 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get chatWorkedItOut => 'I worked it out!';
+
+  @override
+  String get momentTitle => 'You worked it out yourself!';
+
+  @override
+  String get momentText =>
+      'You asked good questions and kept going. That\'s how real mathematicians think.';
+
+  @override
+  String get momentMessages => 'Messages you sent';
+
+  @override
+  String get momentMinutes => 'Minutes thinking';
+
+  @override
+  String get momentTryAnother => 'Try another problem';
+
+  @override
+  String get momentSeeProgress => 'See my progress';
+
+  @override
   String get logoutTitle => 'Log out?';
 
   @override
