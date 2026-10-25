@@ -121,6 +121,27 @@ Only during a test time when the server person has posted **"Server is ON"**.
 3. **Report problems** in the team chat with: what you did, what you saw (a screenshot), the time,
    and your username. Never share your password.
 
+### See how the agent decides (the "brain" behind each reply)
+
+Every coach reply is logged with **what the agent thought and why**. Three ways to look:
+
+1. **Supabase (anyone with access to the project's Supabase dashboard):**
+   **Table Editor → `agent_turns`**. One row per reply, newest at the bottom:
+   - `intent`, `correctness`, `mistake_id`: what the student check saw (`check_source`: `llm` = Gemini, `fallback` = word rules)
+   - `answer_check`: Python's answer check (`correct`, `wrong`, `partial`, `not_found`)
+   - `action` and `reason`: what the tutor chose and why (for example `GIVE_SMALL_HINT`, "wrong try 2 on this step")
+   - `hint_level`: how much help (1 = a question, 3 = a clear explanation); `guard`: the safety check (`ok`, `rewritten`, `safe_reply`, `gemini_busy`)
+
+   Tip: chat in the app with your test username, then look at the newest rows. The table holds labels
+   only, never message text. (Ask the Supabase owner to invite you to the project; never share keys.)
+2. **The server laptop, Window 1:** each message shows a line `"POST /chat HTTP/1.1" 200`. Lines with
+   `503 UNAVAILABLE` mean Gemini was busy (the coach then used a safe reply).
+3. **Scripted students (team members with the code and `.env`):** run
+   `python ../experiments/phase4_agent_eval/run_scenarios.py` from `backend/`. It plays 8 pretend
+   students (right answer, wrong answer, misconception, confused, begging for the answer...) through the
+   real agent and saves every reply with its action and reason, ready for scoring with `rubric.md`.
+   How the agent works is explained in `docs/AGENT_REPORT.md` (sections 3 and 7).
+
 ## For team members, part 2: get the code on your computer (only if you work on the code)
 
 You do **not** need this to test the app. It is for team members who change the code or want to run
