@@ -1,4 +1,4 @@
-# CogniGuide API Contract (Phase 2, Stages 1, 3, 4, 5, 6, 7 and 7c)
+# CogniGuide API Contract (Phase 2, Stages 1, 3, 4, 5, 6, 7 and 7c; agent plan Phase 1)
 
 This is the agreement between the frontend and the Flask backend. The frontend only needs this file.
 
@@ -191,6 +191,25 @@ Stage 7 lets a student see how their own thinking is growing. It is **not a grad
 **Page:** `GET /dashboard` is a simple web page served by the same server. The student logs in with their code and password and sees the growth sentence, number cards, and a line chart of the help needed per session (with a table of the same numbers).
 
 Known limits: the numbers come from the word rules of Stage 4, so "growth" is a rough guide, not proof. The 0.5 rule and the 3-session window are first guesses (Phase 3). Since Stage 7c a student needs their password to see their progress. Still to do before real participants (Phase 3): restrict CORS. The real Flutter screen can use the same `/progress` data.
+
+## 2e. GET /problems (agent plan, Phase 1)
+
+The problems a student can pick. No login needed.
+
+**Request:** `GET /problems`, with optional filters `?area=algebra` and/or `?grade=9`.
+`area` is one of `number`, `algebra`, `geometry`, `trigonometry`, `graphs`, `statistics`; `grade` is 8, 9, 10 or 11.
+
+**Success reply (200):**
+
+```json
+{"problems": [{"id": "alg-9-1", "area": "algebra", "grade": 9, "text": "Solve: 3x − 5 = 2x + 7"}]}
+```
+
+- Only `id`, `area`, `grade` and `text`. The **answer, key steps and common mistakes stay on the server** (`backend/data/problems.json`) and are never sent to the app.
+- The list is in the file's order. A filter with no matches gives `{"problems": []}`.
+- For now these are the same 15 sample problems as the app's own file. A maths teacher must check them before real students use the app.
+
+**Errors:** 400 `invalid_request` (unknown area, or a grade that is not 8-11); 503 `problems_unavailable` (the problem file cannot be read).
 
 ## 3. GET /health
 
