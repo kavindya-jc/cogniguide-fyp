@@ -48,9 +48,16 @@ def get_or_create_student(anon_code):
     return res.data[0]["id"]
 
 
-def create_session(student_id, problem):
-    """Start a new session and return its id."""
-    res = _get_client().table("sessions").insert({"student_id": student_id, "problem": problem}).execute()
+def create_session(student_id, problem, problem_id=None):
+    """Start a new session and return its id.
+
+    problem_id (agent plan, Step 1.4): the bank id, saved only when there is one, so a server
+    whose database has not run stage9_agent.sql yet still works for chats without it.
+    """
+    row = {"student_id": student_id, "problem": problem}
+    if problem_id is not None:
+        row["problem_id"] = problem_id
+    res = _get_client().table("sessions").insert(row).execute()
     return res.data[0]["id"]
 
 

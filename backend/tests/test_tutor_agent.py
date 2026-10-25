@@ -44,7 +44,7 @@ class FakeDb:
 
     def __init__(self, broken=False):
         self.broken = broken
-        self.sessions, self.messages, self.indicators = {}, [], []
+        self.sessions, self.messages, self.indicators, self.created = {}, [], [], []
 
     def install(self, monkeypatch):
         monkeypatch.setattr(db, "is_configured", lambda: True)
@@ -60,9 +60,10 @@ class FakeDb:
             raise RuntimeError("database is down")
         return "uuid-" + code
 
-    def create_session(self, student, problem):
+    def create_session(self, student, problem, problem_id=None):
         sid = f"session-{len(self.sessions) + 1}"
         self.sessions[sid] = student
+        self.created.append({"problem": problem, "problem_id": problem_id})
         return sid
 
 
@@ -187,3 +188,93 @@ def test_chat_endpoint_other_error_gives_500(client, monkeypatch):
     r = client.post("/chat", json={"problem": PROBLEM, "history": []})
     assert r.status_code == 500
     assert "GEMINI_API_KEY" not in r.get_data(as_text=True)
+
+
+# ---- Step 1.4: /chat knows which bank problem it is ----
+
+def login_header(code="P001"):
+    return {"Authorization": "Bearer " + auth.make_token(code)}
+
+
+def test_problem_id_uses_the_bank_text(tutor, client, monkeypatch):
+    store = FakeDb()
+    store.install(monkeypatch)
+    r = client.post("/chat", json={"problem_id": "alg-9-1", "history": []}, headers=login_header())
+    assert r.status_code == 200
+    assert tutor.calls[0]["problem"] == "Solve: 3x − 5 = 2x + 7"  # the server's own text
+    assert store.created == [{"problem": "Solve: 3x − 5 = 2x + 7", "problem_id": "alg-9-1"}]
+
+
+def test_problem_id_wins_over_the_text_from_the_app(tutor, client, monkeypatch):
+    FakeDb().install(monkeypatch)
+    r = client.post("/chat", json={"problem_id": "alg-9-1", "problem": "Something else", "history": []},
+                    headers=login_header())
+    assert r.status_code == 200
+    assert tutor.calls[0]["problem"] == "Solve: 3x − 5 = 2x + 7"
+
+
+def test_old_requests_without_problem_id_work_as_before(tutor, client, monkeypatch):
+    store = FakeDb()
+    store.install(monkeypatch)
+    r = client.post("/chat", json={"problem": PROBLEM, "history": []}, headers=login_header())
+    assert r.status_code == 200
+    assert store.created == [{"problem": PROBLEM, "problem_id": None}]
+
+
+@pytest.mark.parametrize("body", [
+    {"problem_id": "no-such-problem", "history": []},  # not in the bank
+    {"problem_id": "ALG 9 1", "history": []},          # not an id at all
+    {"problem_id": 7, "history": []},                  # not text
+    {"history": []},                                   # neither problem nor problem_id
+])
+def test_bad_problem_id_gives_400(tutor, client, body):
+    r = client.post("/chat", json=body)
+    assert r.status_code == 400
+    assert r.get_json()["error"]["code"] == "invalid_request"
+    assert tutor.calls == []  # Gemini is not asked
+
+
+def test_broken_problem_bank_gives_503(tutor, client, monkeypatch):
+    from app import problems
+
+    def broken(_problem_id):
+        raise problems.ProblemBankError("secret path details")
+
+    monkeypatch.setattr(problems, "find", broken)
+    r = client.post("/chat", json={"problem_id": "alg-9-1", "history": []})
+    assert r.status_code == 503
+    assert "secret path" not in r.get_data(as_text=True)
+
+
+class FakeTable:
+    """Records what db.create_session sends to Supabase."""
+
+    def __init__(self, sent):
+        self.sent = sent
+
+    def insert(self, row):
+        self.sent.append(row)
+        return self
+
+    def execute(self):
+        return type("Result", (), {"data": [{"id": "new-session"}]})()
+
+
+class FakeClient:
+    def __init__(self):
+        self.sent = []
+
+    def table(self, name):
+        assert name == "sessions"
+        return FakeTable(self.sent)
+
+
+def test_create_session_saves_problem_id_only_when_given(monkeypatch):
+    fake = FakeClient()
+    monkeypatch.setattr(db, "_client", fake)
+    assert db.create_session("uuid-1", "Solve: 3x − 5 = 2x + 7", problem_id="alg-9-1") == "new-session"
+    db.create_session("uuid-1", "My own problem")
+    assert fake.sent == [
+        {"student_id": "uuid-1", "problem": "Solve: 3x − 5 = 2x + 7", "problem_id": "alg-9-1"},
+        {"student_id": "uuid-1", "problem": "My own problem"},  # no problem_id key at all
+    ]

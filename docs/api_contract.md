@@ -64,7 +64,8 @@ Asks the Socratic tutor for its next message.
 
 | Field | Type | Required | Rules |
 |---|---|---|---|
-| `problem` | string | yes | Not empty, max 2000 characters |
+| `problem_id` | string | no | Agent plan, Step 1.4: the `id` of a problem from `GET /problems` (for example `"alg-9-1"`). Then the server uses **its own** text for that problem and saves the id with the session. An unknown id gives 400. |
+| `problem` | string | yes, unless `problem_id` is sent | Not empty, max 2000 characters. Ignored when `problem_id` is sent. Still needed for a problem the student typed in. |
 | `history` | list | no (default `[]`) | Max 50 items |
 | `history[].role` | string | yes | Exactly `"teacher"` or `"student"` |
 | `history[].content` | string | yes | Not empty, max 2000 characters |
@@ -79,6 +80,7 @@ Notes for the frontend:
 - Send the `session_id` from the previous reply on every call after the first, so the whole conversation is saved in one session.
 - A token that is wrong or older than 30 days gives **401 `login_required`**: send the student back to Log in.
 - Only the newest student message (the last `history` item, if it is from the student) and the tutor's reply are saved on each call, so earlier messages are not saved twice.
+- For a problem from the list, send `problem_id` on every call of the session (Step 1.4). Old apps that only send `problem` keep working exactly as before. **Server setup (once):** run `backend/sql/stage9_agent.sql` in the Supabase SQL Editor before the app starts sending `problem_id`; without it, the session cannot be saved (the reply still comes back).
 
 ### Success reply (200)
 

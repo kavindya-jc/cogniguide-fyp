@@ -70,11 +70,12 @@ def load_reflection_type(student_code, session_id, history, analysis):
 
 
 def log_turn(student_code, session_id, problem, history, reply, analysis,
-             scaffold_level=scaffolding.MAX_SCAFFOLD, reflection_type=None):
+             scaffold_level=scaffolding.MAX_SCAFFOLD, reflection_type=None, problem_id=None):
     """Save this turn to the database and return the session id.
 
     Saves the student's newest message (if the history ends with one), the tutor's reply,
     and the indicators (Stage 4 + the Stage 5 scaffold level + the Stage 6 reflection type, if one was asked). Raises an exception if anything fails; the caller handles it.
+    A new session also remembers problem_id (Step 1.4) when the problem came from the bank.
     """
     if not db.is_configured():
         log.warning("Supabase is not configured; chat not saved.")
@@ -86,7 +87,7 @@ def log_turn(student_code, session_id, problem, history, reply, analysis,
         if not db.session_belongs_to(session_id, student_uuid):
             raise ValueError("session_id does not exist or belongs to another student")
     else:
-        session_id = db.create_session(student_uuid, problem)
+        session_id = db.create_session(student_uuid, problem, problem_id=problem_id)
 
     messages = []
     if history and history[-1]["role"] == "student":
@@ -108,10 +109,13 @@ def log_turn(student_code, session_id, problem, history, reply, analysis,
     return session_id
 
 
-def run_turn(student_code, problem, history, session_id=None):
+def run_turn(student_code, problem, history, session_id=None, problem_id=None):
     """Run one tutoring turn and return the result for api.py.
 
     student_code: the code from the login token, or None (an anonymous chat that is not saved).
+    problem_id: the bank id (for example "alg-9-1") when the problem came from GET /problems,
+                or None for a problem the student typed in. Step 1.4 only saves it with the
+                session; later steps use it to check the student's answer.
     Returns {"reply", "session_id", "hint_level", "scaffold_level", "reflection_type"}.
     Raises TutorUnavailable when Gemini cannot give a real reply (nothing is saved then).
     Any other exception (for example no GEMINI_API_KEY) is raised to api.py too.
@@ -139,7 +143,8 @@ def run_turn(student_code, problem, history, session_id=None):
     if student_code:
         try:
             session_id = log_turn(
-                student_code, session_id, problem, history, reply, analysis, scaffold_level, reflection_type
+                student_code, session_id, problem, history, reply, analysis, scaffold_level, reflection_type,
+                problem_id=problem_id,
             )
         except Exception as err:
             log.error("Saving chat to database failed: %s", err)
