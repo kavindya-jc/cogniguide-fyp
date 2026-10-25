@@ -216,7 +216,7 @@ db._client = None
 
 # ---- 6. /chat with a pretend tutor and the pretend database ----
 try:
-    from app import api  # noqa: E402
+    from app import api, tutor_agent  # noqa: E402
 except Exception as err:  # e.g. flask or google-genai is not installed
     print(f"\nSKIPPED  the /chat checks (could not import app.api: {err})")
     api = None
@@ -228,7 +228,7 @@ if api is not None:
         seen["instructions"].append(extra_instruction)
         return "Pretend tutor reply. What do you think comes next?"
 
-    api.socratic_response = pretend_tutor
+    tutor_agent.socratic_response = pretend_tutor  # Step 1.3: the turn runs in tutor_agent.py
     db.is_configured = lambda: True  # always use the pretend database below, never the real Supabase
     client = api.app.test_client()
     PROBLEM = "Natalia sold 48 clips in April and half as many in May. How many altogether?"

@@ -43,6 +43,10 @@ Agent plan, Phase 1: problems.py keeps the problem bank (backend/data/problems.j
 answer, key steps and common mistakes. GET /problems gives the app only id, area, grade and
 text: the answer never leaves the server.
 
+Agent plan, Phase 1 (Step 1.3): the tutoring turn itself (Stages 3 to 6 above) now lives in
+tutor_agent.py. /chat only checks the request and who the student is, then calls
+tutor_agent.run_turn().
+
 See docs/api_contract.md for the full request/reply format.
 
 Run from the backend/ folder:
@@ -55,8 +59,8 @@ import uuid
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from app import adaptive, auth, db, problems, progress, reflection, scaffolding
-from app.models.socratic_agent import TutorUnavailable, socratic_response
+from app import auth, db, problems, progress, tutor_agent
+from app.models.socratic_agent import TutorUnavailable
 
 MAX_TEXT_LENGTH = 2000
 MAX_HISTORY_ITEMS = 50
@@ -115,90 +119,6 @@ def validate_chat_body(body):
             return "'session_id' must be the session id returned by a previous /chat reply."
 
     return None
-
-
-def load_scaffold_level(student_code, session_id):
-    """Stage 5: choose the scaffold level (1-3) from the student's earlier sessions.
-
-    Never raises. Any problem (no student_id, new student, no database, database error)
-    gives 3 = full support, which is the Stage 4 behaviour.
-    """
-    if not student_code or not db.is_configured():
-        return scaffolding.MAX_SCAFFOLD
-    try:
-        student_uuid = db.find_student(student_code)
-        if student_uuid is None:
-            return scaffolding.MAX_SCAFFOLD
-        averages = db.get_recent_session_levels(student_uuid, exclude_session_id=session_id)
-        return scaffolding.compute_scaffold_level(averages)
-    except Exception as err:
-        app.logger.error("Reading earlier sessions failed (using full support): %s", err)
-        return scaffolding.MAX_SCAFFOLD
-
-
-def load_reflection_type(student_code, session_id, history, analysis):
-    """Stage 6: choose a reflection type for this reply, or None for no reflection question.
-
-    Never raises. No student_id, no session_id, no database, a database error, a bad moment,
-    a new student, or a reflection already asked in this session all give None.
-    """
-    if not student_code or not session_id or not db.is_configured():
-        return None
-    # Cheap checks first, so most turns do not touch the database at all.
-    if not reflection.is_good_moment(analysis, reflection.count_student_messages(history)):
-        return None
-    try:
-        student_uuid = db.find_student(student_code)
-        if student_uuid is None:
-            return None
-        if not db.session_belongs_to(session_id, student_uuid):
-            return None  # never use another student's session
-        if db.session_has_reflection(session_id):
-            return None  # at most once per session
-        summary = db.get_history_summary(student_uuid, exclude_session_id=session_id)
-        return reflection.choose_reflection_type(summary)
-    except Exception as err:
-        app.logger.error("Reading history for reflection failed (no reflection): %s", err)
-        return None
-
-
-def log_turn(student_code, session_id, problem, history, reply, analysis,
-             scaffold_level=scaffolding.MAX_SCAFFOLD, reflection_type=None):
-    """Save this turn to the database and return the session id.
-
-    Saves the student's newest message (if the history ends with one), the tutor's reply,
-    and the indicators (Stage 4 + the Stage 5 scaffold level + the Stage 6 reflection type, if one was asked). Raises an exception if anything fails; the caller handles it.
-    """
-    if not db.is_configured():
-        app.logger.warning("Supabase is not configured; chat not saved.")
-        return session_id
-
-    student_uuid = db.get_or_create_student(student_code)
-
-    if session_id:
-        if not db.session_belongs_to(session_id, student_uuid):
-            raise ValueError("session_id does not exist or belongs to another student")
-    else:
-        session_id = db.create_session(student_uuid, problem)
-
-    messages = []
-    if history and history[-1]["role"] == "student":
-        messages.append(("student", history[-1]["content"]))
-    messages.append(("teacher", reply))
-    db.save_messages(session_id, messages)
-
-    # Indicators are extra: if they fail, the messages above are already safe.
-    try:
-        rows = adaptive.indicator_rows(analysis)  # empty unless there is a NEW student message
-        if rows:
-            rows.append(("scaffold_level", scaffold_level))
-            if reflection_type:
-                rows.append((reflection.indicator_name(reflection_type), 1))
-        db.save_indicators(student_uuid, session_id, rows)
-    except Exception as err:
-        app.logger.error("Saving indicators failed: %s", err)
-
-    return session_id
 
 
 @app.get("/health")
@@ -317,32 +237,8 @@ def chat():
         return error_response(403, "forbidden", "That is not your account.")
     student_code = token_code  # None = an anonymous chat that is not saved
 
-    history = body.get("history", [])
-
-    # Stage 4: decide the hint level from the student's recent messages.
-    analysis = adaptive.analyze_history(history)
-
-    # Stage 5: fade the help if earlier sessions show the student needs less of it.
-    scaffold_level = load_scaffold_level(student_code, body.get("session_id"))
-    analysis = scaffolding.apply_scaffold(analysis, scaffold_level)
-
-    # Stage 6: maybe ask one reflection question about the student's own way of working.
-    reflection_type = load_reflection_type(student_code, body.get("session_id"), history, analysis)
-
-    extra_instruction = adaptive.build_instruction(analysis)
-    scaffold_note = scaffolding.build_scaffold_instruction(scaffold_level, analysis)
-    if scaffold_note:
-        extra_instruction += "\n" + scaffold_note
-    if reflection_type:
-        extra_instruction += "\n" + reflection.build_reflection_instruction(reflection_type)
-
     try:
-        reply = socratic_response(
-            body["problem"],
-            history,
-            extra_instruction=extra_instruction,
-            raise_on_error=True,
-        )
+        result = tutor_agent.run_turn(student_code, body["problem"], body.get("history", []), body.get("session_id"))
     except TutorUnavailable as err:
         # Gemini was busy or failed. Save nothing, tell the app clearly.
         app.logger.error("Tutor unavailable: %s", err)
@@ -351,25 +247,7 @@ def chat():
         app.logger.error("socratic_response failed: %s", err)
         return error_response(500, "server_error", "The tutor is unavailable right now.")
 
-    # Stage 3: save the chat. Never let a database problem break the reply.
-    session_id = body.get("session_id")
-    if student_code:
-        try:
-            session_id = log_turn(
-                student_code, session_id, body["problem"], history, reply, analysis, scaffold_level, reflection_type
-            )
-        except Exception as err:
-            app.logger.error("Saving chat to database failed: %s", err)
-
-    return jsonify(
-        {
-            "reply": reply,
-            "session_id": session_id,
-            "hint_level": analysis["hint_level"],
-            "scaffold_level": scaffold_level,
-            "reflection_type": reflection_type,
-        }
-    )
+    return jsonify(result)
 
 
 @app.get("/progress")

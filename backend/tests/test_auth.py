@@ -17,7 +17,7 @@ os.environ["AUTH_SECRET"] = "test-secret-for-offline-tests-only-0123456789"
 
 from itsdangerous import URLSafeTimedSerializer  # noqa: E402
 
-from app import api, auth, db  # noqa: E402
+from app import api, auth, db, tutor_agent  # noqa: E402
 
 failures = 0
 
@@ -50,10 +50,10 @@ db.find_student_login = find_student_login
 db.create_student_with_password = create_student_with_password
 db.find_student = lambda code: STUDENTS[code]["id"] if code in STUDENTS else None
 db.get_progress_rows = lambda student_uuid, max_sessions=10: ([], [])
-api.socratic_response = lambda problem, history, extra_instruction="", raise_on_error=False: "What do you notice?"
-api.log_turn = lambda code, session_id, *rest, **kw: SAVED.append(code) or "session-1"
-api.load_scaffold_level = lambda code, session_id: 3
-api.load_reflection_type = lambda *a: None
+tutor_agent.socratic_response = lambda problem, history, extra_instruction="", raise_on_error=False: "What do you notice?"
+tutor_agent.log_turn = lambda code, session_id, *rest, **kw: SAVED.append(code) or "session-1"
+tutor_agent.load_scaffold_level = lambda code, session_id: 3
+tutor_agent.load_reflection_type = lambda *a: None
 
 client = api.app.test_client()
 
