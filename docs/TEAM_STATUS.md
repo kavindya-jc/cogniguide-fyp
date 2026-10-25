@@ -1,6 +1,7 @@
 # CogniGuide: where we are and what comes next
 
-Updated: 25 October 2026. For the whole team. Simple summary first, details after.
+Updated: 25 October 2026 (late). For the whole team. Simple summary first, details after.
+The full answer to the team's audit questions is in **`docs/AGENT_REPORT.md`**.
 
 ## In one minute
 
@@ -8,10 +9,13 @@ Updated: 25 October 2026. For the whole team. Simple summary first, details afte
 - **The tutor is now a real tutoring agent**, not just a chatbot. Before every reply it checks the
   student's answer, chooses one kind of help, writes the reply, checks the reply does not give the
   answer away, and remembers what happened.
-- **Everything is tested**: 231 backend checks and 158 app checks pass. It was also tried in the app
-  on an Android emulator against the real backend and database.
-- **Not done yet:** putting the backend online (Hugging Face Spaces, free, see below),
-  and the study preparation (teacher check, test-account cleanup, scoring the tutor, ethics).
+- **Everything is tested**: 235 backend checks and 158 app checks pass. It was also tried in the app
+  against the real backend and database, including **through a public tunnel**, like a team phone.
+- **Team testing works now with a laptop as the server** (free): see **`docs/laptop_server.md`**.
+- **Important fix:** the phone app (APK) had no internet permission, so it could never reach a server.
+  Fixed. **Use only the new APK.**
+- **Not done yet:** real hosting for the study, and the study preparation (teacher check,
+  test-account cleanup, scoring the tutor, ethics).
 
 ---
 
@@ -95,27 +99,26 @@ but the decisions are not saved.
 3. Paste all of `backend/sql/stage10_agent_log.sql` → **Run** → "Success. No rows returned".
 4. Check: **Table Editor** → you should see a table **agent_turns**.
 
-### B. Put the backend online: Hugging Face Spaces (free, no card)
+### B. Team testing now: a laptop as the server (free)
 
-Render asked for a card, so we use **Hugging Face Spaces** instead: free, no card, and it is your own
-account (the GitHub owner is not needed). Full guide: **`docs/deploy_huggingface.md`**. Short version:
+Render asks for a card, and Hugging Face now charges for Docker Spaces, so for **testing** one team
+laptop is the server, with a free Cloudflare tunnel giving it a public address. Full guide:
+**`docs/laptop_server.md`**. Short version:
 
-1. Make a free account at **huggingface.co** → **New Space** → name `cogniguide-backend`, SDK **Docker**
-   (Blank), hardware **CPU basic · FREE**, visibility **Public**.
-2. **Settings → Variables and secrets**: add `GEMINI_API_KEY`, `GEMINI_MODEL`, `SUPABASE_URL`,
-   `SUPABASE_SERVICE_KEY` and a **new** `AUTH_SECRET` (paste them yourself; never in chat or in the app).
-3. Make the upload folder: `.\venv\Scripts\python backend\scripts\make_hf_space.py` (it makes `hf-space/`,
-   with no `.env` and no keys).
-4. Space → **Files** → **Upload files** → drag everything **inside** `hf-space` → **Commit**.
-5. Wait for **Running**, then check `https://<address>/health` shows `{"status": "ok"}`.
-6. Build the app for the online server (in `frontend/`):
-   `flutter build apk --release --dart-define=API_BASE_URL=https://<address>` and share the APK.
+1. Terminal 1: `cd backend` → `$env:REQUIRE_LOGIN="true"; ..\venv\Scripts\python -m app.api`
+2. Terminal 2: `& "C:\Program Files (x86)\cloudflared\cloudflared.exe" tunnel --url http://localhost:5000`
+   → copy the `https://....trycloudflare.com` address.
+3. If the address is new: rebuild the APK with it and send it to the team.
+4. Keep the laptop on, awake and online; **Ctrl + C** in both windows when finished.
 
-Good to know: a public Space shows its **code** (including the problem answers) in its Files tab, but
-never the secrets or students' data. A free Space **sleeps after ~2 days** without use; the next visit
-wakes it in 1–2 minutes.
+Limits: the laptop must stay on, and the address changes on every restart (then rebuild the APK).
 
-*Render is still possible later (`render.yaml`, `docs/deploy_backend.md`) if the team decides to add a card.*
+### B2. Real hosting for the study (team decision)
+
+- **Render** (`render.yaml`, `docs/deploy_backend.md`): free plan, but asks for a card to verify.
+  A team member or the supervisor could add one (the free instance is not charged).
+- **University hosting or credits**: ask the supervisor.
+- *Hugging Face Docker Spaces now need a paid plan; the files in `deploy/huggingface/` stay for later.*
 
 ### C. Before real students (study preparation)
 
@@ -150,7 +153,9 @@ wakes it in 1–2 minutes.
 |---|---|
 | The full code audit and plan (from before the agent work) | Shared link from Claude (private page; ask for it) |
 | API between app and backend | `docs/api_contract.md` |
-| Putting the backend online | `docs/deploy_huggingface.md` (free, no card); Render: `docs/deploy_backend.md` |
+| Answer to the team's audit questions (current) | `docs/AGENT_REPORT.md` |
+| Laptop as the server (team testing) | `docs/laptop_server.md` |
+| Real hosting | Render: `docs/deploy_backend.md`; Hugging Face (paid): `docs/deploy_huggingface.md` |
 | The design | `docs/design/README.md`, `docs/design/CogniGuide_Design_Spec.md` |
 | Problems with answers | `backend/data/problems.json` |
 | Database setup (run in order) | `backend/sql/` |
