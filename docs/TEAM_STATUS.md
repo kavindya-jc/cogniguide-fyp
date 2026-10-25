@@ -10,7 +10,7 @@ Updated: 25 October 2026. For the whole team. Simple summary first, details afte
   answer away, and remembers what happened.
 - **Everything is tested**: 231 backend checks and 158 app checks pass. It was also tried in the app
   on an Android emulator against the real backend and database.
-- **Not done yet:** putting the backend online (Render; the repository owner does this, see below),
+- **Not done yet:** putting the backend online (Hugging Face Spaces, free, see below),
   and the study preparation (teacher check, test-account cleanup, scoring the tutor, ethics).
 
 ---
@@ -95,27 +95,27 @@ but the decisions are not saved.
 3. Paste all of `backend/sql/stage10_agent_log.sql` → **Run** → "Success. No rows returned".
 4. Check: **Table Editor** → you should see a table **agent_turns**.
 
-### B. Put the backend online on Render (the GitHub repository owner)
+### B. Put the backend online: Hugging Face Spaces (free, no card)
 
-Render must connect to the GitHub account that owns `cogniguide-fyp`, so **the repository owner**
-does this. Full guide: **`docs/deploy_backend.md`**. Short version:
+Render asked for a card, so we use **Hugging Face Spaces** instead: free, no card, and it is your own
+account (the GitHub owner is not needed). Full guide: **`docs/deploy_huggingface.md`**. Short version:
 
-1. Sign up at **render.com** with GitHub; allow access to **cogniguide-fyp** only.
-2. Create the service:
-   - **Easiest:** Blueprints → New Blueprint Instance → `cogniguide-fyp` (it reads `render.yaml`).
-   - **If Render asks for a card** and the team does not want to add one: use
-     **Deploy a Web Service** instead and type the settings from "Step 1b" of the guide.
-   - If Render asks for a card there too: ask for the **no-card option** (Hugging Face Spaces; it
-     needs one extra file, a `Dockerfile`, which can be added quickly).
-3. Paste the secrets into Render yourself (never in chat, never in the app):
-   `GEMINI_API_KEY`, `GEMINI_MODEL`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, and a **new** `AUTH_SECRET`.
-4. Check `https://<address>/health` shows `{"status": "ok"}`.
-5. Build the app for the online server (in `frontend/`):
-   `flutter build apk --release --dart-define=API_BASE_URL=https://<address>`
-   and share the APK with the team.
+1. Make a free account at **huggingface.co** → **New Space** → name `cogniguide-backend`, SDK **Docker**
+   (Blank), hardware **CPU basic · FREE**, visibility **Public**.
+2. **Settings → Variables and secrets**: add `GEMINI_API_KEY`, `GEMINI_MODEL`, `SUPABASE_URL`,
+   `SUPABASE_SERVICE_KEY` and a **new** `AUTH_SECRET` (paste them yourself; never in chat or in the app).
+3. Make the upload folder: `.\venv\Scripts\python backend\scripts\make_hf_space.py` (it makes `hf-space/`,
+   with no `.env` and no keys).
+4. Space → **Files** → **Upload files** → drag everything **inside** `hf-space` → **Commit**.
+5. Wait for **Running**, then check `https://<address>/health` shows `{"status": "ok"}`.
+6. Build the app for the online server (in `frontend/`):
+   `flutter build apk --release --dart-define=API_BASE_URL=https://<address>` and share the APK.
 
-Good to know about Render's free plan: the server **sleeps after ~15 minutes** without use, so the
-first message after that takes about a minute. That is normal.
+Good to know: a public Space shows its **code** (including the problem answers) in its Files tab, but
+never the secrets or students' data. A free Space **sleeps after ~2 days** without use; the next visit
+wakes it in 1–2 minutes.
+
+*Render is still possible later (`render.yaml`, `docs/deploy_backend.md`) if the team decides to add a card.*
 
 ### C. Before real students (study preparation)
 
@@ -139,7 +139,8 @@ first message after that takes about a minute. That is normal.
   *in-between steps* comes from Gemini. Two raters should read real transcripts (section C).
 - **The answer checker reads digits, not words** ("twelve" is not understood).
 - **Free Gemini is often busy.** The chat keeps going with safe replies, but those are simpler.
-- **Not tested yet:** the backend running on Render (we only checked the settings), and the iPhone app.
+- **Not tested yet:** the real online build (Hugging Face or Render; we checked the upload folder and the
+  settings only), and the iPhone app.
 
 ---
 
@@ -149,7 +150,7 @@ first message after that takes about a minute. That is normal.
 |---|---|
 | The full code audit and plan (from before the agent work) | Shared link from Claude (private page; ask for it) |
 | API between app and backend | `docs/api_contract.md` |
-| Putting the backend online | `docs/deploy_backend.md` |
+| Putting the backend online | `docs/deploy_huggingface.md` (free, no card); Render: `docs/deploy_backend.md` |
 | The design | `docs/design/README.md`, `docs/design/CogniGuide_Design_Spec.md` |
 | Problems with answers | `backend/data/problems.json` |
 | Database setup (run in order) | `backend/sql/` |
