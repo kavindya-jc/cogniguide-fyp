@@ -67,6 +67,8 @@ MAX_HISTORY_ITEMS = 50
 VALID_ROLES = ("teacher", "student")
 # Anonymous codes only (like P001). No spaces, no '@', so names/emails are rejected.
 STUDENT_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+# Problem ids look like "alg-9-1".
+PROBLEM_ID_PATTERN = re.compile(r"^[a-z0-9-]{1,40}$")
 
 app = Flask(__name__)
 # Development only: allow any website/app to call us. Restrict before Phase 3.
@@ -83,10 +85,19 @@ def validate_chat_body(body):
     if not isinstance(body, dict):
         return "Request body must be a JSON object."
 
+    # Agent plan, Step 1.4: a problem from the bank is named by its id. Then 'problem'
+    # (the text) may be left out, because the server knows the text itself.
+    problem_id = body.get("problem_id")
+    if problem_id is not None:
+        if not isinstance(problem_id, str) or not PROBLEM_ID_PATTERN.match(problem_id):
+            return "'problem_id' must be the id of a problem from GET /problems."
+
     problem = body.get("problem")
-    if not isinstance(problem, str) or not problem.strip():
+    if problem is None and problem_id is not None:
+        pass  # the text comes from the problem bank
+    elif not isinstance(problem, str) or not problem.strip():
         return "'problem' is required and must be a non-empty string."
-    if len(problem) > MAX_TEXT_LENGTH:
+    elif len(problem) > MAX_TEXT_LENGTH:
         return f"'problem' must be at most {MAX_TEXT_LENGTH} characters."
 
     history = body.get("history", [])
@@ -237,8 +248,23 @@ def chat():
         return error_response(403, "forbidden", "That is not your account.")
     student_code = token_code  # None = an anonymous chat that is not saved
 
+    # Step 1.4: a bank problem is used with the server's own text (the same text the app shows).
+    problem_id = body.get("problem_id")
+    problem_text = body.get("problem")
+    if problem_id is not None:
+        try:
+            bank_problem = problems.find(problem_id)
+        except problems.ProblemBankError as err:
+            app.logger.error("Problem bank cannot be read: %s", err)
+            return error_response(503, "problems_unavailable", "The problem list is not available right now.")
+        if bank_problem is None:
+            return error_response(400, "invalid_request", "'problem_id' must be the id of a problem from GET /problems.")
+        problem_text = bank_problem["text"]
+
     try:
-        result = tutor_agent.run_turn(student_code, body["problem"], body.get("history", []), body.get("session_id"))
+        result = tutor_agent.run_turn(
+            student_code, problem_text, body.get("history", []), body.get("session_id"), problem_id=problem_id
+        )
     except TutorUnavailable as err:
         # Gemini was busy or failed. Save nothing, tell the app clearly.
         app.logger.error("Tutor unavailable: %s", err)
