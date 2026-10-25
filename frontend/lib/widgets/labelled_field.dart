@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
+import '../l10n/app_localizations.dart';
 import 'duo_icon.dart';
 
 /// A text field with a visible label above it.
@@ -56,6 +57,9 @@ class LabelledField extends StatefulWidget {
 
 class _LabelledFieldState extends State<LabelledField> {
   final _focus = FocusNode();
+
+  /// Password boxes start hidden (dots); the eye button shows the letters.
+  late bool _hidden = widget.obscureText;
 
   @override
   void initState() {
@@ -116,7 +120,7 @@ class _LabelledFieldState extends State<LabelledField> {
                 controller: widget.controller,
                 focusNode: _focus,
                 enabled: widget.enabled,
-                obscureText: widget.obscureText,
+                obscureText: _hidden,
                 keyboardType: widget.keyboardType,
                 textInputAction: widget.textInputAction,
                 autofillHints: widget.autofillHints,
@@ -136,6 +140,13 @@ class _LabelledFieldState extends State<LabelledField> {
                     horizontal: AppSpace.s4,
                     vertical: 14,
                   ),
+                  // Password boxes: an eye button to show or hide the letters.
+                  suffixIcon: widget.obscureText
+                      ? _ShowPasswordButton(
+                          hidden: _hidden,
+                          onTap: () => setState(() => _hidden = !_hidden),
+                        )
+                      : null,
                 ),
               ),
             ),
@@ -173,6 +184,35 @@ class _LabelledFieldState extends State<LabelledField> {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// The eye button inside a password box. 48 × 48 to tap easily; a screen
+/// reader hears "Show password" or "Hide password".
+class _ShowPasswordButton extends StatelessWidget {
+  const _ShowPasswordButton({required this.hidden, required this.onTap});
+
+  final bool hidden;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
+    return Semantics(
+      button: true,
+      label: hidden ? l10n.passwordShow : l10n.passwordHide,
+      excludeSemantics: true,
+      child: IconButton(
+        onPressed: onTap,
+        constraints: const BoxConstraints.tightFor(width: 48, height: 48),
+        icon: DuoIcon(
+          hidden ? AppIcon.eye : AppIcon.eyeOff,
+          size: 22,
+          color: c.inkMuted,
+        ),
       ),
     );
   }

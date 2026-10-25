@@ -142,7 +142,10 @@ void main() {
     await tapVisible(tester, find.widgetWithText(TextButton, 'Log in'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Type a code first, for example P001.'), findsOneWidget);
+    expect(
+      find.text('Type a username first, for example P001.'),
+      findsOneWidget,
+    );
     expect(find.text('Type your password.'), findsOneWidget);
 
     await tester.enterText(find.byType(TextField).at(0), 'TEST01');
@@ -152,22 +155,38 @@ void main() {
     expect(find.text('Hi, TEST01'), findsOneWidget);
   });
 
-  testWidgets('Language: the choice is saved and shown on Welcome', (
+  testWidgets('Language choice is hidden for now (English only)', (
     tester,
   ) async {
-    final prefs = await startApp(tester);
+    await startApp(tester);
+    // No language button on Welcome.
+    expect(find.text('English'), findsNothing);
+    expect(find.text('Choose a language'), findsNothing);
+  });
 
-    await tester.tap(find.text('English'));
+  testWidgets('Password box: the eye button shows and hides the letters', (
+    tester,
+  ) async {
+    await startApp(tester);
+    await tester.tap(find.text('Log in'));
     await tester.pumpAndSettle();
-    expect(find.text('Choose a language'), findsOneWidget);
 
-    await tester.tap(find.text('தமிழ்'));
-    await tester.pumpAndSettle();
-    expect(prefs.getString('language'), 'ta');
+    TextField password() =>
+        tester.widget<TextField>(find.byType(TextField).at(1));
+    // The username box has no eye button; the password box starts hidden.
+    expect(
+      tester.widget<TextField>(find.byType(TextField).at(0)).obscureText,
+      isFalse,
+    );
+    expect(password().obscureText, isTrue);
 
-    await tapVisible(tester, find.text('Done'));
+    await tester.tap(find.bySemanticsLabel('Show password'));
     await tester.pumpAndSettle();
-    expect(find.text('தமிழ்'), findsOneWidget);
+    expect(password().obscureText, isFalse);
+
+    await tester.tap(find.bySemanticsLabel('Hide password'));
+    await tester.pumpAndSettle();
+    expect(password().obscureText, isTrue);
   });
 }
 

@@ -184,7 +184,7 @@ class SettingsScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 18),
 
-                            // Language and Glass effects.
+                            // Language (hidden for now), Look and Glass effects.
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
@@ -193,28 +193,30 @@ class SettingsScreen extends StatelessWidget {
                               ),
                               child: Column(
                                 children: [
-                                  ListenableBuilder(
-                                    listenable: settings,
-                                    builder: (context, _) => _Row(
-                                      icon: AppIcon.globe,
-                                      tint: c.skySoft,
-                                      tintInk: c.skyInk,
-                                      label: l10n.settingsLanguage,
-                                      value: settings.language.nativeName,
-                                      onTap: () => Navigator.of(context).push(
-                                        MaterialPageRoute<void>(
-                                          builder: (_) =>
-                                              const LanguageScreen(),
+                                  if (showLanguageChoice) ...[
+                                    ListenableBuilder(
+                                      listenable: settings,
+                                      builder: (context, _) => _Row(
+                                        icon: AppIcon.globe,
+                                        tint: c.skySoft,
+                                        tintInk: c.skyInk,
+                                        label: l10n.settingsLanguage,
+                                        value: settings.language.nativeName,
+                                        onTap: () => Navigator.of(context).push(
+                                          MaterialPageRoute<void>(
+                                            builder: (_) =>
+                                                const LanguageScreen(),
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                      ),
+                                      child: Divider(height: 1, color: c.line),
                                     ),
-                                    child: Divider(height: 1, color: c.line),
-                                  ),
+                                  ],
                                   ListenableBuilder(
                                     listenable: settings,
                                     builder: (context, _) => _ThemeRow(

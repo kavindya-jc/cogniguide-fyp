@@ -67,13 +67,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your coach may answer in English first while we test Sinhala and Tamil.';
 
   @override
-  String get fieldCode => 'Anonymous code';
+  String get fieldCode => 'Username';
 
   @override
   String get fieldCodeHint => 'For example P001';
 
   @override
   String get fieldPassword => 'Password';
+
+  @override
+  String get passwordShow => 'Show password';
+
+  @override
+  String get passwordHide => 'Hide password';
 
   @override
   String get fieldPasswordAgain => 'Type the password again';
@@ -83,7 +89,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createSubtitle =>
-      'No name or email needed. Just a code and a password.';
+      'No name or email needed. Just a username and a password.';
 
   @override
   String get createSubtitleFix => 'Almost there. A few small things to fix.';
@@ -97,7 +103,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createWriteItDown =>
-      'Write your code and password down. Because we don\'t know who you are, we can\'t recover them.';
+      'Write your username and password down. Because we don\'t know who you are, we can\'t recover them.';
 
   @override
   String get createButton => 'Create account';
@@ -109,7 +115,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creatingAccount => 'Creating your account';
 
   @override
-  String get fixCodeEmpty => 'Type a code first, for example P001.';
+  String get fixCodeEmpty => 'Type a username first, for example P001.';
 
   @override
   String get fixCodeFormat =>
@@ -117,7 +123,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fixCodeTaken =>
-      'That code is taken. Try a different one, for example add a few more numbers.';
+      'That username is taken. Try a different one, for example add a few more numbers.';
 
   @override
   String fixPasswordShort(int count) {
@@ -139,7 +145,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fixDetailsDontMatch =>
-      'That code and password don\'t match. Check them and try again.';
+      'That username and password don\'t match. Check them and try again.';
 
   @override
   String get fixTooManyTries =>
@@ -155,11 +161,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginTitle => 'Welcome back';
 
   @override
-  String get loginSubtitle => 'Log in with your code and password.';
+  String get loginSubtitle => 'Log in with your username and password.';
 
   @override
   String get loginPrivacy =>
-      'Your code keeps your progress private. This is not a test and nobody grades you.';
+      'Your username keeps your progress private. This is not a test and nobody grades you.';
 
   @override
   String get loginButton => 'Log in';
@@ -223,11 +229,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String settingsYourCode(String code) {
-    return 'Your code: $code';
+    return 'Your username: $code';
   }
 
   @override
-  String get settingsYourCodeLabel => 'Your code';
+  String get settingsYourCodeLabel => 'Your username';
 
   @override
   String get settingsLanguage => 'Language';
@@ -312,7 +318,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logoutText =>
-      'You\'ll need your code and password to log back in. Your progress stays saved.';
+      'You\'ll need your username and password to log back in. Your progress stays saved.';
 
   @override
   String get logoutStay => 'Stay';

@@ -205,7 +205,7 @@ abstract class AppLocalizations {
   /// No description provided for @fieldCode.
   ///
   /// In en, this message translates to:
-  /// **'Anonymous code'**
+  /// **'Username'**
   String get fieldCode;
 
   /// No description provided for @fieldCodeHint.
@@ -219,6 +219,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password'**
   String get fieldPassword;
+
+  /// No description provided for @passwordShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get passwordShow;
+
+  /// No description provided for @passwordHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get passwordHide;
 
   /// No description provided for @fieldPasswordAgain.
   ///
@@ -235,7 +247,7 @@ abstract class AppLocalizations {
   /// No description provided for @createSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'No name or email needed. Just a code and a password.'**
+  /// **'No name or email needed. Just a username and a password.'**
   String get createSubtitle;
 
   /// No description provided for @createSubtitleFix.
@@ -259,7 +271,7 @@ abstract class AppLocalizations {
   /// No description provided for @createWriteItDown.
   ///
   /// In en, this message translates to:
-  /// **'Write your code and password down. Because we don\'t know who you are, we can\'t recover them.'**
+  /// **'Write your username and password down. Because we don\'t know who you are, we can\'t recover them.'**
   String get createWriteItDown;
 
   /// No description provided for @createButton.
@@ -283,7 +295,7 @@ abstract class AppLocalizations {
   /// No description provided for @fixCodeEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Type a code first, for example P001.'**
+  /// **'Type a username first, for example P001.'**
   String get fixCodeEmpty;
 
   /// Shown when the code has spaces, @, or other characters (so names and emails are not used).
@@ -295,7 +307,7 @@ abstract class AppLocalizations {
   /// No description provided for @fixCodeTaken.
   ///
   /// In en, this message translates to:
-  /// **'That code is taken. Try a different one, for example add a few more numbers.'**
+  /// **'That username is taken. Try a different one, for example add a few more numbers.'**
   String get fixCodeTaken;
 
   /// No description provided for @fixPasswordShort.
@@ -319,7 +331,7 @@ abstract class AppLocalizations {
   /// No description provided for @fixDetailsDontMatch.
   ///
   /// In en, this message translates to:
-  /// **'That code and password don\'t match. Check them and try again.'**
+  /// **'That username and password don\'t match. Check them and try again.'**
   String get fixDetailsDontMatch;
 
   /// No description provided for @fixTooManyTries.
@@ -349,13 +361,13 @@ abstract class AppLocalizations {
   /// No description provided for @loginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Log in with your code and password.'**
+  /// **'Log in with your username and password.'**
   String get loginSubtitle;
 
   /// No description provided for @loginPrivacy.
   ///
   /// In en, this message translates to:
-  /// **'Your code keeps your progress private. This is not a test and nobody grades you.'**
+  /// **'Your username keeps your progress private. This is not a test and nobody grades you.'**
   String get loginPrivacy;
 
   /// No description provided for @loginButton.
@@ -469,13 +481,13 @@ abstract class AppLocalizations {
   /// No description provided for @settingsYourCode.
   ///
   /// In en, this message translates to:
-  /// **'Your code: {code}'**
+  /// **'Your username: {code}'**
   String settingsYourCode(String code);
 
   /// No description provided for @settingsYourCodeLabel.
   ///
   /// In en, this message translates to:
-  /// **'Your code'**
+  /// **'Your username'**
   String get settingsYourCodeLabel;
 
   /// No description provided for @settingsLanguage.
@@ -631,7 +643,7 @@ abstract class AppLocalizations {
   /// No description provided for @logoutText.
   ///
   /// In en, this message translates to:
-  /// **'You\'ll need your code and password to log back in. Your progress stays saved.'**
+  /// **'You\'ll need your username and password to log back in. Your progress stays saved.'**
   String get logoutText;
 
   /// No description provided for @logoutStay.

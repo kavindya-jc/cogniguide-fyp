@@ -87,7 +87,7 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Settings'));
     await tester.pumpAndSettle();
     expect(find.text('P001'), findsOneWidget);
-    expect(find.bySemanticsLabel('Your code: P001'), findsOneWidget);
+    expect(find.bySemanticsLabel('Your username: P001'), findsOneWidget);
 
     await tester.tap(find.text('Log out'));
     await tester.pumpAndSettle();
