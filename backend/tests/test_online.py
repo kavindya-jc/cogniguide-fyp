@@ -66,3 +66,57 @@ def test_render_blueprint_has_no_secrets():
         block = text.split(f"- key: {secret}")[1].split("- key:")[0]
         assert "sync: false" in block and "value:" not in block, secret
     assert "REQUIRE_LOGIN" in text and 'value: "true"' in text
+
+
+# ---- Hugging Face Spaces upload folder (scripts/make_hf_space.py) ----
+
+def _hf_script():
+    import importlib.util
+    from pathlib import Path
+
+    path = Path(__file__).resolve().parents[1] / "scripts" / "make_hf_space.py"
+    spec = importlib.util.spec_from_file_location("make_hf_space", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_hf_folder_has_what_the_server_needs(tmp_path):
+    files = _hf_script().make(tmp_path / "space")
+    for needed in ("Dockerfile", "README.md", "requirements.txt", "backend/app/api.py",
+                   "backend/app/tutor_agent.py", "backend/data/problems.json"):
+        assert needed in files
+    assert not any("tests/" in f or f.endswith(".sql") or "__pycache__" in f for f in files)
+
+
+def test_hf_folder_never_copies_a_secret_file(tmp_path):
+    hf = _hf_script()
+    source = tmp_path / "source"
+    (source / "inner").mkdir(parents=True)
+    for name in (".env", ".env.local", "inner/.env", "keep.py"):
+        (source / name).write_text("X=1", encoding="utf-8")
+    hf._copy_tree(source, tmp_path / "out")
+    copied = sorted(p.name for p in (tmp_path / "out").rglob("*") if p.is_file())
+    assert copied == ["keep.py"]
+
+
+def test_hf_folder_is_only_rebuilt_if_the_script_made_it(tmp_path):
+    hf = _hf_script()
+    other = tmp_path / "someone_elses_folder"
+    other.mkdir()
+    (other / "important.txt").write_text("keep me", encoding="utf-8")
+    with pytest.raises(SystemExit):
+        hf.make(other)
+    assert (other / "important.txt").exists()
+
+
+def test_space_card_and_dockerfile_agree_on_the_port():
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[2] / "deploy" / "huggingface"
+    card = (root / "README.md").read_text(encoding="utf-8")
+    docker = (root / "Dockerfile").read_text(encoding="utf-8")
+    assert "sdk: docker" in card and "app_port: 7860" in card
+    assert "PORT=7860" in docker and "REQUIRE_LOGIN=true" in docker
+    for secret in ("GEMINI_API_KEY=", "SUPABASE_SERVICE_KEY=", "AUTH_SECRET="):
+        assert secret not in docker
