@@ -52,7 +52,7 @@ db.find_student = lambda code: STUDENTS[code]["id"] if code in STUDENTS else Non
 db.get_progress_rows = lambda student_uuid, max_sessions=10: ([], [])
 tutor_agent.socratic_response = lambda problem, history, extra_instruction="", raise_on_error=False: "What do you notice?"
 tutor_agent.log_turn = lambda code, session_id, *rest, **kw: SAVED.append(code) or "session-1"
-tutor_agent.load_scaffold_level = lambda code, session_id: 3
+tutor_agent.load_scaffold_level = lambda code, session_id, area=None: 3
 tutor_agent.load_reflection_type = lambda *a: None
 # Phase 2: no real Gemini check and no real database memory in this test.
 tutor_agent.assess = lambda problem, bank, history: assessment.fallback(history)

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
@@ -76,6 +78,10 @@ class _ChatScreenState extends State<ChatScreen> {
   String? _code;
   String? _sessionId;
   bool _started = false;
+
+  /// The server was told this chat is over (see [_endSession]).
+  bool _ended = false;
+  AppServices? _services;
   bool _waiting = false;
   bool _expanded = false;
 
@@ -93,6 +99,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   /// "I worked it out!": the celebration, with numbers the app knows.
   void _workedItOut() {
+    _endSession('worked_it_out');
     final minutes = (_time.elapsed.inSeconds / 60).ceil().clamp(1, 999);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
@@ -102,9 +109,27 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  /// Tells the server the chat is over ("worked_it_out" or "left"), once.
+  /// Research data only: it runs in the background and never shows an error.
+  void _endSession(String reason) {
+    final services = _services;
+    final sessionId = _sessionId;
+    if (_ended || services == null || sessionId == null) return;
+    _ended = true;
+    unawaited(() async {
+      final token = await services.auth.token();
+      await services.chat.endSession(
+        sessionId: sessionId,
+        reason: reason,
+        token: token,
+      );
+    }());
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _services = AppServices.of(context);
     if (!_started) {
       _started = true;
       _openChat();
@@ -113,6 +138,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _endSession('left'); // does nothing after "I worked it out!"
     _input.dispose();
     _inputFocus.dispose();
     _scroll.dispose();

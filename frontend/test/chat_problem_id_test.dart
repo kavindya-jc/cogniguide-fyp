@@ -37,4 +37,47 @@ void main() {
     final body = await sentBody();
     expect(body.containsKey('problem_id'), isFalse);
   });
+
+  group('endSession (research data)', () {
+    test('sends the session, the reason and the login', () async {
+      late http.Request asked;
+      final api = ChatApi(
+        baseUrl: 'http://server',
+        client: pretendServer((r) {
+          asked = r;
+          return http.Response('{"status": "solved", "verified": true}', 200);
+        }),
+      );
+      await api.endSession(
+        sessionId: 'abc',
+        reason: 'worked_it_out',
+        token: 'tok-1',
+      );
+      expect(asked.url.toString(), 'http://server/session/end');
+      expect(asked.headers['Authorization'], 'Bearer tok-1');
+      expect(jsonDecode(asked.body), {
+        'session_id': 'abc',
+        'reason': 'worked_it_out',
+      });
+    });
+
+    test('without a login nothing is sent', () async {
+      var calls = 0;
+      final api = ChatApi(
+        client: pretendServer((_) {
+          calls++;
+          return http.Response('{}', 200);
+        }),
+      );
+      await api.endSession(sessionId: 'abc', reason: 'left', token: null);
+      expect(calls, 0);
+    });
+
+    test('no internet never shows an error to the student', () async {
+      final api = ChatApi(
+        client: pretendServer((_) => throw http.ClientException('offline')),
+      );
+      await api.endSession(sessionId: 'abc', reason: 'left', token: 'tok');
+    });
+  });
 }

@@ -112,12 +112,6 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get done;
 
-  /// Screen reader name for the language button on Welcome.
-  ///
-  /// In en, this message translates to:
-  /// **'Language: {language}. Change language'**
-  String welcomeLanguageButton(String language);
-
   /// No description provided for @welcomeTitle.
   ///
   /// In en, this message translates to:
@@ -165,42 +159,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your thinking coach, waving hello'**
   String get pipWaving;
-
-  /// No description provided for @languageTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a language'**
-  String get languageTitle;
-
-  /// No description provided for @languageSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'You can change this any time in Settings.'**
-  String get languageSubtitle;
-
-  /// No description provided for @languageEnglish.
-  ///
-  /// In en, this message translates to:
-  /// **'English'**
-  String get languageEnglish;
-
-  /// No description provided for @languageSinhala.
-  ///
-  /// In en, this message translates to:
-  /// **'Sinhala'**
-  String get languageSinhala;
-
-  /// No description provided for @languageTamil.
-  ///
-  /// In en, this message translates to:
-  /// **'Tamil'**
-  String get languageTamil;
-
-  /// No description provided for @languageNote.
-  ///
-  /// In en, this message translates to:
-  /// **'Your coach may answer in English first while we test Sinhala and Tamil.'**
-  String get languageNote;
 
   /// No description provided for @fieldCode.
   ///
@@ -489,12 +447,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your username'**
   String get settingsYourCodeLabel;
-
-  /// No description provided for @settingsLanguage.
-  ///
-  /// In en, this message translates to:
-  /// **'Language'**
-  String get settingsLanguage;
 
   /// No description provided for @settingsTheme.
   ///

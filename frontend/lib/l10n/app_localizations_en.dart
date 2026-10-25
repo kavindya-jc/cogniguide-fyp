@@ -18,11 +18,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get done => 'Done';
 
   @override
-  String welcomeLanguageButton(String language) {
-    return 'Language: $language. Change language';
-  }
-
-  @override
   String get welcomeTitle => 'Think it through, your way.';
 
   @override
@@ -46,25 +41,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pipWaving => 'Your thinking coach, waving hello';
-
-  @override
-  String get languageTitle => 'Choose a language';
-
-  @override
-  String get languageSubtitle => 'You can change this any time in Settings.';
-
-  @override
-  String get languageEnglish => 'English';
-
-  @override
-  String get languageSinhala => 'Sinhala';
-
-  @override
-  String get languageTamil => 'Tamil';
-
-  @override
-  String get languageNote =>
-      'Your coach may answer in English first while we test Sinhala and Tamil.';
 
   @override
   String get fieldCode => 'Username';
@@ -234,9 +210,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsYourCodeLabel => 'Your username';
-
-  @override
-  String get settingsLanguage => 'Language';
 
   @override
   String get settingsTheme => 'Look';

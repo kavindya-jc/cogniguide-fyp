@@ -29,4 +29,4 @@ This folder (`frontend/`) is the Flutter app. The backend (Flask + Gemini + Supa
 - Only an anonymous code and password. Never ask for or show a name, email, school or photo (a cartoon buddy is fine; it is never sent to the server).
 - The chat shows only the coach's reply text. Never show hint level, scaffold level, reflection type or any score.
 - No points, badges, streaks, leaderboards, friends, sharing or picture upload.
-- Typed questions only. English first; keep all app text in language files (ARB) so Sinhala and Tamil can be added later.
+- Typed questions only. English only (the team decided not to add Sinhala and Tamil). Keep all app text in the ARB file `lib/l10n/app_en.arb`.

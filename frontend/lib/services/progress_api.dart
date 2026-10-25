@@ -134,7 +134,7 @@ class ProgressApi {
             Uri.parse('$_baseUrl/progress'),
             headers: {if (token != null) 'Authorization': 'Bearer $token'},
           )
-          .timeout(const Duration(seconds: 30));
+          .timeout(AppConfig.serverTimeout);
     } on TimeoutException {
       return const ProgressFailure(ProgressProblem.failed);
     } on http.ClientException {

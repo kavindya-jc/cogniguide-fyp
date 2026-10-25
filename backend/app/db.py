@@ -303,3 +303,61 @@ def save_session_state(session_id, state, solved=False):
         row["status"] = "solved"
         row["ended_at"] = datetime.now(timezone.utc).isoformat()
     _get_client().table("sessions").update(row).eq("id", session_id).execute()
+
+
+# ---- Agent plan, Phase 3: research data ----
+
+def save_agent_turn(row):
+    """One row in agent_turns (stage10_agent_log.sql): what the tutor decided and why. Labels only."""
+    _get_client().table("agent_turns").insert(row).execute()
+
+
+def end_session(session_id, status):
+    """Mark a session as finished: status 'solved' or 'ended' (the student left or said they were done)."""
+    from datetime import datetime, timezone
+
+    _get_client().table("sessions").update(
+        {"status": status, "ended_at": datetime.now(timezone.utc).isoformat()}
+    ).eq("id", session_id).execute()
+
+
+def get_area_session_levels(student_id, session_ids_by_area, exclude_session_id=None, max_sessions=3):
+    """Phase 4: like get_recent_session_levels, but only for the given sessions (one maths area).
+
+    session_ids_by_area: the ids of this student's earlier sessions in that area.
+    Returns the average hint level per session, newest first.
+    """
+    ids = [sid for sid in session_ids_by_area if sid != exclude_session_id]
+    if not ids:
+        return []
+    res = (
+        _get_client()
+        .table("indicators")
+        .select("session_id, value")
+        .eq("student_id", student_id)
+        .eq("indicator_type", "hint_level")
+        .in_("session_id", ids)
+        .order("created_at", desc=True)
+        .order("id", desc=True)
+        .limit(300)
+        .execute()
+    )
+    per_session = {}
+    for row in res.data or []:
+        if row.get("value") is not None:
+            per_session.setdefault(row["session_id"], []).append(float(row["value"]))
+    return [sum(v) / len(v) for v in per_session.values()][:max_sessions]
+
+
+def get_session_problems(student_id, limit=50):
+    """Phase 4: this student's newest sessions with their problem_id, newest first."""
+    res = (
+        _get_client()
+        .table("sessions")
+        .select("id, problem_id")
+        .eq("student_id", student_id)
+        .order("started_at", desc=True)
+        .limit(limit)
+        .execute()
+    )
+    return res.data or []

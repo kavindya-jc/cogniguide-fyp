@@ -24,4 +24,9 @@ abstract final class AppConfig {
   /// How long to wait for the coach. The server may retry the AI a few
   /// times before answering, so this is generous.
   static const Duration chatTimeout = Duration(seconds: 120);
+
+  /// Log in, sign up and My progress. A free online server sleeps when
+  /// nobody uses it and can take about a minute to wake up, so wait long
+  /// enough for that.
+  static const Duration serverTimeout = Duration(seconds: 75);
 }

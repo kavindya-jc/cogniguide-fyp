@@ -10,6 +10,7 @@ Exposes the Socratic agent over HTTP:
     GET  /progress -> the logged-in student's own progress numbers (Stage 7, token since 7c)
     GET  /dashboard -> a simple web page that shows /progress as words, a chart and cards (Stage 7)
     GET  /problems -> the problem list, without answers (agent plan, Phase 1)
+    POST /session/end -> "I worked it out!" or left the chat; the server checks its own memory (Phase 3)
 
 Stage 3: if the request has a student_id, the chat is saved to Supabase
 (through db.py). Saving never breaks the chat: if it fails, the student
@@ -53,7 +54,10 @@ Run from the backend/ folder:
     python -m app.api
 """
 
+import os
 import re
+import threading
+import time
 import uuid
 
 from flask import Flask, jsonify, request
@@ -71,8 +75,37 @@ STUDENT_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 PROBLEM_ID_PATTERN = re.compile(r"^[a-z0-9-]{1,40}$")
 
 app = Flask(__name__)
-# Development only: allow any website/app to call us. Restrict before Phase 3.
-CORS(app)
+
+# ---- Settings for running online (all from environment variables; see docs/deploy_backend.md) ----
+
+# Which websites may call the API from a browser. Phone apps do not need CORS at all.
+# Not set or "*": any website (fine on a laptop). Online: the web app's address, or "none".
+_cors = os.getenv("CORS_ORIGINS", "*").strip()
+if _cors == "*":
+    CORS(app)
+elif _cors.lower() != "none":
+    CORS(app, origins=[o.strip() for o in _cors.split(",") if o.strip()])
+
+# Online the tutor answers logged-in students only (so nobody else can use up the Gemini quota).
+REQUIRE_LOGIN = os.getenv("REQUIRE_LOGIN", "false").strip().lower() == "true"
+
+# At most this many /chat calls per student (or per address, without login) per minute.
+CHAT_LIMIT_PER_MINUTE = int(os.getenv("CHAT_LIMIT_PER_MINUTE", "20"))
+_chat_calls = {}  # who -> times of recent /chat calls (in memory: fine for one small server)
+_chat_calls_lock = threading.Lock()
+
+
+def too_many_chats(who, now=None):
+    """True if `who` already made CHAT_LIMIT_PER_MINUTE /chat calls in the last minute."""
+    now = time.time() if now is None else now
+    with _chat_calls_lock:
+        recent = [t for t in _chat_calls.get(who, []) if now - t < 60]
+        if len(recent) >= CHAT_LIMIT_PER_MINUTE:
+            _chat_calls[who] = recent
+            return True
+        recent.append(now)
+        _chat_calls[who] = recent
+        return False
 
 
 def error_response(status, code, message):
@@ -247,6 +280,10 @@ def chat():
     if body_code and body_code != token_code:
         return error_response(403, "forbidden", "That is not your account.")
     student_code = token_code  # None = an anonymous chat that is not saved
+    if student_code is None and REQUIRE_LOGIN:
+        return error_response(401, "login_required", "Please log in to talk to your coach.")
+    if too_many_chats(student_code or request.remote_addr or "unknown"):
+        return error_response(429, "too_many_requests", "That is a lot of messages at once. Please wait a minute.")
 
     # Step 1.4: a bank problem is used with the server's own text (the same text the app shows).
     problem_id = body.get("problem_id")
@@ -273,6 +310,44 @@ def chat():
         app.logger.error("socratic_response failed: %s", err)
         return error_response(500, "server_error", "The tutor is unavailable right now.")
 
+    return jsonify(result)
+
+
+END_REASONS = ("worked_it_out", "left")
+
+
+@app.post("/session/end")
+def session_end():
+    """Phase 3: the student pressed "I worked it out!" or left the chat. Needs the login token.
+
+    Body: {"session_id": "...", "reason": "worked_it_out" | "left"}
+    Reply: {"status": "solved" | "ended", "verified": true | false}
+    "verified" says whether the server's own answer check had seen the right answer.
+    """
+    student_code, auth_err = student_from_request()
+    if auth_err:
+        return auth_err
+    if student_code is None:
+        return error_response(401, "login_required", "Please log in first.")
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return error_response(400, "invalid_request", "Request body must be a JSON object.")
+    session_id = body.get("session_id")
+    try:
+        uuid.UUID(str(session_id))
+    except ValueError:
+        return error_response(400, "invalid_request", "'session_id' must be the session id returned by /chat.")
+    if body.get("reason") not in END_REASONS:
+        return error_response(400, "invalid_request", "'reason' must be 'worked_it_out' or 'left'.")
+    if not db.is_configured():
+        return error_response(503, "session_unavailable", "Saving is not available right now.")
+    try:
+        result = tutor_agent.end_session(student_code, session_id, body["reason"])
+    except LookupError:
+        return error_response(404, "not_found", "That session was not found.")
+    except Exception as err:
+        app.logger.error("Ending the session failed: %s", err)
+        return error_response(503, "session_unavailable", "Saving is not available right now.")
     return jsonify(result)
 
 
@@ -353,4 +428,6 @@ def server_error(_err):
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    # Debug mode (auto-restart and the error page) only when asked for: set FLASK_DEBUG=1 in .env.
+    # Online the server runs with gunicorn instead (render.yaml), never with app.run.
+    app.run(host="127.0.0.1", port=5000, debug=os.getenv("FLASK_DEBUG", "0") == "1")

@@ -11,11 +11,10 @@ import '../widgets/round_icon_button.dart';
 import '../widgets/soft_blobs.dart';
 import '../widgets/tap_surface.dart';
 import 'buddy_screen.dart';
-import 'language_screen.dart';
 import 'logout_sheet.dart';
 import '../widgets/duo_icon.dart';
 
-/// Screen 3d: Settings. Your code, Language, Glass effects and Log out.
+/// Screen 3d: Settings. Your username, Look, Glass effects and Log out.
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key, required this.code});
 
@@ -184,7 +183,7 @@ class SettingsScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 18),
 
-                            // Language (hidden for now), Look and Glass effects.
+                            // Look and Glass effects.
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
@@ -193,30 +192,6 @@ class SettingsScreen extends StatelessWidget {
                               ),
                               child: Column(
                                 children: [
-                                  if (showLanguageChoice) ...[
-                                    ListenableBuilder(
-                                      listenable: settings,
-                                      builder: (context, _) => _Row(
-                                        icon: AppIcon.globe,
-                                        tint: c.skySoft,
-                                        tintInk: c.skyInk,
-                                        label: l10n.settingsLanguage,
-                                        value: settings.language.nativeName,
-                                        onTap: () => Navigator.of(context).push(
-                                          MaterialPageRoute<void>(
-                                            builder: (_) =>
-                                                const LanguageScreen(),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                      ),
-                                      child: Divider(height: 1, color: c.line),
-                                    ),
-                                  ],
                                   ListenableBuilder(
                                     listenable: settings,
                                     builder: (context, _) => _ThemeRow(
@@ -267,82 +242,6 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// One row in the Settings list: icon, label, optional value, arrow.
-class _Row extends StatelessWidget {
-  const _Row({
-    required this.icon,
-    required this.tint,
-    required this.tintInk,
-    required this.label,
-    required this.onTap,
-    this.value,
-  });
-
-  final AppIcon icon;
-
-  /// The icon tile's soft colour and the icon's colour.
-  final Color tint;
-  final Color tintInk;
-  final String label;
-  final String? value;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-
-    return Semantics(
-      button: true,
-      label: value == null ? label : '$label, $value',
-      excludeSemantics: true,
-      child: TapSurface(
-        onTap: onTap,
-        color: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-        ),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 64),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: tint,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: DuoIcon(icon, size: 22, color: tintInk),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: AppText.title.copyWith(
-                      fontWeight: FontWeight.w700,
-                      fontVariations: const [FontVariation('wght', 700)],
-                    ),
-                  ),
-                ),
-                if (value != null) ...[
-                  Text(
-                    value!,
-                    style: AppText.label.copyWith(color: c.inkMuted),
-                  ),
-                  const SizedBox(width: AppSpace.s2),
-                ],
-                DuoIcon(AppIcon.forward, size: 20, color: c.inkMuted),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

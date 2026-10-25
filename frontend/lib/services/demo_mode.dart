@@ -39,6 +39,13 @@ class DemoChatApi extends ChatApi {
     final i = studentTurns.length.clamp(0, _replies.length - 1);
     return ChatReply(reply: _replies[i], sessionId: sessionId ?? 'demo');
   }
+
+  @override
+  Future<void> endSession({
+    required String sessionId,
+    required String reason,
+    String? token,
+  }) async {} // the preview saves nothing
 }
 
 /// Example numbers for My progress in the preview.

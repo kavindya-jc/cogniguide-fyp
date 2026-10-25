@@ -7,6 +7,7 @@ A script passes when it ends with exit code 0 ("All checks passed.").
 If one fails, pytest shows the script's output with the failing check names.
 """
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -26,5 +27,7 @@ def test_check_script_passes(script):
         text=True,
         encoding="utf-8",
         timeout=300,
+        # The scripts send many messages quickly; the speed limit is tested in test_online.py.
+        env={**os.environ, "CHAT_LIMIT_PER_MINUTE": "10000", "REQUIRE_LOGIN": "false"},
     )
     assert result.returncode == 0, result.stdout + result.stderr

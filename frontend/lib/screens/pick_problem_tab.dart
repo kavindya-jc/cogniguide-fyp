@@ -54,6 +54,25 @@ class _PickProblemTabState extends State<PickProblemTab> {
   /// How tall the glass header is, so the list starts below it.
   double _headerHeight = 220;
 
+  /// True after scrolling down: the header folds into a slim bar.
+  bool _collapsed = false;
+
+  /// How far the list scrolls before the header folds.
+  static const double _collapseAt = 96;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_onScroll);
+  }
+
+  /// Only rebuilds when the header should fold or unfold (twice per
+  /// scroll at most), not on every scrolled pixel.
+  void _onScroll() {
+    final collapsed = _scroll.hasClients && _scroll.offset > _collapseAt;
+    if (collapsed != _collapsed) setState(() => _collapsed = collapsed);
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -199,13 +218,24 @@ class _PickProblemTabState extends State<PickProblemTab> {
         return Stack(
           children: [
             list,
+            // A soft fade behind the phone's clock and battery, so the list
+            // does not show through there when it scrolls up under the
+            // (slim) header. Drawn once; nothing here moves.
+            const Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: IgnorePointer(child: _StatusBarFade()),
+            ),
             Positioned(
               top: 0,
               left: 0,
               right: 0,
               child: MeasureHeight(
                 onHeight: (h) {
-                  if ((h - _headerHeight).abs() > 0.5) {
+                  // The list keeps the FULL header height as its top space,
+                  // so it does not jump when the header folds.
+                  if (!_collapsed && (h - _headerHeight).abs() > 0.5) {
                     setState(() => _headerHeight = h);
                   }
                 },
@@ -213,6 +243,7 @@ class _PickProblemTabState extends State<PickProblemTab> {
                   code: widget.code,
                   scroll: _scroll,
                   showPip: !loading && items.isNotEmpty,
+                  collapsed: _collapsed,
                 ),
               ),
             ),
@@ -227,7 +258,9 @@ class _PickProblemTabState extends State<PickProblemTab> {
 /// and Pip. The list scrolls underneath it.
 ///
 /// As the student scrolls down, the title shrinks a little and Pip floats
-/// up and tilts, so the screen feels alive.
+/// up and tilts, so the screen feels alive. Further down, the title and Pip
+/// fold away and only the slim top row stays (buddy, greeting, Log out,
+/// Settings), so more problems fit on screen. Back near the top they return.
 /// PERFORMANCE: only a scale, a move and a turn (no layout, no blur
 /// change). The glass is one of at most two blurred things on screen
 /// (the other is the bottom nav). With "reduce motion" on, nothing moves.
@@ -236,10 +269,14 @@ class _Header extends StatelessWidget {
     required this.code,
     required this.scroll,
     required this.showPip,
+    required this.collapsed,
   });
 
   final String code;
   final ScrollController scroll;
+
+  /// Folded into the slim bar (see [_PickProblemTabState._collapseAt]).
+  final bool collapsed;
 
   /// One Pip per screen: hidden while the thinking Pip shows below.
   final bool showPip;
@@ -312,48 +349,58 @@ class _Header extends StatelessWidget {
                     ),
                   ],
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: AnimatedBuilder(
-                        animation: scroll,
-                        builder: (context, child) => Transform.scale(
-                          scale: 1 - 0.14 * progress(),
-                          alignment: Alignment.centerLeft,
-                          child: child,
-                        ),
-                        child: Semantics(
-                          header: true,
-                          child: Text(
-                            l10n.homeTitle,
-                            style: AppText.h1.copyWith(
-                              color: c.ink,
-                              fontSize: 28,
-                              height: 32 / 28,
+                // The fold: one size animation, then nothing moves.
+                // With "reduce motion" it folds at once (no animation).
+                _Fold(
+                  still: still,
+                  child: collapsed
+                      ? const SizedBox(width: double.infinity)
+                      : Row(
+                          children: [
+                            Expanded(
+                              child: AnimatedBuilder(
+                                animation: scroll,
+                                builder: (context, child) => Transform.scale(
+                                  scale: 1 - 0.14 * progress(),
+                                  alignment: Alignment.centerLeft,
+                                  child: child,
+                                ),
+                                child: Semantics(
+                                  header: true,
+                                  child: Text(
+                                    l10n.homeTitle,
+                                    style: AppText.h1.copyWith(
+                                      color: c.ink,
+                                      fontSize: 28,
+                                      height: 32 / 28,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                            if (showPip)
+                              AnimatedBuilder(
+                                animation: scroll,
+                                builder: (context, child) {
+                                  final t = progress();
+                                  return Transform.translate(
+                                    offset: Offset(0, -14 * t),
+                                    child: Transform.rotate(
+                                      angle: -0.1 * t,
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                // Pip stays still here: anything moving inside the
+                                // glass makes the blur redraw every frame. The
+                                // scroll gives Pip its movement instead.
+                                child: const Pip(
+                                  mood: PipMood.determined,
+                                  size: 84,
+                                ),
+                              ),
+                          ],
                         ),
-                      ),
-                    ),
-                    if (showPip)
-                      AnimatedBuilder(
-                        animation: scroll,
-                        builder: (context, child) {
-                          final t = progress();
-                          return Transform.translate(
-                            offset: Offset(0, -14 * t),
-                            child: Transform.rotate(
-                              angle: -0.1 * t,
-                              child: child,
-                            ),
-                          );
-                        },
-                        // Pip stays still here: anything moving inside the
-                        // glass makes the blur redraw every frame. The
-                        // scroll gives Pip its movement instead.
-                        child: const Pip(mood: PipMood.determined, size: 84),
-                      ),
-                  ],
                 ),
               ],
             ),
@@ -535,6 +582,50 @@ class _OwnProblemBox extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// Folds the header's title row away (or back) with one size animation.
+/// With "reduce motion" ([still]) it changes at once.
+class _Fold extends StatelessWidget {
+  const _Fold({required this.still, required this.child});
+
+  final bool still;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (still) return child;
+    return AnimatedSize(
+      duration: AppMotion.medium,
+      curve: AppMotion.ease,
+      alignment: Alignment.topCenter,
+      child: child,
+    );
+  }
+}
+
+/// The page colour behind the status bar, fading out just below it.
+class _StatusBarFade extends StatelessWidget {
+  const _StatusBarFade();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    final top = MediaQuery.paddingOf(context).top;
+    return SizedBox(
+      height: top + AppSpace.s4,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [c.surface, c.surface, c.surface.withValues(alpha: 0)],
+            stops: [0, top / (top + AppSpace.s4), 1],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -6,11 +6,6 @@
   "back": "Back",
   "done": "Done",
 
-  "welcomeLanguageButton": "Language: {language}. Change language",
-  "@welcomeLanguageButton": {
-    "description": "Screen reader name for the language button on Welcome.",
-    "placeholders": { "language": { "type": "String" } }
-  },
   "welcomeTitle": "Think it through, your way.",
   "welcomeSubtitle": "A coach that asks good questions, so you find the answers yourself.",
   "welcomeStep1": "Pick a problem",
@@ -19,13 +14,6 @@
   "welcomeCreateAccount": "Create an account",
   "welcomeLogIn": "Log in",
   "pipWaving": "Your thinking coach, waving hello",
-
-  "languageTitle": "Choose a language",
-  "languageSubtitle": "You can change this any time in Settings.",
-  "languageEnglish": "English",
-  "languageSinhala": "Sinhala",
-  "languageTamil": "Tamil",
-  "languageNote": "Your coach may answer in English first while we test Sinhala and Tamil.",
 
   "fieldCode": "Username",
   "fieldCodeHint": "For example P001",
@@ -92,7 +80,6 @@
   "@settingsYourCode": {
     "placeholders": { "code": { "type": "String" } }
   },
-  "settingsLanguage": "Language",
   "settingsTheme": "Look",
   "settingsThemeSystem": "Same as phone",
   "settingsThemeLight": "Light",

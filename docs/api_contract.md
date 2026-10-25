@@ -208,6 +208,22 @@ Stage 7 lets a student see how their own thinking is growing. It is **not a grad
 
 Known limits: the numbers come from the word rules of Stage 4, so "growth" is a rough guide, not proof. The 0.5 rule and the 3-session window are first guesses (Phase 3). Since Stage 7c a student needs their password to see their progress. Still to do before real participants (Phase 3): restrict CORS. The real Flutter screen can use the same `/progress` data.
 
+## 2f. POST /session/end (agent plan, Phase 3)
+
+The app calls this when the student presses **"I worked it out!"** (`reason: "worked_it_out"`) or leaves the chat (`"left"`). Needs the login token. Research data only: the app never shows its errors.
+
+```json
+{"session_id": "3f2b8c1e-5a47-4d6e-9b0a-1c2d3e4f5a6b", "reason": "worked_it_out"}
+```
+
+Reply (200): `{"status": "solved" | "ended", "verified": true | false}`. `verified` says whether the server's own answer check had seen the right answer. For "worked_it_out" the server saves the indicator `claimed_solved` (1 = verified, 0 = not).
+
+Errors: 401 `login_required`; 400 `invalid_request` (bad session id or reason); 404 `not_found` (not this student's session); 503 `session_unavailable`.
+
+## 2g. Settings when the server runs online
+
+See `docs/deploy_backend.md`. With `REQUIRE_LOGIN=true`, `/chat` without a token gives **401 `login_required`**. Every server limits `/chat` to `CHAT_LIMIT_PER_MINUTE` calls per student (default 20): more gives **429 `too_many_requests`** (the app shows "coach is busy, try again"). Every tutor decision is logged in the table `agent_turns` (labels only, never message text; `backend/sql/stage10_agent_log.sql`).
+
 ## 2e. GET /problems (agent plan, Phase 1)
 
 The problems a student can pick. No login needed.

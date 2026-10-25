@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The soft lilac behind Pip on the app icon (same as `tile` in tool/make_app_icon_test.dart). -->
+    <color name="ic_launcher_background">#E7E3FF</color>
+</resources>
