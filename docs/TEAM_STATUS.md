@@ -2,6 +2,7 @@
 
 Updated: 25 October 2026 (late). For the whole team. Simple summary first, details after.
 The full answer to the team's audit questions is in **`docs/AGENT_REPORT.md`**.
+**To run and test everything yourself, start with `docs/TEAM_SELF_SETUP.md`.**
 
 ## In one minute
 

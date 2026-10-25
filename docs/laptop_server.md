@@ -1,5 +1,8 @@
 # Use a laptop as the CogniGuide server (free, for team testing)
 
+> **Want to do everything on your own computer** (code, server, app, testing the agent)?
+> Use **`docs/TEAM_SELF_SETUP.md`**. This file is for the person who runs a shared test server for the whole team.
+
 Free online hosting needs a card (Render) or is paid (Hugging Face Docker). Until the team chooses
 hosting for the study, **one team laptop is the server**, and a free **Cloudflare tunnel** gives it a
 public address that everyone's phone can use.
@@ -38,6 +41,47 @@ So the team tests **at agreed times**, like a meeting:
 Tip: if the server person keeps the tunnel window open between sessions (laptop on and awake), the
 address stays the same and nobody needs a new APK. Every restart of the tunnel means a new address
 and a new APK.
+
+## When the server laptop is off: how to test on your own
+
+The APK only works while **its** server laptop and tunnel are on. When that laptop is off (for
+example at night), any team member can still test in one of these ways.
+
+**All of them need the code and the secret `.env` file.** Get the code with "part 2" below (clone).
+Ask the project owner for `.env` **privately** (a direct message, never the group chat), put it in the
+main project folder, and never commit or share it.
+
+### Way 1: be your own server (test on your own phone)
+
+You do exactly what the server person does, on **your** laptop:
+
+1. Do "part 2" below once: clone the project, set up `venv`, add `.env`, `flutter pub get`.
+2. Install the tunnel once: `winget install --id Cloudflare.cloudflared`
+3. Follow **"Every time you start the server"** below on your laptop: Window 1 (backend), Window 2
+   (tunnel, copy the new address), then build the APK with **your** address.
+4. Install that APK on your phone and test. It works while **your** laptop runs both windows.
+
+You can share your APK with others too: then you are the server person for that session.
+
+### Way 2: test the agent on your computer only (no phone, no tunnel)
+
+The easiest way to see **how the agent works**:
+
+1. Do "part 2" below once (clone, `venv`, `.env`, `flutter pub get`).
+2. **Start your backend:** `cd backend` then `..\venv\Scripts\python -m app.api`
+3. Pick one:
+   - **The app on an Android emulator** (Android Studio → Device Manager → start a phone), then in a
+     second terminal: `cd frontend` then `flutter run`. The app talks to your own backend automatically.
+   - **Scripted students** (no app at all): in a second terminal, `cd backend` then
+     `..\venv\Scripts\python ..\experiments\phase4_agent_eval\run_scenarios.py`. It plays 8 pretend
+     students through the real agent and saves every reply, with the action the agent chose and why,
+     in `experiments/phase4_agent_eval/results_<time>.md`.
+4. See the decisions in Supabase: **Table Editor → `agent_turns`** (explained in "See how the agent decides").
+
+### Way 3 (later): real hosting
+
+With Render (free plan, needs a card for verification) or university hosting, the server is always
+on, no laptop is needed, and one APK works for everyone. See `docs/deploy_backend.md`.
 
 ## One-time setup (on the server laptop)
 
