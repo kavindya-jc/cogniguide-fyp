@@ -1,6 +1,10 @@
 -- CogniGuide agent plan, Phase 1 (Step 1.4): what each session is about, and room for the agent's memory.
 --
 -- Run ONCE in Supabase: Dashboard -> SQL Editor -> New query -> paste -> Run.
+-- IMPORTANT: the dropdown next to "Save" (top right of the editor) must say "Database".
+-- If it says "Logs", Supabase only allows SELECT and shows errors such as
+-- "sql parser error" or "Only SELECT queries allowed".
+--
 -- Safe to run again (it does nothing the second time). Old sessions keep working:
 -- they get problem_id = null, status = 'in_progress' and an empty state.
 --
@@ -10,6 +14,8 @@
 --   ended_at    when the session was solved or ended (filled in by later steps)
 --   state       the agent's notes about this session, e.g. attempts and hints given
 --               (numbers and short labels only, never message text; filled in by later steps)
+--
+-- Row-level security is already on for sessions (schema.sql); new columns are covered too.
 
 alter table sessions
     add column if not exists problem_id text,
@@ -25,5 +31,3 @@ begin
             add constraint sessions_status_check check (status in ('in_progress', 'solved', 'ended'));
     end if;
 end $$;
-
--- Row-level security is already on for sessions (schema.sql); new columns are covered too.

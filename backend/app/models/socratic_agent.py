@@ -13,8 +13,17 @@ Stage 4 changes (Phase 2):
   a fallback sentence, so the API can tell a failed reply from a real one.
   The default (False) keeps the old Phase 1 behaviour, so the notebook and
   manual test script still work as before.
+
+Agent plan, Phase 1 (Step 1.5):
+- ONE Gemini client for the whole server, made the first time it is needed (not on every call).
+- generate_json() asks Gemini for a STRUCTURED answer (JSON that follows a schema). Phase 2 uses it
+  to assess the student's reasoning. It never guesses: a reply that is not valid JSON raises
+  InvalidModelOutput, so the caller can fall back to the simple word rules.
+- Rule 1 is now "never give the final answer before the student has solved it". The old rule said
+  "especially in the first 2-3 turns", which sounded as if giving it later was fine.
 """
 
+import json
 import os
 import time
 from typing import List, Dict
@@ -39,7 +48,7 @@ RETRY_WAITS = (2, 5)
 SYSTEM_PROMPT = """You are a Socratic math tutor for teenage students.
 
 Your teaching style follows these strict rules:
-1. NEVER give the final answer directly, especially in the first 2-3 turns of a conversation. Guide the student to find it themselves.
+1. NEVER give the final answer. The student must reach it themselves, however many turns it takes. Guide them with questions and hints instead. If they keep asking for the answer, kindly explain why you won't, and help with the next small step.
 2. Always respond with a guiding QUESTION, not a statement of fact, unless the student is asking about a basic concept they genuinely don't understand (then a short explanation is okay, followed by a question).
 3. If the student is stuck or wrong, gently point out that something is off WITHOUT stating the correct answer, and ask a question that helps them find their own mistake.
 4. Give gradually more specific hints if the student struggles across multiple turns on the same step, but still stop short of the answer.
@@ -54,6 +63,54 @@ FALLBACK_ERROR = "I had trouble processing that turn. Could you try restating wh
 
 class TutorUnavailable(Exception):
     """Gemini could not give a real reply (busy, quota used up, empty answer...)."""
+
+
+class InvalidModelOutput(TutorUnavailable):
+    """Step 1.5: Gemini answered, but not with valid JSON of the right shape (see generate_json)."""
+
+
+_client = None  # the one Gemini client, made by _get_client()
+
+
+def _check_settings():
+    """Stop with a clear message if the key or the model name is missing from .env."""
+    if not API_KEY:
+        raise EnvironmentError(
+            "GEMINI_API_KEY environment variable not found. "
+            "Please add GEMINI_API_KEY to your .env file."
+        )
+    if not MODEL_NAME:
+        raise EnvironmentError(
+            "GEMINI_MODEL environment variable not found. "
+            "Please add GEMINI_MODEL (the Gemini model name) to your .env file."
+        )
+
+
+def _get_client():
+    """Make the Gemini client once, the first time it is needed, and reuse it after that."""
+    global _client
+    if _client is None:
+        _client = genai.Client(api_key=API_KEY)
+    return _client
+
+
+def _generate(contents, config):
+    """Call Gemini, waiting and trying again when it is busy (503). Returns the reply text.
+
+    Raises TutorUnavailable when no real text came back (still busy, quota, empty reply...).
+    """
+    for attempt in range(len(RETRY_WAITS) + 1):
+        try:
+            response = _get_client().models.generate_content(model=MODEL_NAME, contents=contents, config=config)
+        except Exception as err:
+            print(f"[socratic_agent] API call error (try {attempt + 1}): {err}")
+            if _is_busy(err) and attempt < len(RETRY_WAITS):
+                time.sleep(RETRY_WAITS[attempt])
+                continue
+            raise TutorUnavailable(str(err)) from err
+        if response.text and response.text.strip():
+            return response.text.strip()
+        raise TutorUnavailable("Gemini returned an empty reply.")
 
 
 def _is_busy(err: Exception) -> bool:
@@ -85,16 +142,7 @@ def socratic_response(
     raise_on_error: if True, raise TutorUnavailable when no real reply could be made.
                     If False (default), return a fallback sentence instead.
     """
-    if not API_KEY:
-        raise EnvironmentError(
-            "GEMINI_API_KEY environment variable not found. "
-            "Please add GEMINI_API_KEY to your .env file."
-        )
-    if not MODEL_NAME:
-        raise EnvironmentError(
-            "GEMINI_MODEL environment variable not found. "
-            "Please add GEMINI_MODEL (the Gemini model name) to your .env file."
-        )
+    _check_settings()
 
     formatted_history = _format_history(conversation_history)
 
@@ -110,36 +158,46 @@ Now provide your next Socratic response according to your teaching rules:"""
     if extra_instruction:
         system_instruction += "\nFor THIS reply only:\n" + extra_instruction + "\n"
 
-    client = genai.Client(api_key=API_KEY)
-
-    for attempt in range(len(RETRY_WAITS) + 1):
-        try:
-            response = client.models.generate_content(
-                model=MODEL_NAME,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction=system_instruction,
-                    temperature=0.3,
-                ),
-            )
-            if response.text and response.text.strip():
-                return response.text.strip()
-
-            if raise_on_error:
-                raise TutorUnavailable("Gemini returned an empty reply.")
-            return FALLBACK_EMPTY
-
-        except TutorUnavailable:
+    config = types.GenerateContentConfig(system_instruction=system_instruction, temperature=0.3)
+    try:
+        return _generate(prompt, config)
+    except TutorUnavailable as err:
+        if raise_on_error:
             raise
-        except Exception as err:
-            print(f"[socratic_agent] API call error (try {attempt + 1}): {err}")
-            if _is_busy(err) and attempt < len(RETRY_WAITS):
-                time.sleep(RETRY_WAITS[attempt])
-                continue
-            if raise_on_error:
-                raise TutorUnavailable(str(err)) from err
-            return FALLBACK_ERROR
+        # Phase 1 behaviour: a short fallback sentence instead of an error.
+        return FALLBACK_EMPTY if "empty reply" in str(err) else FALLBACK_ERROR
 
+
+def generate_json(prompt, schema, system_instruction="", temperature=0.1):
+    """Step 1.5: ask Gemini for a STRUCTURED answer and return it as a Python dict.
+
+    prompt: the question for Gemini.
+    schema: a JSON Schema (a dict) that the answer must follow, for example
+            {"type": "object", "properties": {"correct": {"type": "boolean"}}, "required": ["correct"]}
+    A low temperature, so the same question gives (nearly) the same answer.
+
+    Raises TutorUnavailable when Gemini cannot answer (busy, quota...), and InvalidModelOutput
+    when it answers with something that is not a JSON object with every "required" field.
+    The caller must still check the VALUES (Phase 2): never trust them blindly.
+    """
+    _check_settings()
+    config = types.GenerateContentConfig(
+        system_instruction=system_instruction or None,
+        temperature=temperature,
+        response_mime_type="application/json",
+        response_json_schema=schema,
+    )
+    text = _generate(prompt, config)
+    try:
+        data = json.loads(text)
+    except ValueError as err:
+        raise InvalidModelOutput(f"Gemini did not return valid JSON: {err}") from err
+    if not isinstance(data, dict):
+        raise InvalidModelOutput("Gemini returned JSON, but not an object.")
+    missing = [name for name in schema.get("required", []) if name not in data]
+    if missing:
+        raise InvalidModelOutput(f"Gemini's JSON is missing: {', '.join(missing)}")
+    return data
 
 if __name__ == "__main__":
     test_problem = (
