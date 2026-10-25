@@ -36,6 +36,44 @@ in a chat, never put a key in the app, and never commit `.env`.
    (With a new secret, students log in again once. Their progress is kept.)
 5. Click **Apply**. The first build takes a few minutes.
 
+### If Render asks for a card
+
+Render's **Free** instance costs nothing, but Render may ask for a card to verify the account,
+especially for **Blueprints**. Decide as a team whether to add one (a card on file means paid extras
+*could* be charged if someone turns them on). If you do not want to add a card, try **Step 1b**.
+If Render asks for a card there too, ask Claude to prepare the no-card alternative
+(Hugging Face Spaces, which needs one small extra file, a `Dockerfile`).
+
+## Step 1b: Create the service by hand (no Blueprint)
+
+1. Render **Overview** → **Deploy a Web Service** → connect GitHub → pick **cogniguide-fyp**.
+2. Fill in exactly:
+
+   | Setting | Value |
+   |---|---|
+   | Name | `cogniguide-backend` |
+   | Language / Runtime | **Python 3** |
+   | Branch | `main` |
+   | Root Directory | `backend` |
+   | Build Command | `pip install -r ../requirements.txt` |
+   | Start Command | `gunicorn app.api:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120` |
+   | Instance Type | **Free** |
+
+3. Under **Environment Variables** add these (the first four are plain settings, the rest are secrets
+   you paste from your own `.env`, see the table in Step 1):
+
+   | Key | Value |
+   |---|---|
+   | `PYTHON_VERSION` | `3.12.7` |
+   | `REQUIRE_LOGIN` | `true` |
+   | `CORS_ORIGINS` | `none` |
+   | `CHAT_LIMIT_PER_MINUTE` | `20` |
+   | `GEMINI_API_KEY`, `GEMINI_MODEL`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `AUTH_SECRET` | your secrets |
+   | `GEMINI_FALLBACK_MODEL` | optional |
+
+4. **Advanced** → **Health Check Path**: `/health`.
+5. Click **Deploy Web Service**.
+
 ## Step 2: Check it works
 
 When Render says **Live**, it shows the address, for example `https://cogniguide-backend.onrender.com`.
