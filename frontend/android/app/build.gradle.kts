@@ -30,6 +30,11 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            // No code shrinking (R8): it renamed Kotlin classes that the
+            // shared_preferences plugin looks up by name, so the release app
+            // stopped on the start-up logo. It only saved a few hundred KB.
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }

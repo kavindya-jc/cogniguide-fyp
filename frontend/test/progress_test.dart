@@ -46,33 +46,36 @@ int tileValue(WidgetTester tester, String label) =>
 
 void main() {
   group('ProgressApi', () {
-    test('sends the login token (not the code) and reads the numbers', () async {
-      late http.Request asked;
-      final api = ProgressApi(
-        baseUrl: 'http://server',
-        client: pretendServer((r) {
-          asked = r;
-          return progressSays(fourSessions);
-        }),
-      );
+    test(
+      'sends the login token (not the code) and reads the numbers',
+      () async {
+        late http.Request asked;
+        final api = ProgressApi(
+          baseUrl: 'http://server',
+          client: pretendServer((r) {
+            asked = r;
+            return progressSays(fourSessions);
+          }),
+        );
 
-      final r = await api.load('P001', token: 'tok123');
+        final r = await api.load('P001', token: 'tok123');
 
-      // Stage 7c: the server takes the student from the token.
-      expect(asked.url.toString(), 'http://server/progress');
-      expect(asked.headers['Authorization'], 'Bearer tok123');
-      final p = (r as ProgressLoaded).progress;
-      expect(p.sessions.length, 4);
-      expect(p.sessions.map((s) => s.help), [
-        HelpNeeded.aLot,
-        HelpNeeded.some,
-        HelpNeeded.some,
-        HelpNeeded.aLittle,
-      ]);
-      expect(p.selfCorrections, 3);
-      expect(p.enoughData, isTrue);
-      expect(p.isNewStudent, isFalse);
-    });
+        // Stage 7c: the server takes the student from the token.
+        expect(asked.url.toString(), 'http://server/progress');
+        expect(asked.headers['Authorization'], 'Bearer tok123');
+        final p = (r as ProgressLoaded).progress;
+        expect(p.sessions.length, 4);
+        expect(p.sessions.map((s) => s.help), [
+          HelpNeeded.aLot,
+          HelpNeeded.some,
+          HelpNeeded.some,
+          HelpNeeded.aLittle,
+        ]);
+        expect(p.selfCorrections, 3);
+        expect(p.enoughData, isTrue);
+        expect(p.isNewStudent, isFalse);
+      },
+    );
 
     test('503 progress_unavailable and no connection', () async {
       final busy = ProgressApi(

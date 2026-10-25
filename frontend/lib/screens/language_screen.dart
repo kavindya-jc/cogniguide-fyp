@@ -17,6 +17,10 @@ import '../widgets/duo_icon.dart';
 ///
 /// The choice is saved on the phone. The app text stays English until the
 /// Sinhala and Tamil language files exist (Step 8).
+/// The language choice is hidden for now (English only). Sinhala and Tamil
+/// come later: set this to true to show the Language buttons again.
+const bool showLanguageChoice = false;
+
 class LanguageScreen extends StatelessWidget {
   const LanguageScreen({super.key});
 

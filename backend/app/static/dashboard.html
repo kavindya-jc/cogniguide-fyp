@@ -70,12 +70,12 @@
   <p class="sub">See how your own thinking is growing. This is not a grade.</p>
 
   <form class="card" id="form">
-    <label for="code">Your anonymous code</label>
+    <label for="code">Your username</label>
     <input id="code" name="code" maxlength="64" autocomplete="username" placeholder="for example P001">
     <label for="password">Your password</label>
     <input id="password" name="password" type="password" maxlength="128" autocomplete="current-password">
     <button type="submit">Show my progress</button>
-    <p class="hint">Use the code and password from the app. Never type your name or email.</p>
+    <p class="hint">Use the username and password from the app. Never type your name or email.</p>
   </form>
 
   <p id="status" role="status" aria-live="polite"></p>
@@ -269,7 +269,7 @@
   function load(code, password) {
     result.hidden = true;
     if (!/^[A-Za-z0-9_-]{1,64}$/.test(code)) {
-      setStatus("Please type your anonymous code: letters, numbers, _ or - only (no spaces).", true);
+      setStatus("Please type your username: letters, numbers, _ or - only (no spaces).", true);
       return;
     }
     if (!password) {
@@ -292,7 +292,7 @@
       .then(function (r) {
         if (!r) return;
         if (!r.ok) { setStatus(errorText(r), true); return; }
-        setStatus(r.body.sessions.length ? "" : "No sessions found for this code yet.");
+        setStatus(r.body.sessions.length ? "" : "No sessions found for this username yet.");
         render(r.body);
       })
       .catch(function () { setStatus("Could not reach the server. Is it running?", true); });

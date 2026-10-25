@@ -70,16 +70,17 @@ class WelcomeScreen extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              ListenableBuilder(
-                                listenable: settings,
-                                builder: (context, _) => _LanguageChip(
-                                  name: settings.language.nativeName,
-                                  semanticLabel: l10n.welcomeLanguageButton(
-                                    settings.language.nativeName,
+                              if (showLanguageChoice)
+                                ListenableBuilder(
+                                  listenable: settings,
+                                  builder: (context, _) => _LanguageChip(
+                                    name: settings.language.nativeName,
+                                    semanticLabel: l10n.welcomeLanguageButton(
+                                      settings.language.nativeName,
+                                    ),
+                                    onTap: () => open(const LanguageScreen()),
                                   ),
-                                  onTap: () => open(const LanguageScreen()),
                                 ),
-                              ),
                             ],
                           ),
                         ),
