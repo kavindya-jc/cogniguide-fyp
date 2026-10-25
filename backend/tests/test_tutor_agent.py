@@ -163,9 +163,10 @@ def test_database_failure_still_gives_the_reply(tutor, monkeypatch):
     assert result["session_id"] is None
 
 
-def test_gemini_failure_saves_nothing(monkeypatch):
+def test_gemini_failure_saves_nothing_with_the_safe_reply_off(monkeypatch):
     store = FakeDb()
     store.install(monkeypatch)
+    monkeypatch.setattr(tutor_agent, "SAFE_REPLY_WHEN_BUSY", False)
     monkeypatch.setattr(tutor_agent, "socratic_response", FakeTutor(fail=True))
     with pytest.raises(TutorUnavailable):
         tutor_agent.run_turn("P001", PROBLEM, [])
@@ -189,7 +190,8 @@ def test_chat_endpoint_uses_the_controller(tutor, client, monkeypatch):
     assert body["reply"] == "What do you notice?" and body["session_id"] == "session-1"
 
 
-def test_chat_endpoint_busy_tutor_gives_503(client, monkeypatch):
+def test_chat_endpoint_busy_tutor_gives_503_with_the_safe_reply_off(client, monkeypatch):
+    monkeypatch.setattr(tutor_agent, "SAFE_REPLY_WHEN_BUSY", False)
     monkeypatch.setattr(tutor_agent, "socratic_response", FakeTutor(fail=True))
     r = client.post("/chat", json={"problem": PROBLEM, "history": []})
     assert r.status_code == 503
@@ -318,7 +320,7 @@ def gemini_check(monkeypatch):
     def install(*forms):
         script = list(forms)
 
-        def fake_generate_json(prompt, schema, system_instruction="", temperature=0.1):
+        def fake_generate_json(prompt, schema, system_instruction="", temperature=0.1, **_kw):
             asked.append(prompt)
             return script.pop(0)
 
@@ -446,3 +448,51 @@ def test_the_answer_sheet_is_never_sent_to_the_reply_writer(tutor, gemini_check)
     answer = problems.find("alg-9-1")["answer"]
     for call in tutor.calls:
         assert answer not in call["extra"] and answer not in call["problem"]
+
+
+# ---- Busy Google ----
+
+def test_busy_gemini_gives_the_safe_reply_and_saves_it(monkeypatch):
+    store = FakeDb()
+    store.install(monkeypatch)
+    monkeypatch.setattr(tutor_agent, "socratic_response", FakeTutor(fail=True))
+    result = tutor_agent.run_turn("P001", PROBLEM, [])
+    assert result["reply"] == policy.SAFE_REPLIES[policy.ASK_GUIDING_QUESTION]
+    assert result["session_id"] == "session-1"
+    assert store.states["session-1"]["last_guard"] == "gemini_busy"
+
+
+def test_busy_gemini_still_gives_the_right_kind_of_help(gemini_check, monkeypatch):
+    """Check AND reply busy: Python still sees 'x = 2' is wrong, and the safe reply fits that."""
+    store = FakeDb()
+    store.install(monkeypatch)
+
+    def busy_check(*args, **kwargs):
+        raise TutorUnavailable("503")
+
+    monkeypatch.setattr(assessment, "generate_json", busy_check)
+    monkeypatch.setattr(tutor_agent, "socratic_response", FakeTutor(fail=True))
+    results = play("P001", ["x = 1", "x = 3", "x = 100"], problem=ALG, problem_id="alg-9-1")
+    assert [r["hint_level"] for r in results] == [1, 2, 3]
+    assert results[0]["reply"] == policy.SAFE_REPLIES[policy.ENCOURAGE_SELF_CORRECTION]
+    assert store.states["session-1"]["wrong_attempts"] == 3
+
+
+def test_x_equals_2_counts_as_a_wrong_try_when_the_check_is_busy(tutor, monkeypatch):
+    store = FakeDb()
+    store.install(monkeypatch)
+
+    def busy_check(*args, **kwargs):
+        raise TutorUnavailable("503")
+
+    monkeypatch.setattr(assessment, "generate_json", busy_check)
+    play("P001", ["x = 2"], problem=ALG, problem_id="alg-9-1")
+    assert "Moves −5 to the other side without changing its sign" in tutor.calls[1]["extra"]
+    assert store.states["session-1"]["wrong_attempts"] == 1
+    assert ("wrong_attempt", 1) in store.indicators
+
+
+def test_busy_endpoint_still_answers(client, monkeypatch):
+    monkeypatch.setattr(tutor_agent, "socratic_response", FakeTutor(fail=True))
+    r = client.post("/chat", json={"problem": PROBLEM, "history": []})
+    assert r.status_code == 200 and r.get_json()["reply"] == policy.SAFE_REPLIES[policy.ASK_GUIDING_QUESTION]

@@ -19,6 +19,8 @@ then calls run_turn(). Each turn follows the same cycle:
 
 The next message starts the cycle again with the updated memory: that is the feedback loop.
 Gemini is called twice per student message (check + reply); the opening turn needs only the reply.
+When Google is busy: the check falls back to the word rules, and the reply to a safe ready-made
+reply for the chosen action (SAFE_REPLY_WHEN_BUSY), so the chat keeps going.
 """
 
 import logging
@@ -28,6 +30,12 @@ from app.models.socratic_agent import TutorUnavailable, socratic_response  # noq
 
 # The longest reply that passes the safety check (the tutor is asked for at most three short sentences).
 MAX_REPLY_CHARS = 700
+
+# When Gemini is still busy after all its tries, answer with the safe ready-made reply for the
+# chosen action (policy.SAFE_REPLIES) instead of "coach busy". The session memory records
+# last_guard = "gemini_busy", so these replies can be found in the research data.
+# False = the old behaviour (503 tutor_unavailable, nothing saved).
+SAFE_REPLY_WHEN_BUSY = True
 
 log = logging.getLogger(__name__)
 
@@ -196,7 +204,8 @@ def run_turn(student_code, problem, history, session_id=None, problem_id=None):
     problem: the problem text. problem_id: the bank id (for example "alg-9-1") when the problem
              came from GET /problems, or None for a problem the student typed in (no answer sheet).
     Returns {"reply", "session_id", "hint_level", "scaffold_level", "reflection_type"}.
-    Raises TutorUnavailable when Gemini cannot write the reply (nothing is saved then).
+    When Gemini is still busy, the safe reply is used (SAFE_REPLY_WHEN_BUSY); with that switched
+    off, TutorUnavailable is raised instead (nothing is saved then).
     Any other exception (for example no GEMINI_API_KEY) is raised to api.py too.
     """
     # RECEIVE
@@ -223,11 +232,19 @@ def run_turn(student_code, problem, history, session_id=None, problem_id=None):
     if reflection_type:
         instruction += "\n" + reflection.build_reflection_instruction(reflection_type)
 
-    reply = socratic_response(problem, history, extra_instruction=instruction, raise_on_error=True)
+    guard = "ok"
+    try:
+        reply = socratic_response(problem, history, extra_instruction=instruction, raise_on_error=True)
+    except TutorUnavailable as err:
+        if not SAFE_REPLY_WHEN_BUSY:
+            raise
+        # Google is still busy after the retries (and the backup model, if any): the student
+        # still gets a sensible reply for the chosen action, and the memory notes it.
+        log.warning("Gemini busy for the reply; using the safe reply: %s", err)
+        reply, guard = policy.SAFE_REPLIES[decision["action"]], "gemini_busy"
 
     # CHECK the reply: one more try, then a safe reply
-    guard = "ok"
-    why = check_reply(reply, bank, decision, state)
+    why = check_reply(reply, bank, decision, state) if guard == "ok" else None
     if why:
         log.warning("Reply not allowed (%s); asking again.", why)
         try:

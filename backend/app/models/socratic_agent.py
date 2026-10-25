@@ -42,6 +42,11 @@ API_KEY = _raw_key.strip().strip('"').strip("'")
 _raw_model = os.getenv("GEMINI_MODEL", "")
 MODEL_NAME = _raw_model.strip().strip('"').strip("'")
 
+# Optional backup model, tried once when the main model is still busy after its retries.
+# Leave it out of .env to switch this off. Set it in .env only (like GEMINI_MODEL), never here.
+_raw_fallback = os.getenv("GEMINI_FALLBACK_MODEL", "")
+FALLBACK_MODEL_NAME = _raw_fallback.strip().strip('"').strip("'")
+
 # Seconds to wait before each retry when Google is busy (so up to 3 tries in total).
 RETRY_WAITS = (2, 5)
 
@@ -94,20 +99,28 @@ def _get_client():
     return _client
 
 
-def _generate(contents, config):
+def _generate(contents, config, retry_waits=None):
     """Call Gemini, waiting and trying again when it is busy (503). Returns the reply text.
 
+    retry_waits: seconds to wait before each retry (default RETRY_WAITS). When the main model is
+    still busy after that, the backup model GEMINI_FALLBACK_MODEL (if set in .env) is tried once.
     Raises TutorUnavailable when no real text came back (still busy, quota, empty reply...).
     """
-    for attempt in range(len(RETRY_WAITS) + 1):
+    waits = RETRY_WAITS if retry_waits is None else retry_waits
+    plan = [(MODEL_NAME, attempt) for attempt in range(len(waits) + 1)]
+    if FALLBACK_MODEL_NAME and FALLBACK_MODEL_NAME != MODEL_NAME:
+        plan.append((FALLBACK_MODEL_NAME, None))
+
+    for step, (model, attempt) in enumerate(plan):
         try:
-            response = _get_client().models.generate_content(model=MODEL_NAME, contents=contents, config=config)
+            response = _get_client().models.generate_content(model=model, contents=contents, config=config)
         except Exception as err:
-            print(f"[socratic_agent] API call error (try {attempt + 1}): {err}")
-            if _is_busy(err) and attempt < len(RETRY_WAITS):
-                time.sleep(RETRY_WAITS[attempt])
-                continue
-            raise TutorUnavailable(str(err)) from err
+            print(f"[socratic_agent] API call error ({model}, try {step + 1}): {err}")
+            if not _is_busy(err) or step == len(plan) - 1:
+                raise TutorUnavailable(str(err)) from err
+            if attempt is not None and attempt < len(waits):
+                time.sleep(waits[attempt])
+            continue
         if response.text and response.text.strip():
             return response.text.strip()
         raise TutorUnavailable("Gemini returned an empty reply.")
@@ -168,13 +181,14 @@ Now provide your next Socratic response according to your teaching rules:"""
         return FALLBACK_EMPTY if "empty reply" in str(err) else FALLBACK_ERROR
 
 
-def generate_json(prompt, schema, system_instruction="", temperature=0.1):
+def generate_json(prompt, schema, system_instruction="", temperature=0.1, retry_waits=None):
     """Step 1.5: ask Gemini for a STRUCTURED answer and return it as a Python dict.
 
     prompt: the question for Gemini.
     schema: a JSON Schema (a dict) that the answer must follow, for example
             {"type": "object", "properties": {"correct": {"type": "boolean"}}, "required": ["correct"]}
     A low temperature, so the same question gives (nearly) the same answer.
+    retry_waits: like _generate; a caller with its own backup plan can wait less (for example (1,)).
 
     Raises TutorUnavailable when Gemini cannot answer (busy, quota...), and InvalidModelOutput
     when it answers with something that is not a JSON object with every "required" field.
@@ -187,7 +201,7 @@ def generate_json(prompt, schema, system_instruction="", temperature=0.1):
         response_mime_type="application/json",
         response_json_schema=schema,
     )
-    text = _generate(prompt, config)
+    text = _generate(prompt, config, retry_waits)
     try:
         data = json.loads(text)
     except ValueError as err:

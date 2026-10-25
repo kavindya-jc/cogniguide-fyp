@@ -5,6 +5,7 @@ Plain Python (no AI), so it is free, fast and always gives the same result.
 It compares text with the answer sheet of a bank problem (backend/data/problems.json):
 
   check_final_answer(text, problem) -> did the student give the WHOLE correct final answer?
+  find_wrong_answer(text, problem)  -> did the student clearly give a WRONG final answer ("x = 2")?
   reply_leaks_answer(text, problem) -> does a tutor reply give away any part of the answer?
 
 It understands common ways of writing the same answer:
@@ -79,7 +80,9 @@ def _numbers(text):
     sci = _scientific(text)
     taken = [(start, end) for _, _, start, end in sci]
     found = [(value, start) for _, value, start, _ in sci]
-    for m in re.finditer(rf"(?<![\w.]){_NUM}(?:\s*/\s*\d+(?:\.\d+)?)?", text):
+    # A number written right before an unknown or "(" is part of an expression (the 2 in "2x",
+    # "2(x + 1)"), not a value, so it is skipped. Units stay: "154cm" and "2.5m" are values.
+    for m in re.finditer(rf"(?<![\w.]){_NUM}(?:\s*/\s*\d+(?:\.\d+)?)?(?![\d.]*(?:[xyzabn](?![a-z])|\())", text):
         if any(s <= m.start() < e for s, e in taken):
             continue
         raw = m.group(0).replace(" ", "")
@@ -180,6 +183,59 @@ def check_final_answer(text, problem):
     """
     found, total = _matches(text, problem)
     return {"all_correct": found == total, "parts_found": found, "parts_total": total}
+
+
+def _plain_number(value):
+    """A mistake's wrong answer as one number, or None when it is not a single number."""
+    value = str(value).replace(" ", "")
+    try:
+        if "/" in value:
+            top, bottom = value.split("/")
+            return float(top) / float(bottom)
+        return float(value)
+    except ValueError:
+        return None
+
+
+def find_wrong_answer(text, problem):
+    """Does this message clearly give a WRONG final answer? (Used most when the Gemini check is busy.)
+
+    Two cases only, so in-between steps are never called wrong:
+      - the student names the answer's letter with a wrong value: "x = 2" when x is 12;
+      - a short message with just one value that is a listed common mistake: "320", "(x+1)(x+6)".
+    Returns {"wrong": bool, "mistake_id": the matching common mistake or None}.
+    """
+    t = _normalise(text)
+    wrong = False
+    for part in problem["answer_parts"]:
+        label = str(part.get("label", ""))
+        if part.get("form") or not re.fullmatch(r"[a-z]", label):
+            continue
+        target, rounded = _part_target(part)
+        named = [float(m.group(1)) for m in re.finditer(rf"\b{label}\s*=\s*({_NUM})(?![\d.]*\s*[a-z(])", t)]
+        if named and not any(_close(v, target, rounded) for v in named):
+            wrong = True
+
+    mistake_id = None
+    numbers = _numbers(t)
+    short = len(t.strip()) <= 25
+    for m in problem.get("mistakes", []):
+        given = str(m.get("wrong_answer", ""))
+        if not given or check_final_answer(given, problem)["parts_found"]:
+            # A "mistake" that gives a right number cannot be told apart from a right step:
+            # sta-8-1 (median = mean = 9) and "x = 4" alone in alg-11-1 (right, just not finished).
+            continue
+        factors = _factors(_normalise(given))
+        if factors and _factors(t) == factors:
+            mistake_id = m["id"]
+            break
+        value = _plain_number(given)
+        if value is not None and short and len(numbers) == 1 and _close(numbers[0][0], value, False):
+            mistake_id = m["id"]
+            break
+    if mistake_id:
+        wrong = True
+    return {"wrong": wrong, "mistake_id": mistake_id}
 
 
 def reply_leaks_answer(text, problem):

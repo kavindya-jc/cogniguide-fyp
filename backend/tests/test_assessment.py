@@ -36,7 +36,7 @@ def gemini(monkeypatch):
     seen = {}
 
     def install(answer):
-        def fake(prompt, schema, system_instruction="", temperature=0.1):
+        def fake(prompt, schema, system_instruction="", temperature=0.1, **_kw):
             seen.update(prompt=prompt, schema=schema, system=system_instruction)
             if isinstance(answer, Exception):
                 raise answer
@@ -50,7 +50,7 @@ def gemini(monkeypatch):
 
 def test_a_good_answer_from_gemini_is_kept(gemini):
     gemini(good_raw())
-    form = assessment.assess(TEXT, ALG, chat("x = 2"))
+    form = assessment.assess(TEXT, ALG, chat("I take 2x from both sides"))
     assert form["intent"] == "answer_attempt" and form["correctness"] == "incorrect"
     assert form["mistake_id"] == "sign_when_moving" and form["source"] == "llm"
     assert form["answer_check"] == "not_found"
@@ -76,7 +76,7 @@ def test_the_prompt_has_the_answer_sheet_and_the_mistake_ids(gemini):
 ])
 def test_bad_values_become_safe_values(gemini, field, bad, safe):
     gemini(good_raw(**{field: bad}))
-    assert assessment.assess(TEXT, ALG, chat("x = 2"))[field] == safe
+    assert assessment.assess(TEXT, ALG, chat("I take 2x from both sides"))[field] == safe
 
 
 def test_long_evidence_is_cut():
@@ -103,7 +103,7 @@ def test_python_wins_a_right_answer(gemini):
 
 def test_python_wins_a_false_solved(gemini):
     gemini(good_raw(correctness="correct", solved=True, mistake_id="none"))
-    form = assessment.assess(TEXT, ALG, chat("x = 2"))
+    form = assessment.assess(TEXT, ALG, chat("I think I am done"))
     assert form["solved"] is False and form["correctness"] == "unclear"
 
 
@@ -118,3 +118,30 @@ def test_own_problem_trusts_gemini_for_solved(gemini):
     form = assessment.assess("Find 7 x 8.", None, chat("56"))
     assert form["solved"] is True and form["answer_check"] is None
     assert "no answer sheet" in seen["prompt"]
+
+
+def test_wrong_answer_is_found_when_gemini_is_busy(gemini):
+    """The 'x = 2' fix: the word rules alone could not tell that this is wrong."""
+    gemini(TutorUnavailable("503"))
+    form = assessment.assess(TEXT, ALG, chat("x = 2"))
+    assert form["source"] == "fallback"
+    assert form["correctness"] == "incorrect" and form["answer_check"] == "wrong"
+    assert form["mistake_id"] == "sign_when_moving" and form["mistake_confidence"] >= 0.6
+
+
+def test_python_wins_a_wrong_answer_gemini_liked(gemini):
+    gemini(good_raw(correctness="correct", mistake_id="none", mistake_confidence=0.0))
+    form = assessment.assess(TEXT, ALG, chat("x = 2"))
+    assert form["correctness"] == "incorrect"
+
+
+def test_the_check_gives_up_quickly(gemini, monkeypatch):
+    seen = {}
+
+    def fake(prompt, schema, system_instruction="", temperature=0.1, retry_waits=None):
+        seen["waits"] = retry_waits
+        raise TutorUnavailable("503")
+
+    monkeypatch.setattr(assessment, "generate_json", fake)
+    assessment.assess(TEXT, ALG, chat("hmm"))
+    assert seen["waits"] == assessment.RETRY_WAITS == (1,)
