@@ -79,11 +79,14 @@ class ChatApi {
     required String problem,
     required List<ChatTurn> history,
     required String? studentId,
+    String? problemId,
     String? sessionId,
     String? token,
   }) async {
     final body = jsonEncode({
       'problem': problem,
+      // A problem from the list: the server checks answers with its answer sheet.
+      'problem_id': ?problemId,
       'history': [for (final turn in history) turn.toJson()],
       'student_id': ?studentId,
       'session_id': ?sessionId,

@@ -17,7 +17,7 @@ os.environ["AUTH_SECRET"] = "test-secret-for-offline-tests-only-0123456789"
 
 from itsdangerous import URLSafeTimedSerializer  # noqa: E402
 
-from app import api, auth, db, tutor_agent  # noqa: E402
+from app import api, assessment, auth, db, policy, tutor_agent  # noqa: E402
 
 failures = 0
 
@@ -54,6 +54,10 @@ tutor_agent.socratic_response = lambda problem, history, extra_instruction="", r
 tutor_agent.log_turn = lambda code, session_id, *rest, **kw: SAVED.append(code) or "session-1"
 tutor_agent.load_scaffold_level = lambda code, session_id: 3
 tutor_agent.load_reflection_type = lambda *a: None
+# Phase 2: no real Gemini check and no real database memory in this test.
+tutor_agent.assess = lambda problem, bank, history: assessment.fallback(history)
+tutor_agent.load_state = lambda code, session_id, history: (policy.new_state(), False)
+db.save_session_state = lambda *a, **kw: None
 
 client = api.app.test_client()
 

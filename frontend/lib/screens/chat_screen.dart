@@ -29,13 +29,23 @@ import 'moment_screen.dart';
 /// The coach speaks first. The whole history is sent every time (the
 /// server keeps no memory). Only the coach's reply text is shown.
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key, required this.eyebrow, required this.problem});
+  const ChatScreen({
+    super.key,
+    required this.eyebrow,
+    required this.problem,
+    this.problemId,
+  });
 
   /// For example "Problem 1 · Algebra · Grade 9".
   final String eyebrow;
 
   /// The problem text, sent to the coach on every call.
   final String problem;
+
+  /// The id of a problem from the list (for example "alg-9-1"), so the coach
+  /// can check the student's answer against its answer sheet. Null for a
+  /// problem the student typed in themselves.
+  final String? problemId;
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -133,6 +143,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final services = AppServices.of(context);
     final result = await services.chat.send(
       problem: widget.problem,
+      problemId: widget.problemId,
       history: _history,
       studentId: _code,
       sessionId: _sessionId,

@@ -229,6 +229,9 @@ if api is not None:
         return "Pretend tutor reply. What do you think comes next?"
 
     tutor_agent.socratic_response = pretend_tutor  # Step 1.3: the turn runs in tutor_agent.py
+    # Phase 2: the student check uses the word rules here (never the real Gemini).
+    from app import assessment  # noqa: E402
+    tutor_agent.assess = lambda problem, bank, history: assessment.fallback(history)
     db.is_configured = lambda: True  # always use the pretend database below, never the real Supabase
     client = api.app.test_client()
     PROBLEM = "Natalia sold 48 clips in April and half as many in May. How many altogether?"

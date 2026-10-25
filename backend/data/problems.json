@@ -1,5 +1,5 @@
 {
-  "_note": "CogniGuide problem bank (Phase 1 of the agent plan). The SAME 15 sample problems as the app (frontend/assets/problems/sample_problems.json), plus the answer, the key steps and common mistakes. The answer, steps and mistakes stay on the server: GET /problems never sends them to the app. checked_by_teacher is false until a maths teacher has checked the problem against the Sri Lankan Grade 8-11 syllabus. Field guide: answer = how the answer is written for people; answer_parts = each value a full answer must contain ('value' is plain maths text a program can read, 'decimal' is a rounded number where it helps); steps = the key steps in order; mistakes = common wrong ideas, with the wrong answer they lead to.",
+  "_note": "CogniGuide problem bank (Phase 1 of the agent plan). The SAME 15 sample problems as the app (frontend/assets/problems/sample_problems.json), plus the answer, the key steps and common mistakes. The answer, steps and mistakes stay on the server: GET /problems never sends them to the app. checked_by_teacher is false until a maths teacher has checked the problem against the Sri Lankan Grade 8-11 syllabus. Field guide: answer = how the answer is written for people; answer_parts = each value a full answer must contain ('value' is plain maths text a program can read, 'decimal' is a rounded number where it helps; 'form' says when the answer must be written a special way: scientific, factors or point); steps = the key steps in order; mistakes = common wrong ideas, with the wrong answer they lead to.",
   "problems": [
     {
       "id": "num-8-1", "area": "number", "grade": 8,
@@ -36,7 +36,7 @@
       "id": "num-10-1", "area": "number", "grade": 10,
       "text": "Write 0.000045 in scientific notation.",
       "answer": "4.5 × 10⁻⁵",
-      "answer_parts": [{"label": "scientific notation", "value": "4.5*10^-5", "decimal": 0.000045}],
+      "answer_parts": [{"label": "scientific notation", "value": "4.5*10^-5", "decimal": 0.000045, "form": "scientific"}],
       "steps": [
         "Move the decimal point so there is one non-zero digit before it: 4.5.",
         "Count the places moved: 5 places to the right.",
@@ -69,7 +69,7 @@
       "id": "alg-10-1", "area": "algebra", "grade": 10,
       "text": "Factorise: x² + 5x + 6",
       "answer": "(x + 2)(x + 3)",
-      "answer_parts": [{"label": "factorised form", "value": "(x+2)(x+3)"}],
+      "answer_parts": [{"label": "factorised form", "value": "(x+2)(x+3)", "form": "factors"}],
       "steps": [
         "Look for two numbers that multiply to 6 and add to 5.",
         "The numbers are 2 and 3.",
@@ -187,7 +187,7 @@
         {"label": "y when x = -2", "value": "-3"},
         {"label": "y when x = 0", "value": "1"},
         {"label": "y when x = 2", "value": "5"},
-        {"label": "y-axis crossing", "value": "(0, 1)"}
+        {"label": "y-axis crossing", "value": "(0, 1)", "form": "point"}
       ],
       "steps": [
         "Put each x into y = 2x + 1: 2(−2) + 1 = −3, 2(0) + 1 = 1, 2(2) + 1 = 5.",

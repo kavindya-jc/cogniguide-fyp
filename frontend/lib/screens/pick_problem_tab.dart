@@ -78,10 +78,18 @@ class _PickProblemTabState extends State<PickProblemTab> {
     });
   }
 
-  void _openChat({required String eyebrow, required String problem}) {
+  void _openChat({
+    required String eyebrow,
+    required String problem,
+    String? problemId,
+  }) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => ChatScreen(eyebrow: eyebrow, problem: problem),
+        builder: (_) => ChatScreen(
+          eyebrow: eyebrow,
+          problem: problem,
+          problemId: problemId,
+        ),
       ),
     );
   }
@@ -161,8 +169,11 @@ class _PickProblemTabState extends State<PickProblemTab> {
                               index: i,
                               eyebrow: eyebrow,
                               text: p.text,
-                              onTap: () =>
-                                  _openChat(eyebrow: eyebrow, problem: p.text),
+                              onTap: () => _openChat(
+                                eyebrow: eyebrow,
+                                problem: p.text,
+                                problemId: p.id,
+                              ),
                             ),
                           );
                         },
