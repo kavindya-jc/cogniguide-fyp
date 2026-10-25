@@ -29,6 +29,7 @@ class DemoChatApi extends ChatApi {
     required String problem,
     required List<ChatTurn> history,
     String? studentId,
+    String? problemId,
     String? sessionId,
     String? token,
   }) async {

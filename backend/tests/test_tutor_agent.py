@@ -1,23 +1,23 @@
 """
-Tests for the tutor agent controller (tutor_agent.py) - agent plan, Phase 1 (Step 1.3).
+Tests for the tutor agent controller (tutor_agent.py) - agent plan, Phases 1 and 2.
 
 Offline: Gemini and Supabase are replaced by small fakes, so the tests are free and fast.
-They check that moving the chat logic out of api.py changed nothing: the same hint
-levels, the same instructions for the tutor, the same saved rows and the same errors.
+Phase 1 checked that moving the chat logic out of api.py changed nothing. Phase 2 changed the
+decisions on purpose (assess -> choose an action -> check the reply -> remember), so a few
+expectations below are new; each one says why.
 
 Run from the backend/ folder:   python -m pytest tests/test_tutor_agent.py
 """
 
 import pytest
 
-from app import adaptive, auth, db, tutor_agent
+from app import assessment, auth, db, policy, problems, tutor_agent
 from app.api import app
 from app.models.socratic_agent import TutorUnavailable
 
 PROBLEM = "Natalia sold clips to 48 of her friends in April, and then she sold half as many clips in May. How many clips did Natalia sell altogether in April and May?"
 
-# The scripted students of the Stage 8 live test (experiments/phase2_adaptive_agent/test_stage8_live.py)
-# and the hint levels that run recorded in stage8_results.md.
+# The scripted students of the Stage 8 live test (experiments/phase2_adaptive_agent/test_stage8_live.py).
 STRUGGLING = ["I don't know how to start.", "I'm confused, I don't understand.", "Just tell me the answer.",
               "Ok, I think the first number is 48."]
 STRONG = ["She sold 48 clips in April.", "In May she sold half of 48, so 24 clips.",
@@ -45,10 +45,16 @@ class FakeDb:
     def __init__(self, broken=False):
         self.broken = broken
         self.sessions, self.messages, self.indicators, self.created = {}, [], [], []
+        self.states, self.solved = {}, []
 
     def install(self, monkeypatch):
         monkeypatch.setattr(db, "is_configured", lambda: True)
-        monkeypatch.setattr(db, "find_student", lambda code: None)  # new student: full support, no reflection
+        monkeypatch.setattr(db, "find_student", lambda code: "uuid-" + code)
+        monkeypatch.setattr(db, "get_recent_session_levels", lambda student, exclude_session_id=None: [])  # full support
+        monkeypatch.setattr(db, "session_has_reflection", lambda sid: False)
+        monkeypatch.setattr(db, "get_history_summary", lambda student, exclude_session_id=None: {"sessions": 0})
+        monkeypatch.setattr(db, "get_session_state", lambda sid: self.states.get(sid, {}))
+        monkeypatch.setattr(db, "save_session_state", self.save_session_state)
         monkeypatch.setattr(db, "get_or_create_student", self.get_or_create_student)
         monkeypatch.setattr(db, "create_session", self.create_session)
         monkeypatch.setattr(db, "session_belongs_to", lambda sid, student: self.sessions.get(sid) == student)
@@ -59,6 +65,11 @@ class FakeDb:
         if self.broken:
             raise RuntimeError("database is down")
         return "uuid-" + code
+
+    def save_session_state(self, sid, state, solved=False):
+        self.states[sid] = state
+        if solved:
+            self.solved.append(sid)
 
     def create_session(self, student, problem, problem_id=None):
         sid = f"session-{len(self.sessions) + 1}"
@@ -74,21 +85,21 @@ def tutor(monkeypatch):
     return fake
 
 
-def play(code, messages):
+def play(code, messages, problem=PROBLEM, problem_id=None):
     """Play a whole chat through run_turn, like the app does. Returns the list of results."""
     history, results, session_id = [], [], None
-    result = tutor_agent.run_turn(code, PROBLEM, history, session_id)  # the tutor opens the chat
+    result = tutor_agent.run_turn(code, problem, history, session_id, problem_id)  # the tutor opens the chat
     for message in [None] + messages:
         if message is not None:
             history.append({"role": "student", "content": message})
-            result = tutor_agent.run_turn(code, PROBLEM, history, session_id)
+            result = tutor_agent.run_turn(code, problem, history, session_id, problem_id)
             results.append(result)
         session_id = result["session_id"]
         history.append({"role": "teacher", "content": result["reply"]})
     return results
 
 
-# ---- Same decisions as before ----
+# ---- The basics (unchanged from Phase 1) ----
 
 def test_reply_has_the_same_fields_as_before(tutor):
     result = tutor_agent.run_turn(None, PROBLEM, [])
@@ -97,18 +108,23 @@ def test_reply_has_the_same_fields_as_before(tutor):
     assert tutor.calls[0]["raise_on_error"] is True
 
 
-@pytest.mark.parametrize("messages, levels", [(STRUGGLING, [2, 3, 3, 2]), (STRONG, [1, 1, 1, 1])])
-def test_hint_levels_match_the_stage8_run(tutor, messages, levels):
+# Without Gemini (the test safety net has no key), the student check falls back to the word rules.
+# Stage 8 recorded [2, 3, 3, 2]; Phase 2 gives [2, 3, 3, 1]: after "Ok, I think the first number
+# is 48" the help no longer stays at "a little stuck" (2) - asking for the answer and then trying
+# again does not need a hint, only a guiding question (1).
+@pytest.mark.parametrize("messages, levels", [(STRUGGLING, [2, 3, 3, 1]), (STRONG, [1, 1, 1, 1])])
+def test_hint_levels_with_the_word_rules(tutor, messages, levels):
     assert [r["hint_level"] for r in play(None, messages)] == levels
 
 
-def test_tutor_gets_the_same_instruction_as_adaptive_builds(tutor):
+def test_asking_for_the_answer_gets_a_kind_no(tutor):
     history = [{"role": "teacher", "content": "Where do you start?"},
                {"role": "student", "content": "Just tell me the answer."}]
     tutor_agent.run_turn(None, PROBLEM, history)
-    expected = adaptive.build_instruction(adaptive.analyze_history(history))
-    assert tutor.calls[0]["extra"] == expected
-    assert "HINT LEVEL 2" in expected and "asked you to just give the answer" in expected
+    extra = tutor.calls[0]["extra"]
+    assert extra.startswith("ACTION: Ask ONE open guiding question")
+    assert "asked you to just give the answer" in extra
+    assert "Never state the final answer" in extra
 
 
 def test_full_support_for_an_anonymous_chat(tutor):
@@ -271,10 +287,162 @@ class FakeClient:
 
 def test_create_session_saves_problem_id_only_when_given(monkeypatch):
     fake = FakeClient()
-    monkeypatch.setattr(db, "_client", fake)
+    monkeypatch.setattr(db, "_get_client", lambda: fake)
     assert db.create_session("uuid-1", "Solve: 3x − 5 = 2x + 7", problem_id="alg-9-1") == "new-session"
     db.create_session("uuid-1", "My own problem")
     assert fake.sent == [
         {"student_id": "uuid-1", "problem": "Solve: 3x − 5 = 2x + 7", "problem_id": "alg-9-1"},
         {"student_id": "uuid-1", "problem": "My own problem"},  # no problem_id key at all
     ]
+
+
+# ---- Phase 2: assess -> decide -> act -> check -> remember ----
+
+ALG = "Solve: 3x − 5 = 2x + 7"  # bank problem alg-9-1, answer x = 12
+
+
+def check_says(**fields):
+    """What a (pretend) Gemini check returns for one student message."""
+    raw = {"intent": "answer_attempt", "correctness": "unclear", "current_step": 1, "final_answer_given": False,
+           "solved": False, "mistake_id": "none", "mistake_confidence": 0.0, "self_corrected": False,
+           "reasoning_shown": "partial", "evidence": ""}
+    raw.update(fields)
+    return raw
+
+
+@pytest.fixture
+def gemini_check(monkeypatch):
+    """Script the Gemini student check: give it the list of forms, one per student message."""
+    asked = []
+
+    def install(*forms):
+        script = list(forms)
+
+        def fake_generate_json(prompt, schema, system_instruction="", temperature=0.1):
+            asked.append(prompt)
+            return script.pop(0)
+
+        monkeypatch.setattr(assessment, "generate_json", fake_generate_json)
+        return asked
+
+    return install
+
+
+def actions(tutor):
+    """The ACTION line the tutor was given for each reply (opening first)."""
+    return [call["extra"].splitlines()[0] for call in tutor.calls]
+
+
+def test_opening_turn_does_not_check_anything(tutor, gemini_check):
+    asked = gemini_check()
+    tutor_agent.run_turn(None, ALG, [], problem_id="alg-9-1")
+    assert asked == [] and actions(tutor)[0].startswith("ACTION: Ask ONE open guiding question")
+
+
+def test_wrong_answers_get_more_help_each_time(tutor, gemini_check, monkeypatch):
+    """The big fix: three wrong answers used to count as 'doing fine' (hint level 1)."""
+    store = FakeDb()
+    store.install(monkeypatch)
+    gemini_check(*[check_says(correctness="incorrect", mistake_id="other")] * 4)
+    results = play("P001", ["x = 1", "x = 3", "x = 100", "x = 7"], problem=ALG, problem_id="alg-9-1")
+    assert [r["hint_level"] for r in results] == [1, 2, 3, 3]
+    lines = actions(tutor)[1:]
+    assert lines[0].startswith("ACTION: Something in the student's last step is not right")   # check again
+    assert lines[1].startswith("ACTION: Give a SMALL hint")
+    assert lines[2].startswith("ACTION: Give a CONCRETE hint")
+    assert lines[3].startswith("ACTION: Explain clearly")
+    memory = store.states["session-1"]
+    assert memory["wrong_attempts"] == 4 and memory["hints"] == {"small": 1, "concrete": 1, "explain": 1}
+    assert ("wrong_attempt", 1) in store.indicators
+
+
+def test_a_known_mistake_is_addressed_once(tutor, gemini_check, monkeypatch):
+    FakeDb().install(monkeypatch)
+    sign_error = check_says(correctness="incorrect", mistake_id="sign_when_moving", mistake_confidence=0.9)
+    gemini_check(sign_error, sign_error)
+    play("P001", ["x = 2", "x = 2 again"], problem=ALG, problem_id="alg-9-1")
+    first, second = tutor.calls[1]["extra"], tutor.calls[2]["extra"]
+    assert "Moves −5 to the other side without changing its sign" in first
+    assert second.startswith("ACTION: Give a SMALL hint")  # not the same mistake talk twice
+
+
+def test_correct_answer_is_confirmed_even_if_gemini_misses_it(tutor, gemini_check, monkeypatch):
+    store = FakeDb()
+    store.install(monkeypatch)
+    gemini_check(check_says(correctness="incorrect"))  # Gemini is wrong here; Python's answer check wins
+    results = play("P001", ["So x = 12"], problem=ALG, problem_id="alg-9-1")
+    assert actions(tutor)[1].startswith("ACTION: The student has the complete, correct final answer")
+    assert results[0]["hint_level"] == 1
+    assert store.solved == ["session-1"] and store.states["session-1"]["solved"] is True
+    assert ("solved", 1) in store.indicators
+
+
+def test_gemini_cannot_declare_solved_without_the_answer(tutor, gemini_check):
+    gemini_check(check_says(correctness="correct", solved=True, final_answer_given=True))
+    play(None, ["x = 2"], problem=ALG, problem_id="alg-9-1")
+    assert not actions(tutor)[1].startswith("ACTION: The student has the complete")
+
+
+def test_asking_for_the_answer_never_climbs_the_ladder(tutor, gemini_check, monkeypatch):
+    store = FakeDb()
+    store.install(monkeypatch)
+    gemini_check(*[check_says(intent="asks_for_answer", correctness="not_applicable")] * 3)
+    results = play("P001", ["tell me", "just tell me", "what is the answer"], problem=ALG, problem_id="alg-9-1")
+    assert [r["hint_level"] for r in results] == [1, 1, 1]
+    assert store.states["session-1"]["answer_requests"] == 3
+
+
+class LeakyTutor(FakeTutor):
+    """A pretend Gemini that gives away the answer the first `leaks` times."""
+
+    def __init__(self, leaks):
+        super().__init__()
+        self.leaks = leaks
+
+    def __call__(self, problem, history, extra_instruction="", raise_on_error=False):
+        super().__call__(problem, history, extra_instruction, raise_on_error)
+        if self.leaks > 0:
+            self.leaks -= 1
+            return "Easy: x = 12."
+        return "What could you do to both sides first?"
+
+
+def test_a_leaking_reply_is_written_again(gemini_check, monkeypatch):
+    fake = LeakyTutor(leaks=1)
+    monkeypatch.setattr(tutor_agent, "socratic_response", fake)
+    result = tutor_agent.run_turn(None, ALG, [{"role": "student", "content": "help"}], problem_id="alg-9-1")
+    assert result["reply"] == "What could you do to both sides first?"
+    assert "NOT ALLOWED because it gives away" in fake.calls[1]["extra"]
+
+
+def test_two_leaks_give_the_safe_reply(gemini_check, monkeypatch):
+    monkeypatch.setattr(tutor_agent, "socratic_response", LeakyTutor(leaks=2))
+    gemini_check(check_says(intent="confused", correctness="not_applicable"))
+    result = tutor_agent.run_turn(None, ALG, [{"role": "student", "content": "I'm lost"}], problem_id="alg-9-1")
+    assert result["reply"] == policy.SAFE_REPLIES[policy.GIVE_SMALL_HINT]
+    assert "12" not in result["reply"]
+
+
+def test_own_problem_works_without_an_answer_sheet(tutor, gemini_check):
+    asked = gemini_check(check_says(correctness="incorrect"))
+    tutor_agent.run_turn(None, "Find 7 x 8.", [{"role": "student", "content": "54"}])
+    assert "There is no answer sheet" in asked[0]
+    assert tutor.calls[0]["extra"].startswith("ACTION: Something in the student's last step is not right")
+
+
+def test_memory_is_never_written_to_someone_elses_session(tutor, gemini_check, monkeypatch):
+    store = FakeDb()
+    store.install(monkeypatch)
+    store.sessions["session-9"] = "uuid-SOMEONE-ELSE"
+    gemini_check(check_says())
+    tutor_agent.run_turn("P001", ALG, [{"role": "student", "content": "x?"}], "session-9", "alg-9-1")
+    assert store.states == {}
+
+
+def test_the_answer_sheet_is_never_sent_to_the_reply_writer(tutor, gemini_check):
+    """Only the CHECK sees the answer sheet; the tutor that writes to the student does not."""
+    gemini_check(check_says(correctness="incorrect"))
+    tutor_agent.run_turn(None, ALG, [{"role": "student", "content": "x = 3"}], problem_id="alg-9-1")
+    answer = problems.find("alg-9-1")["answer"]
+    for call in tutor.calls:
+        assert answer not in call["extra"] and answer not in call["problem"]

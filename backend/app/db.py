@@ -279,3 +279,27 @@ def create_student_with_password(anon_code, password_hash):
         .execute()
     )
     return res.data[0]["id"]
+
+
+# ---- Agent plan, Phase 2: the session memory (sessions.state, from stage9_agent.sql) ----
+
+def get_session_state(session_id):
+    """The agent's saved memory of this session (a dict; empty for a new session)."""
+    res = _get_client().table("sessions").select("state").eq("id", session_id).limit(1).execute()
+    if not res.data:
+        return {}
+    return res.data[0].get("state") or {}
+
+
+def save_session_state(session_id, state, solved=False):
+    """Save the agent's memory of this session. solved=True also marks the session as solved.
+
+    The memory holds numbers and short labels only, never message text.
+    """
+    row = {"state": state}
+    if solved:
+        from datetime import datetime, timezone
+
+        row["status"] = "solved"
+        row["ended_at"] = datetime.now(timezone.utc).isoformat()
+    _get_client().table("sessions").update(row).eq("id", session_id).execute()

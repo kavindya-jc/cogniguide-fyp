@@ -93,7 +93,21 @@ Notes for the frontend:
 - `scaffold_level` (new in Stage 5) is a number from 1 to 3: the **highest** hint level the tutor was allowed to use for this student (see section 2b). 3 = full support (the default, also for new students and when no `student_id` is sent). The frontend does not need to send anything new for this; it only needs the same `student_id` on every call. The frontend may ignore it, or show it later on the progress dashboard.
 - `reflection_type` (new in Stage 6) is `null` on most replies. On the one reply in a session where the tutor was asked to add a personal reflection question, it is a short word: `"asks_for_answer"`, `"often_stuck"`, `"improving"` or `"self_checker"` (see section 2c). The frontend does not need to send anything new for this; it only needs the same `student_id` and `session_id` on every call. The frontend may ignore it, or show it later on the progress dashboard.
 
-## 2. How the hint level works (Stage 4)
+## 2. How the tutor decides (agent plan, Phase 2)
+
+Since Phase 2 the server runs a full cycle for every student message (`backend/app/tutor_agent.py`):
+
+1. **Check** (`assessment.py`): Gemini fills in a short form about the newest message (what the student is doing, right or wrong, which common mistake). Python checks every value. For a problem sent with `problem_id`, Python's **answer checker** (`answer_check.py`) has the last word on whether the problem is solved. If Gemini fails, the Stage 4 word rules below fill in the form.
+2. **Decide** (`policy.py`): plain rules choose ONE action. Each wrong try or "I'm confused" on the same step gives one more rung of help: check-again → small hint → concrete hint → explain the step clearly (never the final answer). A known common mistake gets a question aimed at it (once). A correct final answer gets "well done" and one reflection question. Asking for the answer never gives more help by itself.
+3. **Reply**: Gemini writes the reply for that action.
+4. **Safety check**: the reply must not give away any part of the answer and must be short; otherwise it is written again once, then a safe ready-made reply is used.
+5. **Remember**: the session memory (`sessions.state`: tries, hints, last action; numbers and labels only) is saved for the next message. The session gets `status = 'solved'` when the answer is found.
+
+`hint_level` in the reply is now the help level of the chosen action (1 = a question, 2 = a small hint or a mistake question, 3 = a concrete hint or an explanation). The reply fields and the app do not change. Each student message now uses **two** Gemini calls, so a reply takes a little longer, and "coach busy" (503) can happen a little more often when Google is busy.
+
+New indicator rows (value 1): `wrong_attempt`, `solved`, `misconception`. The Stage 4-7 rows are still saved as before.
+
+### The Stage 4 word rules (now the backup)
 
 The server reads the student's **last 3 messages** in `history` and counts how many show a struggle ("I don't know", "I'm confused", "just tell me the answer", and similar). It uses simple word rules, not an AI call.
 
