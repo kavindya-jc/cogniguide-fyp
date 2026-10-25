@@ -145,7 +145,7 @@ class ServerAuthService implements AuthService {
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({'student_id': code, 'password': password}),
           )
-          .timeout(const Duration(seconds: 30));
+          .timeout(AppConfig.serverTimeout);
     } on TimeoutException {
       return AuthResult.failed;
     } on http.ClientException {

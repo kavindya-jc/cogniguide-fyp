@@ -155,9 +155,7 @@ void main() {
     expect(find.text('Hi, TEST01'), findsOneWidget);
   });
 
-  testWidgets('Language choice is hidden for now (English only)', (
-    tester,
-  ) async {
+  testWidgets('English only: no language choice', (tester) async {
     await startApp(tester);
     // No language button on Welcome.
     expect(find.text('English'), findsNothing);

@@ -12,3 +12,5 @@ werkzeug==3.1.9
 itsdangerous==2.2.0
 # Tests only.
 pytest==9.1.1
+# The web server used online (render.yaml). Linux only; on Windows use: python -m app.api
+gunicorn==23.0.0

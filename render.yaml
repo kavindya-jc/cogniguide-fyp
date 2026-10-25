@@ -1,0 +1,42 @@
+# CogniGuide backend on Render (free plan). Step-by-step guide: docs/deploy_backend.md
+#
+# Render reads this file when you choose "New > Blueprint" and pick this GitHub repository.
+# The secrets (sync: false) are NOT in this file: Render asks you to paste them in its
+# dashboard. Never put a key in this file or in the app.
+
+services:
+  - type: web
+    name: cogniguide-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r ../requirements.txt
+    # gunicorn = a real web server (Flask's own server is only for a laptop).
+    # timeout 120: a reply can take long when Gemini is busy and the server retries.
+    startCommand: gunicorn app.api:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      # Online: only logged-in students can talk to the coach.
+      - key: REQUIRE_LOGIN
+        value: "true"
+      # The phone app needs no CORS. "none" = no website may call the API from a browser.
+      # For the online web preview, put its address here instead (for example https://...).
+      - key: CORS_ORIGINS
+        value: "none"
+      - key: CHAT_LIMIT_PER_MINUTE
+        value: "20"
+      # Secrets: Render asks for these when you create the service. Paste them there yourself.
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        sync: false
+      - key: GEMINI_FALLBACK_MODEL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: AUTH_SECRET
+        sync: false

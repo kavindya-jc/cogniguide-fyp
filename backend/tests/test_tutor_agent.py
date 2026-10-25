@@ -46,6 +46,7 @@ class FakeDb:
         self.broken = broken
         self.sessions, self.messages, self.indicators, self.created = {}, [], [], []
         self.states, self.solved = {}, []
+        self.agent_turns, self.ended = [], []
 
     def install(self, monkeypatch):
         monkeypatch.setattr(db, "is_configured", lambda: True)
@@ -55,6 +56,12 @@ class FakeDb:
         monkeypatch.setattr(db, "get_history_summary", lambda student, exclude_session_id=None: {"sessions": 0})
         monkeypatch.setattr(db, "get_session_state", lambda sid: self.states.get(sid, {}))
         monkeypatch.setattr(db, "save_session_state", self.save_session_state)
+        monkeypatch.setattr(db, "save_agent_turn", self.agent_turns.append)
+        monkeypatch.setattr(db, "end_session", lambda sid, status: self.ended.append((sid, status)))
+        monkeypatch.setattr(db, "get_session_problems", lambda student, limit=50: [
+            {"id": sid, "problem_id": c["problem_id"]} for sid, c in zip(self.sessions, self.created)])
+        monkeypatch.setattr(db, "get_area_session_levels",
+                            lambda student, ids, exclude_session_id=None, max_sessions=3: [])
         monkeypatch.setattr(db, "get_or_create_student", self.get_or_create_student)
         monkeypatch.setattr(db, "create_session", self.create_session)
         monkeypatch.setattr(db, "session_belongs_to", lambda sid, student: self.sessions.get(sid) == student)

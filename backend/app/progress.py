@@ -36,19 +36,21 @@ TREND_STEADY = "steady"
 TREND_NOT_ENOUGH = "not_enough_data"
 
 GROWTH_MESSAGES = {
+    # Phase 4: the words describe what the student DID (used less help), not a claim about
+    # their thinking - needing fewer hints can also come from easier problems.
     TREND_LESS_HELP: (
-        "Good news: in your recent sessions you needed less help than at the start. "
-        "That is what growing as a thinker looks like."
+        "In your recent sessions you used less help than at the start. "
+        "Keep saying your steps in your own words."
     ),
     TREND_MORE_HELP: (
-        "Lately you have needed a bit more help than before. That is normal when the problems get harder, "
+        "Lately you have used a bit more help than before. That is normal when the problems get harder, "
         "and asking for a hint is part of learning."
     ),
     TREND_STEADY: (
         "You are working at a steady level. A good next step: say your plan in your own words before each step."
     ),
     TREND_NOT_ENOUGH: (
-        "Not enough sessions yet. Come back after a couple more sessions to see how your thinking is growing."
+        "Not enough sessions yet. Come back after a couple more sessions to see how you are working."
     ),
 }
 
@@ -93,6 +95,9 @@ def summarize_sessions(sessions, indicators):
                 "asked_for_answer": _count(rows, "asked_for_answer"),
                 "self_corrections": _count(rows, "self_correction"),
                 "reflection_type": _reflection_type(rows),
+                # Phase 2-3: from the answer checker and the tutor's decisions.
+                "solved": _count(rows, "solved") > 0,
+                "wrong_attempts": _count(rows, "wrong_attempt"),
             }
         )
     return summary
@@ -123,5 +128,6 @@ def build_progress(student_code, sessions, indicators):
         "asked_for_answer": sum(s["asked_for_answer"] for s in shown),
         "self_corrections": sum(s["self_corrections"] for s in shown),
         "reflections": sum(1 for s in shown if s["reflection_type"]),
+        "solved": sum(1 for s in shown if s["solved"]),
     }
     return {"student_id": student_code, "sessions": shown, "totals": totals, "growth": growth(shown)}

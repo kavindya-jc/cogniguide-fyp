@@ -42,3 +42,13 @@ def no_real_gemini_or_supabase(monkeypatch):
         raise RuntimeError("A test tried to use the real Supabase. Give it a fake database.")
 
     monkeypatch.setattr(db, "_get_client", no_real_database)
+
+
+@pytest.fixture(autouse=True)
+def no_chat_speed_limit(monkeypatch):
+    """Tests send many messages quickly: the per-minute limit is tested on its own (test_online.py)."""
+    from app import api
+
+    monkeypatch.setattr(api, "CHAT_LIMIT_PER_MINUTE", 10_000)
+    monkeypatch.setattr(api, "REQUIRE_LOGIN", False)
+    monkeypatch.setattr(api, "_chat_calls", {})

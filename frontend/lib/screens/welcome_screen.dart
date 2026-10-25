@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
-import '../services/app_services.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 import '../theme/app_text.dart';
-import '../widgets/duo_icon.dart';
 import '../widgets/entrance.dart';
 import '../widgets/glass_surface.dart';
 import '../widgets/pill_button.dart';
 import '../widgets/pip.dart';
 import '../widgets/soft_blobs.dart';
-import '../widgets/tap_surface.dart';
 import 'create_account_screen.dart';
-import 'language_screen.dart';
 import 'login_screen.dart';
 
 /// Screen 0: the first screen. Pip says hello in a glass speech bubble,
@@ -28,7 +24,6 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final l10n = AppLocalizations.of(context);
-    final settings = AppServices.of(context).settings;
 
     void open(Widget screen) => Navigator.of(
       context,
@@ -46,7 +41,7 @@ class WelcomeScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // The name and the language chip.
+                      // The app's name.
                       SafeArea(
                         bottom: false,
                         child: Padding(
@@ -70,17 +65,6 @@ class WelcomeScreen extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              if (showLanguageChoice)
-                                ListenableBuilder(
-                                  listenable: settings,
-                                  builder: (context, _) => _LanguageChip(
-                                    name: settings.language.nativeName,
-                                    semanticLabel: l10n.welcomeLanguageButton(
-                                      settings.language.nativeName,
-                                    ),
-                                    onTap: () => open(const LanguageScreen()),
-                                  ),
-                                ),
                             ],
                           ),
                         ),
@@ -281,55 +265,6 @@ class _SpeechBubble extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 fontVariations: const [FontVariation('wght', 700)],
               ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The language chip at the top right: globe and the language's name.
-class _LanguageChip extends StatelessWidget {
-  const _LanguageChip({
-    required this.name,
-    required this.semanticLabel,
-    required this.onTap,
-  });
-
-  final String name;
-  final String semanticLabel;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    return Semantics(
-      button: true,
-      label: semanticLabel,
-      excludeSemantics: true,
-      child: TapSurface(
-        onTap: onTap,
-        color: c.surfaceRaised,
-        shape: StadiumBorder(side: BorderSide(color: c.line, width: 1.5)),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: AppSizes.tap),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpace.s4),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                DuoIcon(AppIcon.globe, size: 20, color: c.ink),
-                const SizedBox(width: AppSpace.s2),
-                Text(
-                  name,
-                  style: AppText.label.copyWith(
-                    color: c.ink,
-                    fontWeight: FontWeight.w700,
-                    fontVariations: const [FontVariation('wght', 700)],
-                  ),
-                ),
-              ],
             ),
           ),
         ),

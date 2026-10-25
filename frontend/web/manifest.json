@@ -1,11 +1,11 @@
 {
-    "name": "cogniguide",
-    "short_name": "cogniguide",
+    "name": "CogniGuide",
+    "short_name": "CogniGuide",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F5F4F8",
+    "theme_color": "#6656DD",
+    "description": "A Socratic maths coach that asks good questions, so you find the answers yourself.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -133,7 +133,10 @@ class ChatApi {
     if (response.statusCode == 401) {
       return const ChatFailure(ChatProblem.loginExpired);
     }
-    if (response.statusCode == 503 && code == 'tutor_unavailable') {
+    // 429: too many messages in a minute. "Wait a moment, then try again"
+    // is the right advice, so it shows like "busy".
+    if ((response.statusCode == 503 && code == 'tutor_unavailable') ||
+        response.statusCode == 429) {
       return const ChatFailure(ChatProblem.busy);
     }
     if (response.statusCode == 400) {
@@ -143,6 +146,32 @@ class ChatApi {
       debugPrint('CogniGuide: /chat said invalid_request: $reason');
     }
     return const ChatFailure(ChatProblem.failed);
+  }
+
+  /// Tells the server the chat is over: [reason] is "worked_it_out" (the
+  /// student pressed "I worked it out!") or "left". The server checks its
+  /// own notes to see if the answer was really found. This is research data
+  /// only: the student never waits for it or sees an error from it.
+  Future<void> endSession({
+    required String sessionId,
+    required String reason,
+    String? token,
+  }) async {
+    if (token == null) return; // nothing was saved for a chat without login
+    try {
+      await _client
+          .post(
+            Uri.parse('$_baseUrl/session/end'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({'session_id': sessionId, 'reason': reason}),
+          )
+          .timeout(_timeout);
+    } on Exception catch (e) {
+      debugPrint('CogniGuide: could not end the session: ${e.runtimeType}');
+    }
   }
 
   static Map<String, dynamic>? _decode(String body) {

@@ -80,17 +80,21 @@ notebooks/
 
 backend/
 app/
-_init_.py
-api.py # Flask REST endpoints (e.g. /chat)
-socratic_agent.py # Core Socratic agent logic + LLM calls
-config.py # Config (keys, model names, settings)
-models/ # (optional) local / fine‑tuned models
+api.py # Flask REST endpoints (/auth, /chat, /problems, /session/end, /progress)
+tutor_agent.py # The agent: assess -> decide -> reply -> check -> remember
+assessment.py # Gemini student check (JSON) + word-rule fallback
+policy.py # The action rules (11 tutoring actions) and session memory
+answer_check.py # Python answer checker and answer-leak guard
+problems.py # Problem bank (data/problems.json, answers stay on the server)
+adaptive.py / scaffolding.py / reflection.py / progress.py # Stages 4-7
+auth.py / db.py # Sign-in and Supabase
+models/socratic_agent.py # Gemini calls (reply + structured JSON)
+data/problems.json # The 15 problems with answers, steps and common mistakes
+sql/ # Supabase SQL files (run in order)
 scripts/
 preprocess_socrateach.py # Convert raw SocraTeach → train/val/test
-train_baseline.py # (later) fine‑tune or train baseline agent
-evaluate_baseline.py # (later) evaluate agent behaviour
-tests/
-test_socratic_agent.py # Basic tests for agent rules
+delete_test_students.py # Remove test accounts before the study
+tests/ # pytest: run `python -m pytest` from backend/
 
 frontend/
 lib/
@@ -105,10 +109,10 @@ phase2_adaptive_agent/ # For Phase 2 experiments
 phase3_user_study/ # For Phase 3 study setup + analysis
 
 docs/
-proposal.pdf # Fellowship project proposal
 phase1_report.md # Summary of Phase 1 data + baseline
-phase2_design.md # Detailed design for full agent
-phase3_protocol.md # Study protocol, consent, instruments
+api_contract.md # The API the app uses
+deploy_backend.md # Put the backend online (Render)
+design/ # The app design (Round 4)
 
 ```
 
@@ -211,8 +215,12 @@ python -m venv .env
 # Install Python dependencies
 pip install -r requirements.txt
 
-# Run Flask app (example – update when api.py entrypoint is set)
-python -m backend.app.api
+# Run Flask app (from the backend/ folder)
+cd backend
+python -m app.api
+
+# Run the backend tests (from the backend/ folder)
+python -m pytest
 ```
 
 ### Frontend (Development)

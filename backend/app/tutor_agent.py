@@ -24,6 +24,7 @@ reply for the chosen action (SAFE_REPLY_WHEN_BUSY), so the chat keeps going.
 """
 
 import logging
+import time
 
 from app import adaptive, answer_check, assessment, db, policy, problems, reflection, scaffolding
 from app.models.socratic_agent import TutorUnavailable, socratic_response  # noqa: F401 (TutorUnavailable is raised to api.py)
@@ -42,8 +43,12 @@ log = logging.getLogger(__name__)
 assess = assessment.assess
 
 
-def load_scaffold_level(student_code, session_id):
+def load_scaffold_level(student_code, session_id, area=None):
     """Stage 5: choose the scaffold level (1-3) from the student's earlier sessions.
+
+    Phase 4: for a bank problem, only earlier sessions in the SAME maths area count (area,
+    for example "algebra"), so doing well in Number does not take help away in Trigonometry.
+    A typed-in problem (area None) uses all earlier sessions, as before.
 
     Never raises. Any problem (no student_id, new student, no database, database error)
     gives 3 = full support, which is the Stage 4 behaviour.
@@ -54,7 +59,12 @@ def load_scaffold_level(student_code, session_id):
         student_uuid = db.find_student(student_code)
         if student_uuid is None:
             return scaffolding.MAX_SCAFFOLD
-        averages = db.get_recent_session_levels(student_uuid, exclude_session_id=session_id)
+        if area:
+            same_area = [row["id"] for row in db.get_session_problems(student_uuid)
+                         if row.get("problem_id") and (_bank_problem(row["problem_id"]) or {}).get("area") == area]
+            averages = db.get_area_session_levels(student_uuid, same_area, exclude_session_id=session_id)
+        else:
+            averages = db.get_recent_session_levels(student_uuid, exclude_session_id=session_id)
         return scaffolding.compute_scaffold_level(averages)
     except Exception as err:
         log.error("Reading earlier sessions failed (using full support): %s", err)
@@ -187,6 +197,48 @@ def indicator_rows(form, decision, analysis):
     return rows
 
 
+def agent_turn_row(session_id, student_uuid, problem_id, decision, form, scaffold_level, guard, latency_ms):
+    """One row for the agent_turns log (stage10_agent_log.sql). Labels and numbers only, never text."""
+    form = form or {}
+    return {
+        "session_id": session_id,
+        "student_id": student_uuid,
+        "problem_id": problem_id,
+        "action": decision["action"],
+        "reason": decision["reason"][:200],
+        "needed_level": decision["needed_level"],
+        "hint_level": decision["hint_level"],
+        "scaffold_level": scaffold_level,
+        "intent": form.get("intent"),
+        "correctness": form.get("correctness"),
+        "mistake_id": form.get("mistake_id"),
+        "answer_check": form.get("answer_check"),
+        "check_source": form.get("source"),
+        "guard": guard,
+        "latency_ms": latency_ms,
+    }
+
+
+def end_session(student_code, session_id, reason):
+    """The student pressed "I worked it out!" (reason "worked_it_out") or left the chat ("left").
+
+    The server does not just believe "I worked it out": it compares with its own memory
+    (did the answer check find the right answer?). Returns {"status", "verified"}.
+    Raises LookupError if the session is not this student's.
+    """
+    student_uuid = db.find_student(student_code)
+    if student_uuid is None or not db.session_belongs_to(session_id, student_uuid):
+        raise LookupError("not this student's session")
+    state = policy.clean_state(db.get_session_state(session_id))
+    verified = bool(state["solved"])
+    status = "solved" if verified else "ended"
+    db.end_session(session_id, status)
+    if reason == "worked_it_out":
+        # 1 = the answer check agreed, 0 = the student said so but the right answer was never seen.
+        db.save_indicators(student_uuid, session_id, [("claimed_solved", 1 if verified else 0)])
+    return {"status": status, "verified": verified}
+
+
 def _bank_problem(problem_id):
     if not problem_id:
         return None
@@ -208,11 +260,13 @@ def run_turn(student_code, problem, history, session_id=None, problem_id=None):
     off, TutorUnavailable is raised instead (nothing is saved then).
     Any other exception (for example no GEMINI_API_KEY) is raised to api.py too.
     """
+    started = time.monotonic()
+
     # RECEIVE
     analysis = adaptive.analyze_history(history)  # word rules: backup signals and reflection timing
     bank = _bank_problem(problem_id)
     state, _saved = load_state(student_code, session_id, history)
-    scaffold_level = load_scaffold_level(student_code, session_id)
+    scaffold_level = load_scaffold_level(student_code, session_id, bank["area"] if bank else None)
 
     # ASSESS (only when the student wrote something new)
     form = assess(problem, bank, history) if analysis["new_student_message"] else None
@@ -280,6 +334,13 @@ def run_turn(student_code, problem, history, session_id=None, problem_id=None):
                 db.save_session_state(session_id, new_state, solved=new_state["solved"] and not state["solved"])
             except Exception as err:
                 log.error("Saving the session memory failed: %s", err)
+            try:
+                db.save_agent_turn(agent_turn_row(
+                    session_id, db.find_student(student_code), problem_id, decision, form, scaffold_level, guard,
+                    int((time.monotonic() - started) * 1000),
+                ))
+            except Exception as err:  # e.g. stage10_agent_log.sql not run yet
+                log.error("Saving the decision log failed: %s", err)
 
     return {
         "reply": reply,
