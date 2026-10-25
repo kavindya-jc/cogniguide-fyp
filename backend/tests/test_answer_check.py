@@ -55,6 +55,9 @@ FINAL_ANSWERS = [
     ("sta-9-1", "10.5", True),
     ("sta-9-1", "(9 + 12) / 2 = 10.5", True),
     ("sta-9-1", "9", False),
+    ("geo-11-1", "154cm2", True),                    # units with no space
+    ("trig-11-1", "4.33m", True),
+    ("gra-10-1", "y = 2x + 1", False),               # the 2 in 2x is not a value
 ]
 
 
@@ -98,3 +101,26 @@ def test_every_bank_answer_is_recognised():
     """The answer sheet's own wording must count as correct for every problem."""
     for problem in problems.load().values():
         assert answer_check.check_final_answer(problem["answer"], problem)["all_correct"], problem["id"]
+
+
+WRONG_ANSWERS = [
+    # (problem id, what the student wrote, clearly wrong?, common mistake found)
+    ("alg-9-1", "x = 2", True, "sign_when_moving"),
+    ("alg-9-1", "x = 12", False, None),
+    ("alg-9-1", "x - 5 = 7", False, None),          # a right step, not an answer
+    ("alg-9-1", "x = 2x + 12", False, None),        # not a value for x
+    ("num-8-1", "320", True, "divide_by_3"),
+    ("num-8-1", "240 ÷ 4 = 60", False, None),       # a right first step
+    ("alg-10-1", "(x+1)(x+6)", True, "product_only"),
+    ("alg-11-1", "x = 4", False, None),             # right, just not finished
+    ("alg-11-1", "x = 10, y = 9", True, None),      # a wrong x
+    ("sta-8-1", "9", False, None),                  # right (and the same as the 'median' mistake)
+    ("geo-8-1", "48 + 67 = 115", False, None),
+    ("geo-8-1", "245", True, "uses_360"),
+    ("trig-11-1", "2.5 m", True, "uses_cos"),
+]
+
+
+@pytest.mark.parametrize("pid, text, wrong, mistake", WRONG_ANSWERS)
+def test_wrong_answer(pid, text, wrong, mistake):
+    assert answer_check.find_wrong_answer(text, problems.find(pid)) == {"wrong": wrong, "mistake_id": mistake}

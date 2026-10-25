@@ -28,6 +28,10 @@ INTENTS = ("answer_attempt", "step_attempt", "explanation", "question", "confuse
 CORRECTNESS = ("correct", "partially_correct", "incorrect", "not_applicable", "unclear")
 REASONING = ("none", "partial", "clear")
 
+# The check has a backup (the word rules), so when Google is busy it gives up after one short
+# retry instead of three: the student gets the reply sooner.
+RETRY_WAITS = (1,)
+
 # How many earlier chat items Gemini sees (enough for the current step, keeps the call small).
 CONTEXT_ITEMS = 10
 MAX_EVIDENCE = 160
@@ -147,13 +151,29 @@ def fallback(history):
 
 
 def apply_answer_check(form, newest_message, problem):
-    """Python's answer checker has the last word on 'solved' for a bank problem."""
+    """Python's answer checker has the last word on 'solved' for a bank problem.
+
+    It also catches a clearly WRONG final answer ("x = 2", or a listed common mistake), which
+    matters most when the Gemini check was busy and the word rules could not tell.
+    """
     if not problem:
         return form
     check = answer_check.check_final_answer(newest_message, problem)
     form = dict(form)
     form["answer_check"] = "correct" if check["all_correct"] else (
         "partial" if check["parts_found"] else "not_found")
+    wrong = None if check["all_correct"] else answer_check.find_wrong_answer(newest_message, problem)
+    if wrong and wrong["wrong"]:
+        form["answer_check"] = "wrong"
+        form["correctness"] = "incorrect"
+        form["solved"] = False
+        form["final_answer_given"] = True
+        if form["intent"] in ("other", "question", "confused"):
+            form["intent"] = "answer_attempt"
+        if wrong["mistake_id"] and form["mistake_id"] in ("none", "other"):
+            form["mistake_id"] = wrong["mistake_id"]
+            form["mistake_confidence"] = max(form["mistake_confidence"], 0.7)
+        return form
     if check["all_correct"]:
         form["solved"] = True
         form["final_answer_given"] = True
@@ -177,7 +197,7 @@ def assess(problem_text, problem, history):
     newest = history[-1]["content"] if history and history[-1].get("role") == "student" else ""
     try:
         raw = generate_json(build_prompt(problem_text, problem, history), SCHEMA,
-                            system_instruction=SYSTEM_INSTRUCTION)
+                            system_instruction=SYSTEM_INSTRUCTION, retry_waits=RETRY_WAITS)
         form = validate(raw, problem)
     except TutorUnavailable as err:  # busy, quota, bad JSON (InvalidModelOutput)...
         log.warning("Student check by Gemini failed, using the word rules: %s", err)

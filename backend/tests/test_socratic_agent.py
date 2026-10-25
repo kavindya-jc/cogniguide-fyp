@@ -153,3 +153,34 @@ def test_generate_json_retries_when_busy(gemini):
     models = gemini(RuntimeError("503 UNAVAILABLE"), '{"correct": true}')
     assert sa.generate_json("Is it right?", SCHEMA) == {"correct": True}
     assert len(models.calls) == 2
+
+
+# ---- Busy Google: the backup model ----
+
+def test_backup_model_is_tried_when_still_busy(gemini, monkeypatch):
+    monkeypatch.setattr(sa, "FALLBACK_MODEL_NAME", "backup-model")
+    models = gemini(*[RuntimeError("503 UNAVAILABLE")] * 3, "Hello from the backup")
+    assert sa.socratic_response("1 + 1", [], raise_on_error=True) == "Hello from the backup"
+    assert [c["model"] for c in models.calls] == ["fake-model"] * 3 + ["backup-model"]
+
+
+def test_backup_model_not_used_for_other_errors(gemini, monkeypatch):
+    monkeypatch.setattr(sa, "FALLBACK_MODEL_NAME", "backup-model")
+    models = gemini(RuntimeError("400 bad request"), "never")
+    with pytest.raises(sa.TutorUnavailable):
+        sa.socratic_response("1 + 1", [], raise_on_error=True)
+    assert len(models.calls) == 1
+
+
+def test_no_backup_model_by_default(gemini):
+    models = gemini(*[RuntimeError("503 UNAVAILABLE")] * 3)
+    with pytest.raises(sa.TutorUnavailable):
+        sa.socratic_response("1 + 1", [], raise_on_error=True)
+    assert len(models.calls) == 3 and sa.FALLBACK_MODEL_NAME == ""
+
+
+def test_fewer_retries_when_asked(gemini):
+    models = gemini(RuntimeError("503 UNAVAILABLE"), RuntimeError("503 UNAVAILABLE"), "{}")
+    with pytest.raises(sa.TutorUnavailable):
+        sa.generate_json("Is it right?", SCHEMA, retry_waits=(0,))
+    assert len(models.calls) == 2
