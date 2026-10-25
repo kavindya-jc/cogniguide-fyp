@@ -9,6 +9,7 @@ Exposes the Socratic agent over HTTP:
                    "reflection_type": "..." or null}
     GET  /progress -> the logged-in student's own progress numbers (Stage 7, token since 7c)
     GET  /dashboard -> a simple web page that shows /progress as words, a chart and cards (Stage 7)
+    GET  /problems -> the problem list, without answers (agent plan, Phase 1)
 
 Stage 3: if the request has a student_id, the chat is saved to Supabase
 (through db.py). Saving never breaks the chat: if it fails, the student
@@ -38,6 +39,10 @@ Stage 7c: sign up and log in with an anonymous code + password (auth.py). The ap
 from the token, never from the request. Without a token, /chat still answers but saves nothing,
 and /progress refuses.
 
+Agent plan, Phase 1: problems.py keeps the problem bank (backend/data/problems.json) with the
+answer, key steps and common mistakes. GET /problems gives the app only id, area, grade and
+text: the answer never leaves the server.
+
 See docs/api_contract.md for the full request/reply format.
 
 Run from the backend/ folder:
@@ -50,7 +55,7 @@ import uuid
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from app import adaptive, auth, db, progress, reflection, scaffolding
+from app import adaptive, auth, db, problems, progress, reflection, scaffolding
 from app.models.socratic_agent import TutorUnavailable, socratic_response
 
 MAX_TEXT_LENGTH = 2000
@@ -397,6 +402,29 @@ def progress_view():
         return error_response(503, "progress_unavailable", "Progress is not available right now.")
 
     return _no_store(jsonify(body))  # personal numbers: do not let the browser keep a copy
+
+
+@app.get("/problems")
+def problem_list():
+    """Agent plan, Phase 1: the problems the student can pick, WITHOUT answers.
+
+    Optional filters: ?area=algebra and/or ?grade=9. No login needed: the list has no
+    personal data, and the answers, steps and mistakes are never in it.
+    """
+    area = request.args.get("area")
+    if area is not None and area not in problems.AREAS:
+        return error_response(400, "invalid_request", f"'area' must be one of: {', '.join(problems.AREAS)}.")
+    grade = request.args.get("grade")
+    if grade is not None:
+        if not grade.isdigit() or int(grade) not in problems.GRADES:
+            return error_response(400, "invalid_request", "'grade' must be 8, 9, 10 or 11.")
+        grade = int(grade)
+    try:
+        items = problems.list_public(area=area, grade=grade)
+    except problems.ProblemBankError as err:
+        app.logger.error("Problem bank cannot be read: %s", err)
+        return error_response(503, "problems_unavailable", "The problem list is not available right now.")
+    return jsonify({"problems": items})
 
 
 @app.get("/dashboard")

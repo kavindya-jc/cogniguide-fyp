@@ -1,0 +1,250 @@
+{
+  "_note": "CogniGuide problem bank (Phase 1 of the agent plan). The SAME 15 sample problems as the app (frontend/assets/problems/sample_problems.json), plus the answer, the key steps and common mistakes. The answer, steps and mistakes stay on the server: GET /problems never sends them to the app. checked_by_teacher is false until a maths teacher has checked the problem against the Sri Lankan Grade 8-11 syllabus. Field guide: answer = how the answer is written for people; answer_parts = each value a full answer must contain ('value' is plain maths text a program can read, 'decimal' is a rounded number where it helps); steps = the key steps in order; mistakes = common wrong ideas, with the wrong answer they lead to.",
+  "problems": [
+    {
+      "id": "num-8-1", "area": "number", "grade": 8,
+      "text": "Find 3/4 of 240.",
+      "answer": "180",
+      "answer_parts": [{"label": "result", "value": "180"}],
+      "steps": [
+        "Find one quarter of 240: 240 ÷ 4 = 60.",
+        "Three quarters is 3 of those: 3 × 60 = 180."
+      ],
+      "mistakes": [
+        {"id": "divide_by_3", "description": "Divides by 3 and multiplies by 4 (mixes up the top and bottom of the fraction).", "wrong_answer": "320"},
+        {"id": "only_one_quarter", "description": "Stops after finding one quarter.", "wrong_answer": "60"}
+      ],
+      "checked_by_teacher": false
+    },
+    {
+      "id": "num-9-1", "area": "number", "grade": 9,
+      "text": "A bag costs Rs. 2400. The shop gives a 15% discount. What is the new price?",
+      "answer": "Rs. 2040",
+      "answer_parts": [{"label": "new price", "value": "2040", "unit": "Rs."}],
+      "steps": [
+        "Find 15% of 2400: 15/100 × 2400 = 360 (the discount).",
+        "Take the discount away from the price: 2400 − 360 = 2040."
+      ],
+      "mistakes": [
+        {"id": "discount_not_price", "description": "Gives the discount (360) as the new price.", "wrong_answer": "360"},
+        {"id": "subtract_percent_number", "description": "Takes 15 away from 2400 as if 15% were 15 rupees.", "wrong_answer": "2385"},
+        {"id": "adds_discount", "description": "Adds the discount instead of taking it away.", "wrong_answer": "2760"}
+      ],
+      "checked_by_teacher": false
+    },
+    {
+      "id": "num-10-1", "area": "number", "grade": 10,
+      "text": "Write 0.000045 in scientific notation.",
+      "answer": "4.5 × 10⁻⁵",
+      "answer_parts": [{"label": "scientific notation", "value": "4.5*10^-5", "decimal": 0.000045}],
+      "steps": [
+        "Move the decimal point so there is one non-zero digit before it: 4.5.",
+        "Count the places moved: 5 places to the right.",
+        "Moving right for a small number gives a negative power: 4.5 × 10⁻⁵."
+      ],
+      "mistakes": [
+        {"id": "positive_power", "description": "Uses a positive power for a small number.", "wrong_answer": "4.5*10^5"},
+        {"id": "not_standard_form", "description": "Leaves more than one digit before the point.", "wrong_answer": "45*10^-6"},
+        {"id": "miscounts_places", "description": "Counts the places wrongly.", "wrong_answer": "4.5*10^-4"}
+      ],
+      "checked_by_teacher": false
+    },
+    {
+      "id": "alg-9-1", "area": "algebra", "grade": 9,
+      "text": "Solve: 3x − 5 = 2x + 7",
+      "answer": "x = 12",
+      "answer_parts": [{"label": "x", "value": "12"}],
+      "steps": [
+        "Get the x terms on one side: take 2x from both sides, so x − 5 = 7.",
+        "Get the numbers on the other side: add 5 to both sides, so x = 12.",
+        "Check: 3(12) − 5 = 31 and 2(12) + 7 = 31."
+      ],
+      "mistakes": [
+        {"id": "sign_when_moving", "description": "Moves −5 to the other side without changing its sign (7 − 5).", "wrong_answer": "2"},
+        {"id": "adds_x_terms", "description": "Adds the x terms (3x + 2x) instead of taking one away, giving 5x = 12.", "wrong_answer": "12/5"}
+      ],
+      "checked_by_teacher": false
+    },
+    {
+      "id": "alg-10-1", "area": "algebra", "grade": 10,
+      "text": "Factorise: x² + 5x + 6",
+      "answer": "(x + 2)(x + 3)",
+      "answer_parts": [{"label": "factorised form", "value": "(x+2)(x+3)"}],
+      "steps": [
+        "Look for two numbers that multiply to 6 and add to 5.",
+        "The numbers are 2 and 3.",
+        "Write the factors: (x + 2)(x + 3). Check by expanding."
+      ],
+      "mistakes": [
+        {"id": "product_only", "description": "Finds numbers that multiply to 6 but do not add to 5.", "wrong_answer": "(x+1)(x+6)"},
+        {"id": "sum_only", "description": "Finds numbers that add to 5 but do not multiply to 6.", "wrong_answer": "(x+1)(x+4)"}
+      ],
+      "checked_by_teacher": false
+    },
+    {
+      "id": "alg-11-1", "area": "algebra", "grade": 11,
+      "text": "Solve together: 2x + y = 11 and x − y = 1",
+      "answer": "x = 4, y = 3",
+      "answer_parts": [{"label": "x", "value": "4"}, {"label": "y", "value": "3"}],
+      "steps": [
+        "Add the two equations so y cancels: 3x = 12.",
+        "Divide by 3: x = 4.",
+        "Put x = 4 into x − y = 1: y = 3.",
+        "Check in 2x + y = 11: 8 + 3 = 11."
+      ],
+      "mistakes": [
+        {"id": "only_one_value", "description": "Finds x but forgets to find y.", "wrong_answer": "4"},
+        {"id": "subtracts_wrongly", "description": "Subtracts the equations and drops the minus in −(−y), so y seems to cancel: x = 10, then y = 9.", "wrong_answer": "x = 10, y = 9"}
+      ],
+      "checked_by_teacher": false
+    },
+    {
+      "id": "geo-8-1", "area": "geometry", "grade": 8,
+      "text": "Two angles of a triangle are 48° and 67°. Find the third angle.",
+      "answer": "65°",
+      "answer_parts": [{"label": "third angle", "value": "65", "unit": "°"}],
+      "steps": [
+        "The angles of a triangle add up to 180°.",
+        "Add the two angles: 48° + 67° = 115°.",
+        "Take that from 180°: 180° − 115° = 65°."
+      ],
+      "mistakes": [
+        {"id": "uses_360", "description": "Uses 360° (the angles of a quadrilateral or a full turn) instead of 180°.", "wrong_answer": "245"},
+        {"id": "gives_sum", "description": "Gives the sum of the two angles.", "wrong_answer": "115"}
+      ],
+      "checked_by_teacher": false
+    },
+    {
+      "id": "geo-10-1", "area": "geometry", "grade": 10,
+      "text": "In triangle ABC, AB = AC and angle A = 40°. Find angle B.",
+      "answer": "70°",
+      "answer_parts": [{"label": "angle B", "value": "70", "unit": "°"}],
+      "steps": [
+        "AB = AC, so the triangle is isosceles and angle B = angle C.",
+        "Angles B and C share what is left: 180° − 40° = 140°.",
+        "Each one is half: 140° ÷ 2 = 70°."
+      ],
+      "mistakes": [
+        {"id": "wrong_equal_angles", "description": "Thinks angle B equals angle A (picks the wrong pair of equal angles).", "wrong_answer": "40"},
+        {"id": "forgets_to_halve", "description": "Gives what is left for B and C together.", "wrong_answer": "140"}
+      ],
+      "checked_by_teacher": false
+    },
+    {
+      "id": "geo-11-1", "area": "geometry", "grade": 11,
+      "text": "Find the area of a circle with radius 7 cm. Use π = 22/7.",
+      "answer": "154 cm²",
+      "answer_parts": [{"label": "area", "value": "154", "unit": "cm²"}],
+      "steps": [
+        "Area of a circle = π r².",
+        "r² = 7 × 7 = 49.",
+        "22/7 × 49 = 22 × 7 = 154 cm²."
+      ],
+      "mistakes": [
+        {"id": "uses_circumference", "description": "Uses the circumference formula 2πr.", "wrong_answer": "44"},
+        {"id": "doubles_radius", "description": "Works out r × 2 instead of r × r.", "wrong_answer": "44"},
+        {"id": "uses_diameter", "description": "Uses the diameter (14) as r.", "wrong_answer": "616"}
+      ],
+      "checked_by_teacher": false
+    },
+    {
+      "id": "trig-10-1", "area": "trigonometry", "grade": 10,
+      "text": "In a right-angled triangle, the side opposite θ is 6 cm and the hypotenuse is 10 cm. Find sin θ.",
+      "answer": "sin θ = 3/5 (0.6)",
+      "answer_parts": [{"label": "sin θ", "value": "3/5", "decimal": 0.6}],
+      "steps": [
+        "sin θ = opposite ÷ hypotenuse.",
+        "6 ÷ 10 = 6/10.",
+        "Simplify: 3/5 = 0.6."
+      ],
+      "mistakes": [
+        {"id": "upside_down", "description": "Divides the hypotenuse by the opposite side.", "wrong_answer": "10/6"},
+        {"id": "uses_adjacent", "description": "Finds the adjacent side (8 cm) and uses it, giving cos θ.", "wrong_answer": "4/5"}
+      ],
+      "checked_by_teacher": false
+    },
+    {
+      "id": "trig-11-1", "area": "trigonometry", "grade": 11,
+      "text": "A 5 m ladder leans on a wall at 60° to the ground. How high up the wall does it reach?",
+      "answer": "5 sin 60° = 5√3/2 ≈ 4.33 m",
+      "answer_parts": [{"label": "height", "value": "5*sqrt(3)/2", "decimal": 4.33, "unit": "m"}],
+      "steps": [
+        "The ladder is the hypotenuse (5 m); the height is the side opposite the 60° angle.",
+        "Opposite and hypotenuse use sin: height = 5 × sin 60°.",
+        "sin 60° = √3/2, so height = 5√3/2 ≈ 4.33 m."
+      ],
+      "mistakes": [
+        {"id": "uses_cos", "description": "Uses cos 60°, which gives the distance along the ground.", "wrong_answer": "2.5"},
+        {"id": "uses_tan", "description": "Uses tan 60° with the ladder length.", "wrong_answer": "8.66"}
+      ],
+      "checked_by_teacher": false
+    },
+    {
+      "id": "gra-9-1", "area": "graphs", "grade": 9,
+      "text": "For y = 2x + 1, find y when x = −2, 0 and 2. Where does the line cross the y-axis?",
+      "answer": "y = −3, 1 and 5; it crosses the y-axis at (0, 1)",
+      "answer_parts": [
+        {"label": "y when x = -2", "value": "-3"},
+        {"label": "y when x = 0", "value": "1"},
+        {"label": "y when x = 2", "value": "5"},
+        {"label": "y-axis crossing", "value": "(0, 1)"}
+      ],
+      "steps": [
+        "Put each x into y = 2x + 1: 2(−2) + 1 = −3, 2(0) + 1 = 1, 2(2) + 1 = 5.",
+        "The line crosses the y-axis where x = 0, so at (0, 1)."
+      ],
+      "mistakes": [
+        {"id": "negative_times", "description": "Treats 2 × (−2) as +4.", "wrong_answer": "5"},
+        {"id": "x_intercept", "description": "Gives where the line crosses the x-axis instead.", "wrong_answer": "(-0.5, 0)"}
+      ],
+      "checked_by_teacher": false
+    },
+    {
+      "id": "gra-10-1", "area": "graphs", "grade": 10,
+      "text": "What is the gradient of the line through (1, 3) and (4, 9)?",
+      "answer": "2",
+      "answer_parts": [{"label": "gradient", "value": "2"}],
+      "steps": [
+        "Gradient = change in y ÷ change in x.",
+        "Change in y: 9 − 3 = 6. Change in x: 4 − 1 = 3.",
+        "6 ÷ 3 = 2."
+      ],
+      "mistakes": [
+        {"id": "x_over_y", "description": "Divides the change in x by the change in y.", "wrong_answer": "1/2"},
+        {"id": "mixed_order", "description": "Takes the points in a different order for y and for x.", "wrong_answer": "-2"}
+      ],
+      "checked_by_teacher": false
+    },
+    {
+      "id": "sta-8-1", "area": "statistics", "grade": 8,
+      "text": "Find the mean of 4, 7, 9, 10 and 15.",
+      "answer": "9",
+      "answer_parts": [{"label": "mean", "value": "9"}],
+      "steps": [
+        "Add the numbers: 4 + 7 + 9 + 10 + 15 = 45.",
+        "Divide by how many numbers there are (5): 45 ÷ 5 = 9."
+      ],
+      "mistakes": [
+        {"id": "wrong_count", "description": "Divides by 4 instead of 5.", "wrong_answer": "11.25"},
+        {"id": "picks_middle", "description": "Picks the middle number (the median). Here the median is also 9, so ask how they got it.", "wrong_answer": "9"}
+      ],
+      "checked_by_teacher": false
+    },
+    {
+      "id": "sta-9-1", "area": "statistics", "grade": 9,
+      "text": "Find the median of 12, 5, 8, 20, 9 and 15.",
+      "answer": "10.5",
+      "answer_parts": [{"label": "median", "value": "10.5"}],
+      "steps": [
+        "Put the numbers in order: 5, 8, 9, 12, 15, 20.",
+        "There are 6 numbers, so the median is halfway between the 3rd and 4th: 9 and 12.",
+        "(9 + 12) ÷ 2 = 10.5."
+      ],
+      "mistakes": [
+        {"id": "not_sorted", "description": "Takes the middle of the list without putting it in order.", "wrong_answer": "14"},
+        {"id": "picks_one_middle", "description": "Picks one of the two middle numbers.", "wrong_answer": "9"}
+      ],
+      "checked_by_teacher": false
+    }
+  ]
+}
