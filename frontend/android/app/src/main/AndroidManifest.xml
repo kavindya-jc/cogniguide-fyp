@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The app talks to the CogniGuide server (log in, coach, progress). Without this line the
+         release app (the APK for phones) cannot use the internet at all; debug builds add it
+         by themselves, which is why it was missed. Only https is allowed in release builds. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="CogniGuide"
         android:name="${applicationName}"
