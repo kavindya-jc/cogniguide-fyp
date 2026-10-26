@@ -17,3 +17,9 @@ venv/
 .venv/
 # The upload folder for Hugging Face (made by backend/scripts/make_hf_space.py)
 hf-space/
+
+# The zip for sending to the team (made by hand, not code)
+team-pack/
+
+# The upload folder for Google Cloud Run (made by backend/scripts/make_hf_space.py cloudrun)
+cloudrun-upload/

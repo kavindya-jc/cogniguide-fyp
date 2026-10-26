@@ -1,9 +1,11 @@
 """
-Make the folder to upload to a Hugging Face Space (the free, no-card way to put the backend online).
+Make the folder to upload when you put the backend online with Docker:
+a Hugging Face Space (now a paid feature there) or Google Cloud Run (docs/deploy_cloudrun.md).
 
 Run from the repo root or the backend/ folder:
 
-    python backend/scripts/make_hf_space.py
+    python backend/scripts/make_hf_space.py              # Hugging Face -> hf-space/
+    python backend/scripts/make_hf_space.py cloudrun     # Google Cloud Run -> cloudrun-upload/
 
 It makes the folder  hf-space/  (next to backend/, ignored by Git) with ONLY what the server needs:
 
@@ -24,6 +26,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "hf-space"
+CLOUDRUN_OUT = ROOT / "cloudrun-upload"
 MARKER = ".made-by-make_hf_space"  # so the script only ever deletes a folder it made itself
 
 SKIP_DIRS = {"__pycache__", ".pytest_cache"}
@@ -46,9 +49,15 @@ def _copy_tree(source, target):
             shutil.copy2(path, dest)
 
 
-def make(out=OUT):
-    """Build the upload folder. Returns the list of files in it (paths relative to the folder)."""
-    out = Path(out)
+def make(out=None, target="huggingface"):
+    """Build the upload folder. Returns the list of files in it (paths relative to the folder).
+
+    target "huggingface": Dockerfile + the Space's README card (folder hf-space/).
+    target "cloudrun": Dockerfile only (folder cloudrun-upload/).
+    """
+    if target not in ("huggingface", "cloudrun"):
+        raise ValueError("target must be 'huggingface' or 'cloudrun'")
+    out = Path(out) if out else (OUT if target == "huggingface" else CLOUDRUN_OUT)
     if out.exists():
         if not (out / MARKER).exists():
             sys.exit(f"{out} exists but was not made by this script; not touching it.")
@@ -56,8 +65,11 @@ def make(out=OUT):
     out.mkdir(parents=True)
     (out / MARKER).write_text("This folder is rebuilt by backend/scripts/make_hf_space.py\n", encoding="utf-8")
 
-    shutil.copy2(ROOT / "deploy" / "huggingface" / "Dockerfile", out / "Dockerfile")
-    shutil.copy2(ROOT / "deploy" / "huggingface" / "README.md", out / "README.md")
+    if target == "huggingface":
+        shutil.copy2(ROOT / "deploy" / "huggingface" / "Dockerfile", out / "Dockerfile")
+        shutil.copy2(ROOT / "deploy" / "huggingface" / "README.md", out / "README.md")
+    else:
+        shutil.copy2(ROOT / "deploy" / "cloudrun" / "Dockerfile", out / "Dockerfile")
     shutil.copy2(ROOT / "requirements.txt", out / "requirements.txt")
     _copy_tree(ROOT / "backend" / "app", out / "backend" / "app")
     _copy_tree(ROOT / "backend" / "data", out / "backend" / "data")
@@ -68,11 +80,16 @@ def make(out=OUT):
 
 
 def main():
-    files = make()
-    print(f"Made {OUT} with {len(files)} files:")
+    target = sys.argv[1] if len(sys.argv) > 1 else "huggingface"
+    if target not in ("huggingface", "cloudrun"):
+        sys.exit("Usage: python backend/scripts/make_hf_space.py [cloudrun]")
+    files = make(target=target)
+    folder = OUT if target == "huggingface" else CLOUDRUN_OUT
+    print(f"Made {folder} with {len(files)} files:")
     for name in files:
         print("  ", name)
-    print("\nNo .env and no keys inside. Next: docs/deploy_huggingface.md, Step 3 (upload).")
+    guide = "docs/deploy_huggingface.md, Step 3" if target == "huggingface" else "docs/deploy_cloudrun.md, Step 5"
+    print(f"\nNo .env and no keys inside. Next: {guide}.")
 
 
 if __name__ == "__main__":
