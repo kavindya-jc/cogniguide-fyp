@@ -120,3 +120,31 @@ def test_space_card_and_dockerfile_agree_on_the_port():
     assert "PORT=7860" in docker and "REQUIRE_LOGIN=true" in docker
     for secret in ("GEMINI_API_KEY=", "SUPABASE_SERVICE_KEY=", "AUTH_SECRET="):
         assert secret not in docker
+
+
+# ---- Google Cloud Run upload folder (scripts/make_hf_space.py cloudrun) ----
+
+def test_cloudrun_folder_has_what_the_server_needs(tmp_path):
+    files = _hf_script().make(tmp_path / "upload", target="cloudrun")
+    for needed in ("Dockerfile", "requirements.txt", "backend/app/api.py",
+                   "backend/app/tutor_agent.py", "backend/data/problems.json"):
+        assert needed in files
+    assert "README.md" not in files  # that card is only for Hugging Face
+    assert not any("tests/" in f or f.endswith(".sql") or "__pycache__" in f or ".env" in f for f in files)
+
+
+def test_cloudrun_dockerfile_uses_the_port_cloud_run_gives_and_has_no_secrets():
+    from pathlib import Path
+
+    docker = (Path(__file__).resolve().parents[2] / "deploy" / "cloudrun" / "Dockerfile").read_text(encoding="utf-8")
+    assert "${PORT:-8080}" in docker  # Cloud Run sets PORT; 8080 is only a fallback
+    assert "PORT=" not in docker.replace("${PORT:-8080}", "")  # no fixed port that could override it
+    assert "REQUIRE_LOGIN=true" in docker and "CORS_ORIGINS=none" in docker
+    assert "USER user" in docker  # not root
+    for secret in ("GEMINI_API_KEY=", "SUPABASE_SERVICE_KEY=", "AUTH_SECRET=", "SUPABASE_URL="):
+        assert secret not in docker
+
+
+def test_unknown_upload_target_is_refused(tmp_path):
+    with pytest.raises(ValueError):
+        _hf_script().make(tmp_path / "x", target="somewhere-else")
