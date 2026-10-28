@@ -79,6 +79,32 @@ class SecureTokenStore implements TokenStore {
   }
 }
 
+/// For the WEB version of the app (a browser, for example Safari on an iPhone).
+///
+/// A browser has no Keystore or Keychain. Its "secure storage" is browser
+/// storage as well, so the token goes in the same place as the other small
+/// settings (shared_preferences = the browser's local storage). The token
+/// stays on this browser only, runs out after 30 days, and is deleted at log out.
+class PrefsTokenStore implements TokenStore {
+  PrefsTokenStore(this._prefs);
+
+  final SharedPreferences _prefs;
+  static const _key = 'auth_token';
+
+  @override
+  Future<String?> read() async => _prefs.getString(_key);
+
+  @override
+  Future<void> write(String token) async {
+    await _prefs.setString(_key, token);
+  }
+
+  @override
+  Future<void> delete() async {
+    await _prefs.remove(_key);
+  }
+}
+
 /// For tests: keeps the token in memory.
 class MemoryTokenStore implements TokenStore {
   MemoryTokenStore([this._token]);
@@ -155,8 +181,14 @@ class ServerAuthService implements AuthService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       final token = _field(response.body, 'token');
       if (token == null) return AuthResult.failed;
-      await _tokens.write(token);
-      await _prefs.setString(_codeKey, code);
+      try {
+        await _tokens.write(token);
+        await _prefs.setString(_codeKey, code);
+      } catch (_) {
+        // The token could not be saved (a broken keystore or browser storage).
+        // Say so calmly instead of waiting forever on "Creating your account".
+        return AuthResult.failed;
+      }
       return AuthResult.ok;
     }
     return switch (response.statusCode) {

@@ -116,6 +116,10 @@ Limits: the laptop must stay on, and the address changes on every restart (then 
 
 ### B2. Real hosting for the study (team decision)
 
+- **iPhone friends:** an APK cannot be installed on an iPhone. Use the **web version**: `docs/deploy_web.md`
+  (build the website, host it free on Netlify, and the Cloud Run deployer allows its address once with `CORS_ORIGINS`).
+  Tested in a browser at iPhone size; not yet on a real iPhone.
+
 - **Google Cloud Run** (the team already has an account): **`docs/deploy_cloudrun.md`**. Free monthly
   allowance, always on, a permanent address, **one APK for everyone, no laptop**. Needs a billing account
   linked to the project (a card, for verification) and a budget alert. Written but **not yet tested** on
@@ -160,6 +164,7 @@ Limits: the laptop must stay on, and the address changes on every restart (then 
 | API between app and backend | `docs/api_contract.md` |
 | Answer to the team's audit questions (current) | `docs/AGENT_REPORT.md` |
 | Laptop as the server (team testing) | `docs/laptop_server.md` |
+| iPhone / web version (free) | `docs/deploy_web.md` |
 | Real hosting | Google Cloud Run: `docs/deploy_cloudrun.md`; Render: `docs/deploy_backend.md`; Hugging Face (paid): `docs/deploy_huggingface.md` |
 | The design | `docs/design/README.md`, `docs/design/CogniGuide_Design_Spec.md` |
 | Problems with answers | `backend/data/problems.json` |
