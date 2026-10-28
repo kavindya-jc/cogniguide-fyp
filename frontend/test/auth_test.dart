@@ -47,6 +47,7 @@ makeAuth(http.Response Function(http.Request) answer) async {
 }
 
 void main() {
+  webAuthTests();
   group('ServerAuthService', () {
     test(
       'sign up: sends code + password, keeps only the token and code',
@@ -225,5 +226,49 @@ void main() {
       find.text('Too many tries. Please wait 15 minutes and try again.'),
       findsOneWidget,
     );
+  });
+}
+
+// ---- The web version (a browser has no Keystore) ----
+
+class _BrokenTokenStore implements TokenStore {
+  @override
+  Future<String?> read() async => null;
+  @override
+  Future<void> write(String token) async => throw StateError('storage broken');
+  @override
+  Future<void> delete() async {}
+}
+
+void webAuthTests() {
+  group('web token storage', () {
+    test('PrefsTokenStore keeps, reads and deletes the token', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final store = PrefsTokenStore(prefs);
+      expect(await store.read(), isNull);
+      await store.write('tok-web');
+      expect(await store.read(), 'tok-web');
+      await store.delete();
+      expect(await store.read(), isNull);
+    });
+
+    test('a token that cannot be saved gives "failed", not a hang', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final auth = ServerAuthService(
+        prefs,
+        _BrokenTokenStore(),
+        baseUrl: 'http://server',
+        client: pretendServer(
+          (_) => replyWith(201, {'token': 'tok-1', 'student_id': 'P001'}),
+        ),
+      );
+      expect(
+        await auth.signUp(code: 'P001', password: 'password1'),
+        AuthResult.failed,
+      );
+      expect(await auth.currentCode(), isNull); // not half logged in
+    });
   });
 }

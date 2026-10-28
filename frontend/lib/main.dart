@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,7 +21,11 @@ Future<void> main() async {
   // Real sign-in through the server; the online demo has no server.
   final AuthService auth = DemoMode.on
       ? StandInAuthService(prefs)
-      : ServerAuthService(prefs, SecureTokenStore());
+      : ServerAuthService(
+          prefs,
+          // A phone keeps the token in its locked storage; a browser has none.
+          kIsWeb ? PrefsTokenStore(prefs) : SecureTokenStore(),
+        );
   final settings = SettingsStore(prefs);
 
   // Turns glass off by itself if this phone is too slow for it.
