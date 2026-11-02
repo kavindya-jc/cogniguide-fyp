@@ -23,6 +23,7 @@ import '../widgets/typing_dots.dart';
 import '../widgets/duo_icon.dart';
 import '../widgets/measure_height.dart';
 import '../widgets/soft_blobs.dart';
+import '../widgets/status_bar_fade.dart';
 import 'login_screen.dart';
 import 'moment_screen.dart';
 
@@ -36,6 +37,8 @@ class ChatScreen extends StatefulWidget {
     required this.eyebrow,
     required this.problem,
     this.problemId,
+    this.sessionId,
+    this.history = const [],
   });
 
   /// For example "Problem 1 · Algebra · Grade 9".
@@ -48,6 +51,12 @@ class ChatScreen extends StatefulWidget {
   /// can check the student's answer against its answer sheet. Null for a
   /// problem the student typed in themselves.
   final String? problemId;
+
+  /// An old chat from Recent chats: its session and its messages so far.
+  /// The student carries on where they left off (the coach does not open
+  /// the chat again).
+  final String? sessionId;
+  final List<ChatTurn> history;
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -64,6 +73,10 @@ class _Message {
   bool unsent = false;
 }
 
+/// How far down the chat starts, below the safe area: room for the two
+/// floating round buttons (44) and a little air.
+const double _floatingTop = AppSpace.s2 + AppSizes.tap + AppSpace.s3;
+
 class _ChatScreenState extends State<ChatScreen> {
   final _messages = <_Message>[];
   final _input = TextEditingController();
@@ -73,7 +86,6 @@ class _ChatScreenState extends State<ChatScreen> {
   /// Heights of the floating glass header and input bar (measured after
   /// layout), so the conversation can scroll underneath both.
   double _barHeight = 150;
-  double _headerHeight = 200;
 
   String? _code;
   String? _sessionId;
@@ -83,7 +95,6 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _ended = false;
   AppServices? _services;
   bool _waiting = false;
-  bool _expanded = false;
 
   /// The last problem, shown as a notice with "Try again".
   ChatProblem? _problem;
@@ -146,9 +157,21 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   /// First call: empty history and no session, so the coach opens the chat.
+  /// An old chat shows its messages and waits for the student instead.
   Future<void> _openChat() async {
     _code = await AppServices.of(context).auth.currentCode();
     if (!mounted) return;
+    if (widget.history.isNotEmpty) {
+      setState(() {
+        _sessionId = widget.sessionId;
+        _messages.addAll([
+          for (final t in widget.history) _Message(t.role, t.content),
+        ]);
+      });
+      _scrollToEnd();
+      return;
+    }
+    _sessionId = widget.sessionId;
     await _ask();
   }
 
@@ -270,15 +293,23 @@ class _ChatScreenState extends State<ChatScreen> {
               container: true,
               child: ListView(
                 controller: _scroll,
-                // Room above and below so the first and last messages can
-                // scroll clear of the floating header and bar.
+                // Room above for the two floating buttons, and below so the
+                // last message can scroll clear of the input bar.
                 padding: EdgeInsets.fromLTRB(
                   AppSpace.s4,
-                  _headerHeight + AppSpace.s4,
+                  MediaQuery.paddingOf(context).top + _floatingTop,
                   AppSpace.s4,
                   AppSpace.s4 + _barHeight,
                 ),
                 children: [
+                  // Who you talk to and the problem: the first card of the
+                  // chat, so it scrolls away and the chat gets the screen.
+                  _ProblemCard(
+                    eyebrow: widget.eyebrow,
+                    problem: widget.problem,
+                    mood: mood,
+                  ),
+                  const SizedBox(height: AppSpace.s5),
                   for (final m in _messages) ...[
                     // Each new bubble pops in once (the key stops it
                     // replaying when the list rebuilds).
@@ -318,27 +349,50 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
           ),
+          // The page colour behind the phone's clock, so messages do not
+          // show through there when they scroll up.
+          const Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: IgnorePointer(child: StatusBarFade()),
+          ),
+          // Two small floating buttons instead of a top bar (team request):
+          // Back, and the problem in a sheet. Solid, not glass, so the only
+          // blur on this screen is the input bar.
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            child: MeasureHeight(
-              onHeight: (h) {
-                if ((h - _headerHeight).abs() > 0.5) {
-                  setState(() => _headerHeight = h);
-                }
-              },
-              // While the student types, the header pauses its blur too
-              // (it still looks like glass), so typing stays light.
-              child: ListenableBuilder(
-                listenable: _inputFocus,
-                builder: (context, _) => _Header(
-                  eyebrow: widget.eyebrow,
-                  problem: widget.problem,
-                  mood: mood,
-                  expanded: _expanded,
-                  blur: !_inputFocus.hasFocus,
-                  onToggle: () => setState(() => _expanded = !_expanded),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpace.s3,
+                  AppSpace.s2,
+                  AppSpace.s3,
+                  0,
+                ),
+                child: Row(
+                  children: [
+                    RoundIconButton(
+                      icon: AppIcon.back,
+                      semanticLabel: l10n.chatBack,
+                      tone: RoundIconTone.light,
+                      onPressed: () => Navigator.of(context).maybePop(),
+                    ),
+                    const Spacer(),
+                    RoundIconButton(
+                      icon: AppIcon.book,
+                      semanticLabel: l10n.chatShowProblem,
+                      tone: RoundIconTone.light,
+                      onPressed: () => _showProblemSheet(
+                        context,
+                        eyebrow: widget.eyebrow,
+                        problem: widget.problem,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -369,199 +423,182 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
-/// The floating glass header: Back, Pip, the coach's name and the pinned
-/// problem on a soft lilac card (tap it to see the whole problem).
+/// The first card of the chat: Pip (with the coach's mood), the coach's
+/// name, and the whole problem on a soft lilac card. It scrolls with the
+/// chat, so the conversation gets the whole screen (team request).
 ///
-/// Pip shows the coach's mood (thinking while the coach writes). Pip stays
-/// still here: anything moving inside the glass would redraw the blur on
-/// every frame.
-class _Header extends StatelessWidget {
-  const _Header({
+/// Not glass (it scrolls), so nothing here redraws a blur.
+class _ProblemCard extends StatelessWidget {
+  const _ProblemCard({
     required this.eyebrow,
     required this.problem,
     required this.mood,
-    required this.expanded,
-    required this.blur,
-    required this.onToggle,
   });
 
   final String eyebrow;
   final String problem;
   final PipMood mood;
-  final bool expanded;
-
-  /// False while the student types (see GlassSurface.blur).
-  final bool blur;
-  final VoidCallback onToggle;
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final l10n = AppLocalizations.of(context);
 
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, AppSpace.s2, 12, 0),
-        child: GlassSurface(
-          tone: GlassTone.clear,
-          blur: blur,
-          borderRadius: BorderRadius.circular(28),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      decoration: BoxDecoration(
+        color: c.surfaceRaised,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: c.line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: mood == PipMood.thinking ? c.skySoft : c.lilacSoft,
+                  shape: BoxShape.circle,
+                ),
+                clipBehavior: Clip.antiAlias,
+                alignment: Alignment.center,
+                child: Pip(mood: mood, size: 54),
+              ),
+              const SizedBox(width: AppSpace.s3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    RoundIconButton(
-                      icon: AppIcon.back,
-                      semanticLabel: l10n.chatBack,
-                      tone: RoundIconTone.light,
-                      onPressed: () => Navigator.of(context).maybePop(),
-                    ),
-                    const SizedBox(width: 10),
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: mood == PipMood.thinking
-                            ? c.skySoft
-                            : c.lilacSoft,
-                        shape: BoxShape.circle,
+                    Semantics(
+                      header: true,
+                      child: Text(
+                        l10n.chatCoachTitle,
+                        style: AppText.h2.copyWith(
+                          color: c.ink,
+                          fontSize: 19,
+                          height: 24 / 19,
+                        ),
                       ),
-                      clipBehavior: Clip.antiAlias,
-                      alignment: Alignment.center,
-                      child: Pip(mood: mood, size: 58),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Semantics(
-                            header: true,
-                            child: Text(
-                              l10n.chatCoachTitle,
-                              style: AppText.h2.copyWith(
-                                color: c.ink,
-                                fontSize: 19,
-                                height: 24 / 19,
-                                fontVariations: const [
-                                  FontVariation('wght', 800),
-                                  FontVariation('opsz', 19),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Text(
-                            l10n.chatCoachSubtitle,
-                            style: AppText.caption.copyWith(
-                              color: c.inkMuted,
-                              fontSize: 14,
-                              height: 18 / 14,
-                              fontWeight: FontWeight.w600,
-                              fontVariations: const [
-                                FontVariation('wght', 600),
-                              ],
-                            ),
-                          ),
-                        ],
+                    Text(
+                      l10n.chatCoachSubtitle,
+                      style: AppText.caption.copyWith(
+                        color: c.inkMuted,
+                        fontSize: 14,
+                        height: 18 / 14,
+                        fontWeight: FontWeight.w600,
+                        fontVariations: const [FontVariation('wght', 600)],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                // The pinned problem. Tap to show the whole text.
-                Semantics(
-                  button: true,
-                  expanded: expanded,
-                  hint: l10n.chatToggleProblem,
-                  child: TapSurface(
-                    onTap: onToggle,
-                    color: c.lilacSoft,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 56),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 10, 12, 10),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    eyebrow,
-                                    style: AppText.caption.copyWith(
-                                      color: c.lilacInk,
-                                      fontWeight: FontWeight.w700,
-                                      fontVariations: const [
-                                        FontVariation('wght', 700),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  // Grows open smoothly to show the whole
-                                  // problem (one small size animation).
-                                  AnimatedSize(
-                                    duration: AppMotion.of(
-                                      context,
-                                      AppMotion.medium,
-                                    ),
-                                    curve: AppMotion.ease,
-                                    alignment: Alignment.topLeft,
-                                    child: Text(
-                                      problem,
-                                      maxLines: expanded ? null : 1,
-                                      overflow: expanded
-                                          ? TextOverflow.visible
-                                          : TextOverflow.ellipsis,
-                                      style: AppText.title.copyWith(
-                                        color: c.ink,
-                                        fontWeight: FontWeight.w700,
-                                        fontVariations: const [
-                                          FontVariation('wght', 700),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              // The arrow turns to point up when open.
-                              child: AnimatedRotation(
-                                turns: expanded ? 0.5 : 0,
-                                duration: AppMotion.of(
-                                  context,
-                                  AppMotion.medium,
-                                ),
-                                curve: AppMotion.ease,
-                                child: DuoIcon(
-                                  AppIcon.chevronDown,
-                                  color: c.lilacInk,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ),
+          const SizedBox(height: AppSpace.s3),
+          _ProblemText(eyebrow: eyebrow, problem: problem),
+        ],
       ),
     );
   }
+}
+
+/// The eyebrow and the whole problem on a soft lilac card.
+class _ProblemText extends StatelessWidget {
+  const _ProblemText({required this.eyebrow, required this.problem});
+
+  final String eyebrow;
+  final String problem;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+      decoration: BoxDecoration(
+        color: c.lilacSoft,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            eyebrow,
+            style: AppText.caption.copyWith(
+              color: c.lilacInk,
+              fontWeight: FontWeight.w700,
+              fontVariations: const [FontVariation('wght', 700)],
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            problem,
+            style: AppText.title.copyWith(
+              color: c.ink,
+              fontWeight: FontWeight.w700,
+              fontVariations: const [FontVariation('wght', 700)],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The floating Problem button's sheet: the whole problem, any time, even
+/// when the first card has scrolled away. A plain solid sheet (no blur).
+Future<void> _showProblemSheet(
+  BuildContext context, {
+  required String eyebrow,
+  required String problem,
+}) {
+  final c = AppColors.of(context);
+  final l10n = AppLocalizations.of(context);
+  return showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: c.surfaceRaised,
+    barrierColor: c.night.withValues(alpha: 0.3),
+    constraints: const BoxConstraints(maxWidth: 480),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
+    sheetAnimationStyle: AppMotion.reduced(context)
+        ? AnimationStyle.noAnimation
+        : null,
+    builder: (context) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpace.screen,
+          AppSpace.s5,
+          AppSpace.screen,
+          AppSpace.s4,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Semantics(
+              header: true,
+              child: Text(
+                l10n.chatProblemSheetTitle,
+                style: AppText.h2.copyWith(color: c.ink),
+              ),
+            ),
+            const SizedBox(height: AppSpace.s3),
+            _ProblemText(eyebrow: eyebrow, problem: problem),
+            const SizedBox(height: AppSpace.s5),
+            PillButton(
+              label: l10n.chatProblemSheetClose,
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 /// The butter notice for busy / something went wrong / no internet.

@@ -123,7 +123,9 @@ void main() {
       expect(prefs.get(key).toString(), isNot(contains('password1')));
     }
 
-    // Log out opens the "Log out?" sheet; its dark button logs out.
+    // Settings → Log out opens the "Log out?" sheet; its dark button logs out.
+    await tester.tap(find.bySemanticsLabel('Settings'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Log out'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(TextButton, 'Log out').last);

@@ -72,12 +72,14 @@ class ProblemCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       text,
+                      // 18px semibold: easy to read, but the page no
+                      // longer feels packed (it was 19px bold).
                       style: AppText.title.copyWith(
                         color: fg,
-                        fontSize: 19,
-                        height: 25 / 19,
-                        fontWeight: FontWeight.w700,
-                        fontVariations: const [FontVariation('wght', 700)],
+                        fontSize: 18,
+                        height: 24 / 18,
+                        fontWeight: FontWeight.w600,
+                        fontVariations: const [FontVariation('wght', 600)],
                       ),
                     ),
                   ],

@@ -361,3 +361,49 @@ def get_session_problems(student_id, limit=50):
         .execute()
     )
     return res.data or []
+
+
+# ---- Team request: "Recent chats", so a student can carry on an old chat ----
+
+RECENT_CHATS_LIMIT = 20
+CHAT_MESSAGES_LIMIT = 200
+
+
+def get_recent_chats(student_id, limit=RECENT_CHATS_LIMIT):
+    """This student's newest chats, newest first: id, problem text, bank id, status, start time."""
+    res = (
+        _get_client()
+        .table("sessions")
+        .select("id, problem, problem_id, status, started_at")
+        .eq("student_id", student_id)
+        .order("started_at", desc=True)
+        .limit(limit)
+        .execute()
+    )
+    return res.data or []
+
+
+def get_chat_for_student(session_id, student_id):
+    """One chat of THIS student (None if it is not theirs or does not exist), with its messages in order."""
+    client = _get_client()
+    res = (
+        client.table("sessions")
+        .select("id, problem, problem_id, status, started_at")
+        .eq("id", session_id)
+        .eq("student_id", student_id)
+        .limit(1)
+        .execute()
+    )
+    if not res.data:
+        return None
+    chat = dict(res.data[0])
+    res = (
+        client.table("messages")
+        .select("role, content")
+        .eq("session_id", session_id)
+        .order("id")
+        .limit(CHAT_MESSAGES_LIMIT)
+        .execute()
+    )
+    chat["messages"] = res.data or []
+    return chat

@@ -220,6 +220,23 @@ Reply (200): `{"status": "solved" | "ended", "verified": true | false}`. `verifi
 
 Errors: 401 `login_required`; 400 `invalid_request` (bad session id or reason); 404 `not_found` (not this student's session); 503 `session_unavailable`.
 
+## 2h. Recent chats: GET /sessions and GET /sessions/{id}/messages (team request)
+
+The app's **Recent chats** drawer, so a student can carry on an old chat. Both need the login token and only ever show the student's **own** chats. Both replies have `Cache-Control: no-store`.
+
+`GET /sessions`: the newest 20 chats, newest first.
+
+```json
+{"sessions": [{"session_id": "3f2b8c1e-...", "problem": "Solve: 3x − 5 = 2x + 7", "problem_id": "alg-9-1",
+               "status": "solved", "started_at": "2026-10-30T10:00:00+00:00"}]}
+```
+
+`status` is `solved`, `ended` or `active`. `problem_id` is null for a problem the student typed in. A new student gets `{"sessions": []}`.
+
+`GET /sessions/{id}/messages`: the same fields plus `"messages": [{"role": "teacher" | "student", "content": "..."}]`, oldest first (at most 200). To carry on, the app sends the next `/chat` with this `session_id`, the `problem_id` (or `problem`) and these messages as `history` (the last 50).
+
+Errors: 401 `login_required`; 404 `not_found` (a bad id, or not this student's chat); 503 `chats_unavailable`.
+
 ## 2g. Settings when the server runs online
 
 See `docs/deploy_backend.md`. With `REQUIRE_LOGIN=true`, `/chat` without a token gives **401 `login_required`**. Every server limits `/chat` to `CHAT_LIMIT_PER_MINUTE` calls per student (default 20): more gives **429 `too_many_requests`** (the app shows "coach is busy, try again"). Every tutor decision is logged in the table `agent_turns` (labels only, never message text; `backend/sql/stage10_agent_log.sql`).

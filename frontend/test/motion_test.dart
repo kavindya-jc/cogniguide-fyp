@@ -120,19 +120,17 @@ void main() {
     expect(faded, isEmpty);
   });
 
-  testWidgets('the pinned problem opens to show the whole text', (
+  testWidgets('the chat shows the whole problem, never cut short', (
     tester,
   ) async {
     await startApp(tester, saved: {'student_code': 'P001'});
     await tester.tap(find.text('Solve: 3x − 5 = 2x + 7'));
     await tester.pumpAndSettle();
 
-    Text problemText() =>
-        tester.widget<Text>(find.text('Solve: 3x − 5 = 2x + 7'));
-    expect(problemText().maxLines, 1);
-
-    await tester.tap(find.text('Solve: 3x − 5 = 2x + 7'));
-    await tester.pumpAndSettle();
-    expect(problemText().maxLines, isNull);
+    final problemText = tester.widget<Text>(
+      find.text('Solve: 3x − 5 = 2x + 7'),
+    );
+    expect(problemText.maxLines, isNull);
+    expect(problemText.overflow, isNull);
   });
 }

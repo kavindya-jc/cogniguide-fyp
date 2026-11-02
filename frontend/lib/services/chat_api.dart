@@ -60,6 +60,40 @@ class ChatFailure extends ChatResult {
   final ChatProblem problem;
 }
 
+/// One chat in the Recent chats list.
+class RecentChat {
+  const RecentChat({
+    required this.sessionId,
+    required this.problem,
+    required this.problemId,
+    required this.solved,
+    required this.startedAt,
+  });
+
+  final String sessionId;
+  final String problem;
+
+  /// Null for a problem the student typed in.
+  final String? problemId;
+  final bool solved;
+  final DateTime? startedAt;
+
+  /// Null when the row is missing its id or problem.
+  static RecentChat? fromJson(Map<String, dynamic> json) {
+    final id = json['session_id'];
+    final problem = json['problem'];
+    if (id is! String || problem is! String || problem.isEmpty) return null;
+    final problemId = json['problem_id'];
+    return RecentChat(
+      sessionId: id,
+      problem: problem,
+      problemId: problemId is String ? problemId : null,
+      solved: json['status'] == 'solved',
+      startedAt: DateTime.tryParse('${json['started_at']}')?.toLocal(),
+    );
+  }
+}
+
 /// Talks to `POST /chat` on the CogniGuide server.
 ///
 /// The server keeps no memory, so the app sends the whole [history] every
@@ -171,6 +205,57 @@ class ChatApi {
           .timeout(_timeout);
     } on Exception catch (e) {
       debugPrint('CogniGuide: could not end the session: ${e.runtimeType}');
+    }
+  }
+
+  /// Recent chats (`GET /sessions`): the student's newest chats, newest
+  /// first. Null when they could not be loaded (no login, offline, an old
+  /// server without this endpoint).
+  Future<List<RecentChat>?> recentChats({String? token}) async {
+    final json = await _get('/sessions', token);
+    final list = json?['sessions'];
+    if (list is! List) return null;
+    return [
+      for (final item in list)
+        if (item is Map<String, dynamic>) ?RecentChat.fromJson(item),
+    ];
+  }
+
+  /// One old chat's messages, oldest first (`GET /sessions/{id}/messages`),
+  /// to carry it on. Null when it could not be loaded.
+  Future<List<ChatTurn>?> chatMessages({
+    required String sessionId,
+    String? token,
+  }) async {
+    final json = await _get(
+      '/sessions/${Uri.encodeComponent(sessionId)}/messages',
+      token,
+    );
+    final list = json?['messages'];
+    if (list is! List) return null;
+    return [
+      for (final m in list)
+        if (m is Map &&
+            m['content'] is String &&
+            ChatRole.values.any((r) => r.name == m['role']))
+          ChatTurn(ChatRole.values.byName(m['role'] as String), m['content']),
+    ];
+  }
+
+  /// A logged-in GET; the JSON body of a 200 reply, or null.
+  Future<Map<String, dynamic>?> _get(String path, String? token) async {
+    if (token == null) return null; // only saved chats can come back
+    try {
+      final response = await _client
+          .get(
+            Uri.parse('$_baseUrl$path'),
+            headers: {'Authorization': 'Bearer $token'},
+          )
+          .timeout(_timeout);
+      return response.statusCode == 200 ? _decode(response.body) : null;
+    } on Exception catch (e) {
+      debugPrint('CogniGuide: could not load $path: ${e.runtimeType}');
+      return null;
     }
   }
 

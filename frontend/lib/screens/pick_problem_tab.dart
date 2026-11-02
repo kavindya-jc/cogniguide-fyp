@@ -22,8 +22,10 @@ import '../widgets/pill_button.dart';
 import '../widgets/pip.dart';
 import '../widgets/problem_card.dart';
 import '../widgets/round_icon_button.dart';
+import '../widgets/status_bar_fade.dart';
+import '../widgets/tap_surface.dart';
 import 'chat_screen.dart';
-import 'logout_sheet.dart';
+import 'recent_chats_panel.dart';
 import 'settings_screen.dart';
 
 /// The longest problem the server accepts (docs/api_contract.md).
@@ -47,6 +49,10 @@ class _PickProblemTabState extends State<PickProblemTab> {
 
   final _own = TextEditingController();
   String? _ownFix;
+
+  /// "Type your own problem" starts as one button (a calmer page); the big
+  /// box opens when it is tapped.
+  bool _ownOpen = false;
 
   /// The list scrolls under the floating glass header.
   final _scroll = ScrollController();
@@ -146,7 +152,7 @@ class _PickProblemTabState extends State<PickProblemTab> {
               selected: _area,
               onChanged: (a) => _filter(area: a),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: AppSpace.s2),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpace.s5),
               child: GradeFilter(
@@ -154,7 +160,7 @@ class _PickProblemTabState extends State<PickProblemTab> {
                 onChanged: (g) => _filter(grade: g, allGrades: g == null),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpace.s4),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpace.s5),
               child: switch ((loading, snap.hasError, items.isEmpty)) {
@@ -171,7 +177,7 @@ class _PickProblemTabState extends State<PickProblemTab> {
                 _ => Column(
                   children: [
                     for (final (i, p) in items.indexed) ...[
-                      if (i > 0) const SizedBox(height: 10),
+                      if (i > 0) const SizedBox(height: AppSpace.s3),
                       Builder(
                         builder: (context) {
                           final eyebrow = l10n.problemEyebrow(
@@ -202,15 +208,19 @@ class _PickProblemTabState extends State<PickProblemTab> {
                 ),
               },
             ),
-            const SizedBox(height: AppSpace.s4),
+            const SizedBox(height: AppSpace.s6),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpace.s5),
-              child: _OwnProblemBox(
-                controller: _own,
-                fixMessage: _ownFix,
-                onChanged: () => setState(() => _ownFix = null),
-                onStart: _startOwn,
-              ),
+              child: _ownOpen
+                  ? _OwnProblemBox(
+                      controller: _own,
+                      fixMessage: _ownFix,
+                      onChanged: () => setState(() => _ownFix = null),
+                      onStart: _startOwn,
+                    )
+                  : _OwnProblemButton(
+                      onTap: () => setState(() => _ownOpen = true),
+                    ),
             ),
           ],
         );
@@ -225,7 +235,7 @@ class _PickProblemTabState extends State<PickProblemTab> {
               top: 0,
               left: 0,
               right: 0,
-              child: IgnorePointer(child: _StatusBarFade()),
+              child: IgnorePointer(child: StatusBarFade()),
             ),
             Positioned(
               top: 0,
@@ -254,12 +264,12 @@ class _PickProblemTabState extends State<PickProblemTab> {
   }
 }
 
-/// The floating glass header: "Hi, P001", Log out, Settings, the title
+/// The floating glass header: "Hi, P001", Recent chats, Settings, the title
 /// and Pip. The list scrolls underneath it.
 ///
 /// As the student scrolls down, the title shrinks a little and Pip floats
 /// up and tilts, so the screen feels alive. Further down, the title and Pip
-/// fold away and only the slim top row stays (buddy, greeting, Log out,
+/// fold away and only the slim top row stays (buddy, greeting, Recent chats,
 /// Settings), so more problems fit on screen. Back near the top they return.
 /// PERFORMANCE: only a scale, a move and a turn (no layout, no blur
 /// change). The glass is one of at most two blurred things on screen
@@ -331,10 +341,12 @@ class _Header extends StatelessWidget {
                         ),
                       ),
                     ),
-                    PillButton(
-                      label: l10n.logOut,
-                      tone: PillTone.ghost,
-                      onPressed: () => showLogoutSheet(context),
+                    // Recent chats (team request). Log out is in Settings.
+                    RoundIconButton(
+                      icon: AppIcon.clock,
+                      semanticLabel: l10n.recentChatsOpen,
+                      tone: RoundIconTone.light,
+                      onPressed: () => showRecentChats(context),
                     ),
                     const SizedBox(width: AppSpace.s1),
                     RoundIconButton(
@@ -369,11 +381,9 @@ class _Header extends StatelessWidget {
                                   header: true,
                                   child: Text(
                                     l10n.homeTitle,
-                                    style: AppText.h1.copyWith(
-                                      color: c.ink,
-                                      fontSize: 28,
-                                      height: 32 / 28,
-                                    ),
+                                    // Calmer than a page title: the problems
+                                    // below are what the student came for.
+                                    style: AppText.h2.copyWith(color: c.ink),
                                   ),
                                 ),
                               ),
@@ -396,7 +406,7 @@ class _Header extends StatelessWidget {
                                 // scroll gives Pip its movement instead.
                                 child: const Pip(
                                   mood: PipMood.determined,
-                                  size: 84,
+                                  size: 60,
                                 ),
                               ),
                           ],
@@ -534,6 +544,7 @@ class _OwnProblemBox extends StatelessWidget {
                   label: l10n.homeOwnLabel,
                   child: TextField(
                     controller: controller,
+                    autofocus: true,
                     minLines: 4,
                     maxLines: 6,
                     onChanged: (_) => onChanged(),
@@ -586,6 +597,56 @@ class _OwnProblemBox extends StatelessWidget {
   }
 }
 
+/// "Type your own problem" while folded: one calm row. Tapping it opens the
+/// big box ([_OwnProblemBox]) with the keyboard ready.
+class _OwnProblemButton extends StatelessWidget {
+  const _OwnProblemButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
+    return Semantics(
+      button: true,
+      label: l10n.homeOwnOpen,
+      excludeSemantics: true,
+      child: TapSurface(
+        onTap: onTap,
+        pressScale: 0.98,
+        color: c.surfaceRaised,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          side: BorderSide(color: c.fieldLine, width: 1.5),
+        ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: AppSizes.button),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpace.s5,
+              vertical: AppSpace.s3,
+            ),
+            child: Row(
+              children: [
+                DuoIcon(AppIcon.pencil, size: 22, color: c.ink),
+                const SizedBox(width: AppSpace.s3),
+                Expanded(
+                  child: Text(
+                    l10n.homeOwnOpen,
+                    style: AppText.title.copyWith(color: c.ink),
+                  ),
+                ),
+                DuoIcon(AppIcon.forward, size: 20, color: c.inkMuted),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Folds the header's title row away (or back) with one size animation.
 /// With "reduce motion" ([still]) it changes at once.
 class _Fold extends StatelessWidget {
@@ -602,30 +663,6 @@ class _Fold extends StatelessWidget {
       curve: AppMotion.ease,
       alignment: Alignment.topCenter,
       child: child,
-    );
-  }
-}
-
-/// The page colour behind the status bar, fading out just below it.
-class _StatusBarFade extends StatelessWidget {
-  const _StatusBarFade();
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    final top = MediaQuery.paddingOf(context).top;
-    return SizedBox(
-      height: top + AppSpace.s4,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [c.surface, c.surface, c.surface.withValues(alpha: 0)],
-            stops: [0, top / (top + AppSpace.s4), 1],
-          ),
-        ),
-      ),
     );
   }
 }

@@ -16,12 +16,27 @@ class MeasureHeight extends StatefulWidget {
 class _MeasureHeightState extends State<MeasureHeight> {
   final _key = GlobalKey();
 
-  @override
-  Widget build(BuildContext context) {
+  void _measure() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final box = _key.currentContext?.findRenderObject() as RenderBox?;
       if (box != null && box.hasSize) widget.onHeight(box.size.height);
     });
-    return KeyedSubtree(key: _key, child: widget.child);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _measure();
+    // Also measure when the child changes size by itself (a size
+    // animation inside it), not only when this widget is rebuilt.
+    return NotificationListener<SizeChangedLayoutNotification>(
+      onNotification: (_) {
+        _measure();
+        return true;
+      },
+      child: SizeChangedLayoutNotifier(
+        child: KeyedSubtree(key: _key, child: widget.child),
+      ),
+    );
   }
 }

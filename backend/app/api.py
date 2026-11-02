@@ -383,6 +383,72 @@ def progress_view():
     return _no_store(jsonify(body))  # personal numbers: do not let the browser keep a copy
 
 
+def _chat_summary(row):
+    """One row of the Recent chats list. The status is 'solved', 'ended' or 'active'."""
+    return {
+        "session_id": row["id"],
+        "problem": row.get("problem") or "",
+        "problem_id": row.get("problem_id"),
+        "status": row.get("status") or "active",
+        "started_at": row.get("started_at"),
+    }
+
+
+def _logged_in_student_uuid(what):
+    """(student_uuid, error). The student is the one in the login token; None = no chats yet."""
+    student_code, auth_err = student_from_request()
+    if auth_err:
+        return None, auth_err
+    if student_code is None:
+        return None, error_response(401, "login_required", "Please log in to see your chats.")
+    if not db.is_configured():
+        return None, error_response(503, "chats_unavailable", f"{what} not available right now.")
+    return db.find_student(student_code), None
+
+
+@app.get("/sessions")
+def recent_chats():
+    """Team request: this student's newest chats (at most 20), newest first. Needs the login token.
+
+    Reply: {"sessions": [{"session_id", "problem", "problem_id", "status", "started_at"}, ...]}
+    """
+    try:
+        student_uuid, err = _logged_in_student_uuid("Your chats are")
+        if err:
+            return err
+        rows = [] if student_uuid is None else db.get_recent_chats(student_uuid)
+    except Exception as err:
+        app.logger.error("Reading recent chats failed: %s", err)
+        return error_response(503, "chats_unavailable", "Your chats are not available right now.")
+    return _no_store(jsonify({"sessions": [_chat_summary(r) for r in rows]}))
+
+
+@app.get("/sessions/<session_id>/messages")
+def chat_messages(session_id):
+    """Team request: one of this student's own chats with its messages in order, to carry it on.
+
+    Reply: the summary fields plus "messages": [{"role": "teacher" | "student", "content"}, ...].
+    Another student's chat gives 404, the same as a chat that does not exist.
+    """
+    try:
+        uuid.UUID(session_id)
+    except ValueError:
+        return error_response(404, "not_found", "That chat was not found.")
+    try:
+        student_uuid, err = _logged_in_student_uuid("This chat is")
+        if err:
+            return err
+        chat = None if student_uuid is None else db.get_chat_for_student(session_id, student_uuid)
+    except Exception as err:
+        app.logger.error("Reading a chat failed: %s", err)
+        return error_response(503, "chats_unavailable", "This chat is not available right now.")
+    if chat is None:
+        return error_response(404, "not_found", "That chat was not found.")
+    body = _chat_summary(chat)
+    body["messages"] = [{"role": m["role"], "content": m["content"]} for m in chat["messages"]]
+    return _no_store(jsonify(body))
+
+
 @app.get("/problems")
 def problem_list():
     """Agent plan, Phase 1: the problems the student can pick, WITHOUT answers.

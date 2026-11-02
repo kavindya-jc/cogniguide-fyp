@@ -161,6 +161,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logOut => 'Log out';
 
   @override
+  String get recentChatsOpen => 'Recent chats';
+
+  @override
+  String get recentChatsTitle => 'Recent chats';
+
+  @override
+  String get recentChatsHint => 'Tap a chat to carry on where you left off.';
+
+  @override
+  String get recentChatsLoading => 'Getting your chats';
+
+  @override
+  String get recentChatsFailed =>
+      'Your chats could not be loaded. Please try again.';
+
+  @override
+  String get recentChatsOpenFailed =>
+      'That chat could not be opened. Please try again.';
+
+  @override
+  String get recentChatsEmpty => 'No chats yet. Pick a problem to start one.';
+
+  @override
+  String get recentChatsSolved => 'Solved';
+
+  @override
+  String get recentChatsOpening => 'Opening';
+
+  @override
+  String get recentChatsClose => 'Close recent chats';
+
+  @override
+  String get recentChatEyebrow => 'From your recent chats';
+
+  @override
   String get homeTitle => 'What would you like to work on?';
 
   @override
@@ -182,6 +217,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeOwnLabel => 'Or type your own problem';
+
+  @override
+  String get homeOwnOpen => 'Type your own problem';
 
   @override
   String get homeOwnHint =>
@@ -306,7 +344,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatBack => 'Back to problems';
 
   @override
-  String get chatToggleProblem => 'Show or hide the whole problem';
+  String get chatShowProblem => 'Show the problem';
+
+  @override
+  String get chatProblemSheetTitle => 'The problem';
+
+  @override
+  String get chatProblemSheetClose => 'Back to the chat';
 
   @override
   String get chatConversation => 'Conversation';

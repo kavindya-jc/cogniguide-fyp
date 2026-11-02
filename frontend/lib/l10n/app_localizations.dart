@@ -358,6 +358,72 @@ abstract class AppLocalizations {
   /// **'Log out'**
   String get logOut;
 
+  /// No description provided for @recentChatsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent chats'**
+  String get recentChatsOpen;
+
+  /// No description provided for @recentChatsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent chats'**
+  String get recentChatsTitle;
+
+  /// No description provided for @recentChatsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a chat to carry on where you left off.'**
+  String get recentChatsHint;
+
+  /// No description provided for @recentChatsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting your chats'**
+  String get recentChatsLoading;
+
+  /// No description provided for @recentChatsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your chats could not be loaded. Please try again.'**
+  String get recentChatsFailed;
+
+  /// No description provided for @recentChatsOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'That chat could not be opened. Please try again.'**
+  String get recentChatsOpenFailed;
+
+  /// No description provided for @recentChatsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No chats yet. Pick a problem to start one.'**
+  String get recentChatsEmpty;
+
+  /// No description provided for @recentChatsSolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Solved'**
+  String get recentChatsSolved;
+
+  /// No description provided for @recentChatsOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening'**
+  String get recentChatsOpening;
+
+  /// No description provided for @recentChatsClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close recent chats'**
+  String get recentChatsClose;
+
+  /// No description provided for @recentChatEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'From your recent chats'**
+  String get recentChatEyebrow;
+
   /// No description provided for @homeTitle.
   ///
   /// In en, this message translates to:
@@ -399,6 +465,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Or type your own problem'**
   String get homeOwnLabel;
+
+  /// No description provided for @homeOwnOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your own problem'**
+  String get homeOwnOpen;
 
   /// No description provided for @homeOwnHint.
   ///
@@ -622,11 +694,23 @@ abstract class AppLocalizations {
   /// **'Back to problems'**
   String get chatBack;
 
-  /// No description provided for @chatToggleProblem.
+  /// No description provided for @chatShowProblem.
   ///
   /// In en, this message translates to:
-  /// **'Show or hide the whole problem'**
-  String get chatToggleProblem;
+  /// **'Show the problem'**
+  String get chatShowProblem;
+
+  /// No description provided for @chatProblemSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The problem'**
+  String get chatProblemSheetTitle;
+
+  /// No description provided for @chatProblemSheetClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the chat'**
+  String get chatProblemSheetClose;
 
   /// No description provided for @chatConversation.
   ///

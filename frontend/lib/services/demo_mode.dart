@@ -46,6 +46,9 @@ class DemoChatApi extends ChatApi {
     required String reason,
     String? token,
   }) async {} // the preview saves nothing
+
+  @override
+  Future<List<RecentChat>?> recentChats({String? token}) async => const [];
 }
 
 /// Example numbers for My progress in the preview.

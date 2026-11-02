@@ -67,6 +67,11 @@ void main() {
   ) async {
     await startApp(tester, saved: {'student_code': 'P001'});
 
+    // The box starts folded into one button (a calmer page).
+    expect(find.byType(TextField), findsNothing);
+    await tapVisible(tester, find.bySemanticsLabel('Type your own problem'));
+    await tester.pumpAndSettle();
+
     final start = find.bySemanticsLabel('Start with this problem');
     await tapVisible(tester, start);
     await tester.pumpAndSettle();

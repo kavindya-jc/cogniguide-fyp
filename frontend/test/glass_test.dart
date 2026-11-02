@@ -76,9 +76,9 @@ void main() {
     await tester.tap(find.text('Solve: 3x − 5 = 2x + 7'));
     await tester.pumpAndSettle();
 
-    // Two glass surfaces: the header and the input bar (never more).
-    expect(find.byType(GlassSurface), findsNWidgets(2));
-    expect(blurs(), findsNWidgets(2));
+    // One glass surface: the input bar (the top is two solid buttons).
+    expect(find.byType(GlassSurface), findsOneWidget);
+    expect(blurs(), findsOneWidget);
     // The coach's message is still fully readable above the bar.
     expect(find.text('Hello!'), findsOneWidget);
   });
@@ -91,7 +91,7 @@ void lighterGlassTests() {
     await startApp(tester, saved: {'student_code': 'P001'});
     await tester.tap(find.text('Solve: 3x − 5 = 2x + 7'));
     await tester.pumpAndSettle();
-    expect(blurs(), findsNWidgets(2));
+    expect(blurs(), findsOneWidget);
 
     // The student taps into the message box: no blur while typing.
     await tester.tap(find.byType(TextField));
@@ -101,7 +101,7 @@ void lighterGlassTests() {
     // Done typing (box not active any more): the glass comes back.
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
-    expect(blurs(), findsNWidgets(2));
+    expect(blurs(), findsOneWidget);
   });
 
   testWidgets('log-out sheet: solid while sliding, glass once stopped', (
@@ -111,11 +111,15 @@ void lighterGlassTests() {
     // The header and the bottom nav are glass: 2 blurs.
     expect(blurs(), findsNWidgets(2));
 
+    // Log out is in Settings (home has Recent chats there now).
+    await tester.tap(find.bySemanticsLabel('Settings'));
+    await tester.pumpAndSettle();
+    expect(blurs(), findsNothing); // Settings has no glass of its own
+
     await tester.tap(find.text('Log out'));
     await tester.pump(); // the tap
     await tester.pump(const Duration(milliseconds: 150)); // mid-slide
-    // Covered by the sheet, header and nav pause their blur; the sliding
-    // sheet is solid.
+    // The sliding sheet is solid.
     expect(blurs(), findsNothing);
 
     await tester.pumpAndSettle(); // the sheet has stopped
