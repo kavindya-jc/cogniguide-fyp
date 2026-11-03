@@ -66,12 +66,18 @@ class _HomeScreenState extends State<HomeScreen> {
             left: AppSpace.s4,
             right: AppSpace.s4,
             bottom: AppSpace.s4,
-            child: SafeArea(
-              top: false,
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 480),
-                  child: AppBottomNav(current: _tab, onChanged: _go),
+            // Hidden while the keyboard is up, or it would ride up with
+            // the keyboard and cover the "own problem" box and its send
+            // button. Offstage keeps it built (no state lost, no blur).
+            child: Offstage(
+              offstage: MediaQuery.viewInsetsOf(context).bottom > 0,
+              child: SafeArea(
+                top: false,
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    child: AppBottomNav(current: _tab, onChanged: _go),
+                  ),
                 ),
               ),
             ),

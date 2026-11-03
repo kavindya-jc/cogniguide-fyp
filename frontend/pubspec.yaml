@@ -1,5 +1,5 @@
 name: cogniguide
-description: "A new Flutter project."
+description: "CogniGuide: a Socratic maths coach for Grades 8-11 that asks questions instead of giving answers."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -31,9 +31,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
   flutter_svg: ^2.3.0
   flutter_animate: ^4.5.2
   http: ^1.6.0
@@ -68,9 +65,8 @@ flutter:
   # Makes the app text code from lib/l10n/*.arb (see l10n.yaml).
   generate: true
 
-  # Pip the coach and the logo (copied from docs/design/assets/).
+  # Pip is drawn in code (lib/widgets/pip.dart), so no Pip pictures here.
   assets:
-    - assets/pip/
     - assets/problems/
     # The buddy pictures students pick (playful-ui-avatars set).
     - assets/avatars/

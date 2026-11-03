@@ -292,7 +292,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get buddySave => 'Save';
 
   @override
-  String get buddyChange => 'Change';
+  String get buddyChange => 'Change buddy';
 
   @override
   String get buddyChangeLabel => 'Change your buddy';

@@ -25,8 +25,8 @@ enum AppIcon {
   settings,
   chart,
   star,
-  sparkle,
-  sun,
+  glassPanes,
+  lightDark,
   eye,
   eyeOff,
 }
@@ -75,10 +75,12 @@ const Map<AppIcon, String> _shapes = {
       '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" $_soft/><circle cx="12" cy="12" r="3"/>',
   AppIcon.eyeOff:
       '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" $_soft/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/>',
-  AppIcon.sun:
-      '<circle cx="12" cy="12" r="4.5" $_soft/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
-  AppIcon.sparkle:
-      '<path d="M12 3l2 5.5L19.5 10 14 12l-2 6-2-6-5.5-2L10 8.5z" $_soft/><path d="M19 16l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
+  // Look: half light, half dark (the usual light/dark symbol).
+  AppIcon.lightDark:
+      '<circle cx="12" cy="12" r="8.5" $_soft/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="8.5"/>',
+  // Glass effects: two overlapping see-through panes with a shine.
+  AppIcon.glassPanes:
+      '<rect x="3" y="3" width="13" height="13" rx="3.5"/><rect x="8" y="8" width="13" height="13" rx="3.5" $_soft/><path d="M11.5 14.5l3-3"/>',
 };
 
 /// Arrows and ticks are drawn a little bolder, as they have no fill.

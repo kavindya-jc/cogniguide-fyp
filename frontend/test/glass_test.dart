@@ -114,7 +114,8 @@ void lighterGlassTests() {
     // Log out is in Settings (home has Recent chats there now).
     await tester.tap(find.bySemanticsLabel('Settings'));
     await tester.pumpAndSettle();
-    expect(blurs(), findsNothing); // Settings has no glass of its own
+    // Settings has one: its floating header (the cards have no blur).
+    expect(blurs(), findsOneWidget);
 
     await tester.tap(find.text('Log out'));
     await tester.pump(); // the tap

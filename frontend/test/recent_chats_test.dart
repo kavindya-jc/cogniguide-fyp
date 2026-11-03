@@ -7,6 +7,7 @@ import 'package:cogniguide/services/chat_api.dart';
 import 'package:cogniguide/services/problem_repository.dart';
 import 'package:cogniguide/services/progress_api.dart';
 import 'package:cogniguide/services/settings_store.dart';
+import 'package:cogniguide/widgets/appear.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -160,6 +161,14 @@ void main() {
     expect(find.text('Good. What could you do with them?'), findsOneWidget);
     expect(find.text('From your recent chats'), findsOneWidget);
     expect(chatCalls, isEmpty);
+    // Old bubbles are shown at once, not popped in all together.
+    expect(
+      find.ancestor(
+        of: find.text('There are x on both sides'),
+        matching: find.byType(Appear),
+      ),
+      findsNothing,
+    );
 
     // The next message carries on the same session, with the history.
     await tester.enterText(find.byType(TextField), 'Take x from both sides');

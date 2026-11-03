@@ -55,7 +55,7 @@ class FormPage extends StatelessWidget {
     final back = RoundIconButton(
       icon: AppIcon.back,
       semanticLabel: l10n.back,
-      tone: RoundIconTone.light,
+      tone: RoundIconTone.glass,
       onPressed: onBack ?? () => Navigator.of(context).maybePop(),
     );
 

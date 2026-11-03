@@ -149,28 +149,28 @@ class _Tiles extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final tiles = [
       StatTile(
-        value: dashed ? 0 : progress.sessionCount,
+        value: progress.sessionCount,
         label: l10n.tileSessions,
         icon: AppIcon.book,
         tone: StatTone.sky,
         dashed: dashed,
       ),
       StatTile(
-        value: dashed ? 0 : progress.selfCorrections,
+        value: progress.selfCorrections,
         label: l10n.tileSelfCorrections,
         icon: AppIcon.check,
         tone: StatTone.mint,
         dashed: dashed,
       ),
       StatTile(
-        value: dashed ? 0 : progress.stuck,
+        value: progress.stuck,
         label: l10n.tileStuck,
         icon: AppIcon.bell,
         tone: StatTone.peach,
         dashed: dashed,
       ),
       StatTile(
-        value: dashed ? 0 : progress.reflections,
+        value: progress.reflections,
         label: l10n.tileReflections,
         icon: AppIcon.star,
         tone: StatTone.lilac,

@@ -50,6 +50,11 @@ FALLBACK_MODEL_NAME = _raw_fallback.strip().strip('"').strip("'")
 # Seconds to wait before each retry when Google is busy (so up to 3 tries in total).
 RETRY_WAITS = (2, 5)
 
+# The longest one Gemini call may take. Without it a hung call never ends, and on Cloud Run
+# (only 4 requests at once) a few hung chats would block every student. A time-out is not
+# retried: one student message makes at most 3 calls, so it stays under the app's 120 s wait.
+GEMINI_TIMEOUT_MS = 30_000
+
 SYSTEM_PROMPT = """You are a Socratic math tutor for teenage students.
 
 Your teaching style follows these strict rules:
@@ -95,7 +100,9 @@ def _get_client():
     """Make the Gemini client once, the first time it is needed, and reuse it after that."""
     global _client
     if _client is None:
-        _client = genai.Client(api_key=API_KEY)
+        _client = genai.Client(
+            api_key=API_KEY, http_options=types.HttpOptions(timeout=GEMINI_TIMEOUT_MS)
+        )
     return _client
 
 

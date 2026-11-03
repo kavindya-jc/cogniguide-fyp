@@ -64,10 +64,14 @@ class ChatScreen extends StatefulWidget {
 
 /// One message on screen.
 class _Message {
-  _Message(this.role, this.text);
+  _Message(this.role, this.text, {this.old = false});
 
   final ChatRole role;
   final String text;
+
+  /// From an old chat: shown at once, with no pop-in. Up to 200 bubbles
+  /// popping in together would stutter on a cheap phone.
+  final bool old;
 
   /// The student's message that could not be sent yet.
   bool unsent = false;
@@ -165,7 +169,8 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _sessionId = widget.sessionId;
         _messages.addAll([
-          for (final t in widget.history) _Message(t.role, t.content),
+          for (final t in widget.history)
+            _Message(t.role, t.content, old: true),
         ]);
       });
       _scrollToEnd();
@@ -272,6 +277,18 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  Widget _bubble(_Message m) => ChatBubble(
+    // Coach maths like $x$ is shown as plain x (the original text is what
+    // goes back to the server).
+    text: m.role == ChatRole.teacher ? readableMaths(m.text) : m.text,
+    kind: m.role == ChatRole.teacher
+        ? BubbleKind.coach
+        : m.unsent
+        ? BubbleKind.unsent
+        : BubbleKind.student,
+    buddy: AppServices.of(context).settings.buddyOrFallback,
+  );
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -312,26 +329,17 @@ class _ChatScreenState extends State<ChatScreen> {
                   const SizedBox(height: AppSpace.s5),
                   for (final m in _messages) ...[
                     // Each new bubble pops in once (the key stops it
-                    // replaying when the list rebuilds).
-                    Appear(
-                      key: ObjectKey(m),
-                      style: m.role == ChatRole.teacher
-                          ? AppearStyle.popLeft
-                          : AppearStyle.popRight,
-                      child: ChatBubble(
-                        // Coach maths like $x$ is shown as plain x (the
-                        // original text is what goes back to the server).
-                        text: m.role == ChatRole.teacher
-                            ? readableMaths(m.text)
-                            : m.text,
-                        kind: m.role == ChatRole.teacher
-                            ? BubbleKind.coach
-                            : m.unsent
-                            ? BubbleKind.unsent
-                            : BubbleKind.student,
-                        buddy: AppServices.of(context).settings.buddyOrFallback,
+                    // replaying when the list rebuilds). Old ones do not.
+                    if (m.old)
+                      KeyedSubtree(key: ObjectKey(m), child: _bubble(m))
+                    else
+                      Appear(
+                        key: ObjectKey(m),
+                        style: m.role == ChatRole.teacher
+                            ? AppearStyle.popLeft
+                            : AppearStyle.popRight,
+                        child: _bubble(m),
                       ),
-                    ),
                     const SizedBox(height: 14),
                   ],
                   if (_waiting)
@@ -378,14 +386,14 @@ class _ChatScreenState extends State<ChatScreen> {
                     RoundIconButton(
                       icon: AppIcon.back,
                       semanticLabel: l10n.chatBack,
-                      tone: RoundIconTone.light,
+                      tone: RoundIconTone.glass,
                       onPressed: () => Navigator.of(context).maybePop(),
                     ),
                     const Spacer(),
                     RoundIconButton(
                       icon: AppIcon.book,
                       semanticLabel: l10n.chatShowProblem,
-                      tone: RoundIconTone.light,
+                      tone: RoundIconTone.glass,
                       onPressed: () => _showProblemSheet(
                         context,
                         eyebrow: widget.eyebrow,

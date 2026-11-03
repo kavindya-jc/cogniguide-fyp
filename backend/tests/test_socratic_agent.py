@@ -62,9 +62,30 @@ def test_the_client_is_made_only_once(monkeypatch):
     made = []
     monkeypatch.setattr(sa, "_client", None)
     monkeypatch.setattr(sa, "API_KEY", "fake-key")
-    monkeypatch.setattr(sa.genai, "Client", lambda api_key: made.append(api_key) or object())
+    monkeypatch.setattr(
+        sa.genai, "Client", lambda api_key, http_options=None: made.append(api_key) or object()
+    )
     first, second = sa._get_client(), sa._get_client()
     assert first is second and made == ["fake-key"]
+
+
+def test_a_gemini_call_has_a_time_limit(monkeypatch):
+    seen = {}
+    monkeypatch.setattr(sa, "_client", None)
+    monkeypatch.setattr(sa, "API_KEY", "fake-key")
+    monkeypatch.setattr(
+        sa.genai, "Client", lambda api_key, http_options=None: seen.update(options=http_options)
+    )
+    sa._get_client()
+    # 30 seconds (the setting is in milliseconds), so a hung call cannot block the server.
+    assert seen["options"].timeout == 30_000
+
+
+def test_a_time_out_is_not_retried(gemini):
+    models = gemini(TimeoutError("The read operation timed out"), "never reached")
+    with pytest.raises(sa.TutorUnavailable):
+        sa.socratic_response("1 + 1", [], raise_on_error=True)
+    assert len(models.calls) == 1
 
 
 def test_missing_key_gives_a_clear_error(monkeypatch):

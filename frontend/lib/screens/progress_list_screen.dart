@@ -54,7 +54,7 @@ class ProgressListScreen extends StatelessWidget {
                       child: RoundIconButton(
                         icon: AppIcon.back,
                         semanticLabel: l10n.listBack,
-                        tone: RoundIconTone.light,
+                        tone: RoundIconTone.glass,
                         onPressed: () => Navigator.of(context).maybePop(),
                       ),
                     ),

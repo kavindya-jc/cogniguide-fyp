@@ -601,7 +601,7 @@ abstract class AppLocalizations {
   /// No description provided for @buddyChange.
   ///
   /// In en, this message translates to:
-  /// **'Change'**
+  /// **'Change buddy'**
   String get buddyChange;
 
   /// No description provided for @buddyChangeLabel.

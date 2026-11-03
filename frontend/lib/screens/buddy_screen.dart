@@ -100,7 +100,7 @@ class _BuddyScreenState extends State<BuddyScreen> {
                                   RoundIconButton(
                                     icon: AppIcon.back,
                                     semanticLabel: l10n.back,
-                                    tone: RoundIconTone.light,
+                                    tone: RoundIconTone.glass,
                                     onPressed: () =>
                                         Navigator.of(context).maybePop(),
                                   )

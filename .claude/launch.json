@@ -6,6 +6,12 @@
       "runtimeExecutable": "cmd",
       "runtimeArgs": ["/c", "cd frontend && flutter run -d web-server --release --web-hostname 127.0.0.1 --web-port 8080"],
       "port": 8080
+    },
+    {
+      "name": "cogniguide-backend",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "set REQUIRE_LOGIN=true&& cd backend && ..\\venv\\Scripts\\python -m app.api"],
+      "port": 5000
     }
   ]
 }

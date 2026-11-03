@@ -106,7 +106,7 @@
   "buddyGroup": "Buddies",
   "buddyGo": "Let's go!",
   "buddySave": "Save",
-  "buddyChange": "Change",
+  "buddyChange": "Change buddy",
   "buddyChangeLabel": "Change your buddy",
   "buddyYours": "Your buddy: {name}",
   "@buddyYours": {

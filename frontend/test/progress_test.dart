@@ -159,6 +159,33 @@ void main() {
       expect(find.text('What would you like to work on?'), findsOneWidget);
     });
 
+    testWidgets('after the first chat the tiles count it, not 0', (
+      tester,
+    ) async {
+      await openProgress(
+        tester,
+        serverSays({
+          ...newStudent,
+          'sessions': [
+            {'started_at': '2026-11-03T10:00:00+00:00', 'needed_level': 1.0},
+          ],
+          'totals': {
+            'sessions': 1,
+            'stuck': 2,
+            'asked_for_answer': 0,
+            'self_corrections': 1,
+            'reflections': 0,
+          },
+        }),
+      );
+
+      // Still the "new student" look (no chart yet), but the real numbers.
+      expect(find.byType(HelpChart), findsNothing);
+      expect(tileValue(tester, 'Sessions'), 1);
+      expect(tileValue(tester, 'Times you felt stuck'), 2);
+      expect(tileValue(tester, 'Times you fixed your own mistake'), 1);
+    });
+
     testWidgets('progress_unavailable shows its message and Try again', (
       tester,
     ) async {

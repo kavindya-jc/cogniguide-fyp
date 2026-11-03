@@ -31,6 +31,10 @@ import 'settings_screen.dart';
 /// The longest problem the server accepts (docs/api_contract.md).
 const int maxProblemLength = 2000;
 
+/// Lets go of the "own problem" box before another screen opens. Otherwise
+/// coming back puts the focus back in the box and the keyboard pops up.
+void _dropKeyboard() => FocusManager.instance.primaryFocus?.unfocus();
+
 /// Screen 3 (Practice tab): pick a problem, or type your own.
 class PickProblemTab extends StatefulWidget {
   const PickProblemTab({super.key, required this.code});
@@ -108,6 +112,7 @@ class _PickProblemTabState extends State<PickProblemTab> {
     required String problem,
     String? problemId,
   }) {
+    _dropKeyboard();
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ChatScreen(
@@ -227,7 +232,15 @@ class _PickProblemTabState extends State<PickProblemTab> {
 
         return Stack(
           children: [
-            list,
+            // Also checks the fold when the list changes size without a
+            // scroll (the keyboard closing jumps it back to the top).
+            NotificationListener<ScrollMetricsNotification>(
+              onNotification: (_) {
+                _onScroll();
+                return false;
+              },
+              child: list,
+            ),
             // A soft fade behind the phone's clock and battery, so the list
             // does not show through there when it scrolls up under the
             // (slim) header. Drawn once; nothing here moves.
@@ -345,19 +358,25 @@ class _Header extends StatelessWidget {
                     RoundIconButton(
                       icon: AppIcon.clock,
                       semanticLabel: l10n.recentChatsOpen,
-                      tone: RoundIconTone.light,
-                      onPressed: () => showRecentChats(context),
+                      tone: RoundIconTone.glass,
+                      onPressed: () {
+                        _dropKeyboard();
+                        showRecentChats(context);
+                      },
                     ),
                     const SizedBox(width: AppSpace.s1),
                     RoundIconButton(
                       icon: AppIcon.settings,
                       semanticLabel: l10n.homeSettings,
-                      tone: RoundIconTone.light,
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => SettingsScreen(code: code),
-                        ),
-                      ),
+                      tone: RoundIconTone.glass,
+                      onPressed: () {
+                        _dropKeyboard();
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => SettingsScreen(code: code),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -547,6 +566,10 @@ class _OwnProblemBox extends StatelessWidget {
                     autofocus: true,
                     minLines: 4,
                     maxLines: 6,
+                    // Scroll far enough to show the whole box and its
+                    // start button above the keyboard, not just the line
+                    // being typed.
+                    scrollPadding: const EdgeInsets.only(bottom: 160),
                     onChanged: (_) => onChanged(),
                     style: AppText.body.copyWith(color: c.ink),
                     cursorColor: c.ink,
