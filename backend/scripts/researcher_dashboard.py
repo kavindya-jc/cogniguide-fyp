@@ -50,7 +50,14 @@ INDICATORS = [
     ("wrong_attempt", "Wrong try"),
     ("misconception", "Common mistake spotted"),
 ]
-AREAS = {"alg": "Algebra", "geo": "Geometry", "trig": "Trigonometry", "num": "Number", "sta": "Statistics"}
+AREAS = {
+    "alg": "Algebra",
+    "geo": "Geometry",
+    "gra": "Graphs",
+    "trig": "Trigonometry",
+    "num": "Number",
+    "sta": "Statistics",
+}
 TYPED_IN = "Typed-in problem"
 GUARD_LABELS = {
     "ok": "Reply passed first time",

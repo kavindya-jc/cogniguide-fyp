@@ -1,6 +1,7 @@
 """Offline tests for the researcher analytics page: correct totals, and no private data on it."""
 
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
@@ -120,6 +121,13 @@ def test_areas_and_typed_in_problems():
     assert areas["Algebra"]["solved"] == 1
     assert areas["Geometry"]["sessions"] == 1
     assert rd.TYPED_IN in areas
+
+
+def test_every_problem_in_the_bank_has_a_named_area():
+    bank = json.loads((SCRIPT.parent.parent / "data" / "problems.json").read_text(encoding="utf-8"))
+    problems = bank if isinstance(bank, list) else bank["problems"]
+    assert problems
+    assert all(rd.area_of(p["id"]) != "Other" for p in problems)
 
 
 def test_gemini_failure_and_latency_are_reported():
