@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The phone's first colour when the app starts. Same as _purple in lib/screens/opening_screen.dart. -->
+    <color name="launch_purple">#6656DD</color>
+</resources>

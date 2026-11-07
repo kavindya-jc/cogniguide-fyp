@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n/app_localizations.dart';
 import 'screens/home_screen.dart';
+import 'screens/opening_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'services/app_services.dart';
 import 'services/auth_service.dart';
@@ -42,6 +43,7 @@ Future<void> main() async {
       progress: DemoMode.on ? DemoProgressApi() : ProgressApi(),
       // A student who is still logged in goes straight to Pick a problem.
       loggedIn: await auth.currentCode() != null,
+      showOpening: true,
     ),
   );
 }
@@ -56,6 +58,7 @@ class CogniGuideApp extends StatelessWidget {
     required this.chat,
     required this.progress,
     required this.loggedIn,
+    this.showOpening = false,
   });
 
   final AuthService auth;
@@ -65,8 +68,14 @@ class CogniGuideApp extends StatelessWidget {
   final ProgressApi progress;
   final bool loggedIn;
 
+  /// Pip's opening screen first. The real app turns this on in [main].
+  final bool showOpening;
+
   @override
   Widget build(BuildContext context) {
+    final Widget firstScreen = loggedIn
+        ? const HomeScreen()
+        : const WelcomeScreen();
     return AppServices(
       auth: auth,
       settings: settings,
@@ -86,7 +95,7 @@ class CogniGuideApp extends StatelessWidget {
           supportedLocales: AppLocalizations.supportedLocales,
           // Lets all glass on a screen share one backdrop (faster blur).
           builder: (context, child) => BackdropGroup(child: child!),
-          home: loggedIn ? const HomeScreen() : const WelcomeScreen(),
+          home: showOpening ? OpeningScreen(next: firstScreen) : firstScreen,
         ),
       ),
     );
