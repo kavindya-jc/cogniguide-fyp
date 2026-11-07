@@ -23,3 +23,6 @@ team-pack/
 
 # The upload folder for Google Cloud Run (made by backend/scripts/make_hf_space.py cloudrun)
 cloudrun-upload/
+
+# The researcher analytics page (made by backend/scripts/researcher_dashboard.py), research data
+experiments/analytics/
