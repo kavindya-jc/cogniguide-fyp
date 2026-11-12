@@ -729,10 +729,37 @@ class _InputBar extends StatelessWidget {
       ),
     );
 
+    // A soft fade from see-through to the page colour behind the buttons, so
+    // messages that scroll under them fade away instead of showing through
+    // the gaps between the keys (phone test, 9 Nov). A plain gradient, not a
+    // blur, so it costs almost nothing on low-end phones.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            c.surface.withValues(alpha: 0),
+            c.surface.withValues(alpha: 0.94),
+            c.surface,
+          ],
+          stops: const [0, 0.22, 1],
+        ),
+      ),
+      child: _content(context, c, l10n, pill),
+    );
+  }
+
+  Widget _content(
+    BuildContext context,
+    AppColors c,
+    AppLocalizations l10n,
+    Widget pill,
+  ) {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 0, AppSpace.s3),
+        padding: const EdgeInsets.fromLTRB(0, AppSpace.s5, 0, AppSpace.s3),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,

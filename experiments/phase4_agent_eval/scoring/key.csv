@@ -1,0 +1,40 @@
+﻿id,agent,source
+R01,current,says they are confused / turn 1
+R02,current,no progress despite hints / turn 1
+R03,baseline,GSM8K_train_1448_GSM8K_train_1448_3_turn3
+R04,baseline,GSM8K_train_2857_GSM8K_train_2857_2_turn0
+R05,baseline,MAWPS_train_546_MAWPS_train_546_1_turn4
+R06,current,no progress despite hints / turn 3
+R07,current,keeps asking for the answer / turn 3
+R08,current,corrects own mistake / turn 1
+R09,current,corrects own mistake / turn 2
+R10,current,says they are confused / turn 0
+R11,current,keeps asking for the answer / turn 1
+R12,current,specific misconception / turn 1
+R13,baseline,GSM8K_test_193_GSM8K_test_193_2_turn5
+R14,baseline,MAWPS_train_1067_MAWPS_train_1067_2_turn2
+R15,baseline,GSM8K_train_2652_GSM8K_train_2652_2_turn0
+R16,current,no progress despite hints / turn 2
+R17,current,says they are confused / turn 2
+R18,current,corrects own mistake / turn 0
+R19,current,specific misconception / turn 0
+R20,current,keeps asking for the answer / turn 0
+R21,current,no progress despite hints / turn 4
+R22,current,keeps asking for the answer / turn 2
+R23,current,incorrect answer / turn 1
+R24,current,understands and answers correctly / turn 1
+R25,current,off topic / turn 1
+R26,current,no progress despite hints / turn 0
+R27,baseline,GSM8K_test_1309_GSM8K_test_1309_1_turn0
+R28,baseline,GSM8K_train_6381_GSM8K_train_6381_4_turn0
+R29,current,off topic / turn 0
+R30,baseline,MAWPS_train_783_MAWPS_train_783_3_turn3
+R31,current,incorrect answer / turn 0
+R32,baseline,GSM8K_train_6105_GSM8K_train_6105_3_turn0
+R33,baseline,MAWPS_train_2299_MAWPS_train_2299_1_turn3
+R34,baseline,GSM8K_train_2303_GSM8K_train_2303_0_turn3
+R35,baseline,GSM8K_train_913_GSM8K_train_913_3_turn3
+R36,current,understands and answers correctly / turn 0
+R37,current,understands and answers correctly / turn 2
+R38,baseline,MAWPS_train_2002_MAWPS_train_2002_0_turn2
+R39,baseline,GSM8K_train_3309_GSM8K_train_3309_3_turn1
